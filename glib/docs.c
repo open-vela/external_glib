@@ -1865,7 +1865,24 @@
  * macro will not work on an array allocated on the heap, only static
  * arrays or arrays on the stack.
  */
- 
+
+/**
+ * G_ALIGNOF
+ * @a: a type-name
+ *
+ * Return the minimal alignment required by the platform ABI for values of the given
+ * type. The address of a variable or struct member of the given type must always be
+ * a multiple of this alignment. For example, most platforms require int variables
+ * to be aligned at a 4-byte boundary, so `G_ALIGNOF (int)` is 4 on most platforms.
+ *
+ * Note this is not necessarily the same as the value returned by GCC’s
+ * `__alignof__` operator, which returns the preferred alignment for a type.
+ * The preferred alignment may be a stricter alignment than the minimal
+ * alignment.
+ *
+ * Since: 2.60
+ */
+
 /* Miscellaneous Macros {{{1 */
 
 /**

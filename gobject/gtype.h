@@ -1779,7 +1779,7 @@ guint     g_type_get_type_registration_serial (void);
 /**
  * G_IMPLEMENT_INTERFACE:
  * @TYPE_IFACE: The #GType of the interface to add
- * @iface_init: (type GInterfaceInitFunc): The interface init function, of type #GInterfaceInitFunc
+ * @iface_init: The interface init function
  *
  * A convenience macro to ease interface addition in the `_C_` section
  * of G_DEFINE_TYPE_WITH_CODE() or G_DEFINE_ABSTRACT_TYPE_WITH_CODE().
@@ -2023,7 +2023,7 @@ type_name##_get_type (void) \
                                        0, \
                                        (GInstanceInitFunc)NULL, \
                                        (GTypeFlags) 0); \
-      if (TYPE_PREREQ) \
+      if (TYPE_PREREQ != G_TYPE_INVALID) \
         g_type_interface_add_prerequisite (g_define_type_id, TYPE_PREREQ); \
       { /* custom code follows */
 #define _G_DEFINE_INTERFACE_EXTENDED_END()	\

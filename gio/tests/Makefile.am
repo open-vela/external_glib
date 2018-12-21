@@ -50,7 +50,6 @@ test_programs = \
 	memory-output-stream			\
 	monitor					\
 	mount-operation				\
-	network-address				\
 	network-monitor				\
 	network-monitor-race			\
 	permission				\
@@ -195,6 +194,12 @@ schema_tests = \
 	wrong-category.gschema.xml			\
 	$(NULL)
 
+test_programs += network-address
+network_address_SOURCES = \
+	network-address.c \
+	mock-resolver.c \
+	mock-resolver.h
+
 test_programs += thumbnail-verification
 dist_test_data += $(thumbnail_data_files)
 thumbnail_data_files = $(addprefix thumbnails/,$(thumbnail_tests))
@@ -220,15 +225,20 @@ tls_certificate_SOURCES = \
 dist_test_data += $(cert_data_files)
 cert_data_files = $(addprefix cert-tests/,$(cert_tests))
 cert_tests = \
-	cert1.pem	\
-	cert2.pem	\
-	cert3.pem	\
-	cert-key.pem	\
-	cert-list.pem	\
-	key8.pem	\
-	key-cert.pem	\
-	key.pem		\
-	nothing.pem	\
+	cert1.pem		\
+	cert2.pem		\
+	cert3.pem		\
+	cert-crlf.pem		\
+	cert-key.pem		\
+	cert-list.pem		\
+	key8.pem		\
+	key8enc.pem		\
+	key-cert.pem		\
+	key.pem			\
+	key-crlf.pem		\
+	key_missing-footer.pem	\
+	key_missing-header.pem	\
+	nothing.pem		\
 	$(NULL)
 
 uninstalled_test_extra_programs += socket-client
@@ -334,10 +344,7 @@ dist_test_data += \
 
 dist_test_data += \
 	appinfo-test-actions.desktop		\
-	appinfo-test-gnome.desktop		\
-	appinfo-test-notgnome.desktop		\
-	appinfo-test.desktop			\
-	appinfo-test2.desktop			\
+	appinfo-test-static.desktop		\
 	file.c					\
 	org.gtk.test.dbusappinfo.desktop	\
 	x-content/image-dcf/DCIM/Camera/20130831_203925.jpg \
@@ -357,10 +364,36 @@ uninstalled_test_extra_programs += \
 if !OS_COCOA
 test_extra_programs += apps
 test_programs += mimeapps
-clean-local: clean-mimeapps
-clean-mimeapps:
-	rm -rf xdgdatadir xdgdatahome xdgconfighome
 endif
+
+appinfo-test-gnome.desktop: appinfo-test-gnome.desktop.in Makefile
+	$(AM_V_GEN)$(SED) \
+		-e 's|[@]installed_tests_dir[@]|$(installed_testdir)|g' \
+		$< > $@
+appinfo-test-notgnome.desktop: appinfo-test-notgnome.desktop.in Makefile
+	$(AM_V_GEN)$(SED) \
+		-e 's|[@]installed_tests_dir[@]|$(installed_testdir)|g' \
+		$< > $@
+appinfo-test.desktop: appinfo-test.desktop.in Makefile
+	$(AM_V_GEN)$(SED) \
+		-e 's|[@]installed_tests_dir[@]|$(installed_testdir)|g' \
+		$< > $@
+appinfo-test2.desktop: appinfo-test2.desktop.in Makefile
+	$(AM_V_GEN)$(SED) \
+		-e 's|[@]installed_tests_dir[@]|$(installed_testdir)|g' \
+		$< > $@
+
+appinfo_desktop_templates = \
+	appinfo-test-gnome.desktop.in \
+	appinfo-test-notgnome.desktop.in \
+	appinfo-test.desktop.in \
+	appinfo-test2.desktop.in \
+	$(NULL)
+appinfo_desktop_files = $(appinfo_desktop_templates:.in=)
+
+EXTRA_DIST += $(appinfo_desktop_templates)
+CLEANFILES += $(appinfo_desktop_files)
+test_data += $(appinfo_desktop_files)
 
 uninstalled_test_programs += gsettings gschema-compile
 gsettings_DEPENDENCIES = test.mo
@@ -487,16 +520,16 @@ gdbus_proxy_threads_SOURCES              = $(gdbus_sessionbus_sources) gdbus-pro
 gdbus_proxy_unique_name_SOURCES          = $(gdbus_sessionbus_sources) gdbus-proxy-unique-name.c
 gdbus_proxy_well_known_name_SOURCES      = $(gdbus_sessionbus_sources) gdbus-proxy-well-known-name.c
 gdbus_test_codegen_SOURCES               = $(gdbus_sessionbus_sources) gdbus-test-codegen.c
-nodist_gdbus_test_codegen_SOURCES        = gdbus-test-codegen-generated.c gdbus-test-codegen-generated.h
+nodist_gdbus_test_codegen_SOURCES        = gdbus-test-codegen-generated.c gdbus-test-codegen-generated.h gdbus-test-codegen-generated-interface-info.c gdbus-test-codegen-generated-interface-info.h
 gdbus_test_codegen_old_SOURCES           = $(gdbus_sessionbus_sources) gdbus-test-codegen.c
-nodist_gdbus_test_codegen_old_SOURCES    = gdbus-test-codegen-generated.c gdbus-test-codegen-generated.h
+nodist_gdbus_test_codegen_old_SOURCES    = gdbus-test-codegen-generated.c gdbus-test-codegen-generated.h gdbus-test-codegen-generated-interface-info.c gdbus-test-codegen-generated-interface-info.h
 gdbus_test_codegen_old_CPPFLAGS          = $(AM_CPPFLAGS) -DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_36 -DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_36
 gdbus_threading_SOURCES                  = $(gdbus_sessionbus_sources) gdbus-threading.c
 gmenumodel_SOURCES                       = $(gdbus_sessionbus_sources) gmenumodel.c
 gnotification_SOURCES                    = $(gdbus_sessionbus_sources) gnotification.c gnotification-server.h gnotification-server.c
 
-BUILT_SOURCES += gdbus-test-codegen-generated.c gdbus-test-codegen-generated.h
-gdbus-test-codegen.o: gdbus-test-codegen-generated.h
+BUILT_SOURCES += gdbus-test-codegen-generated.c gdbus-test-codegen-generated.h gdbus-test-codegen-generated-interface-info.c gdbus-test-codegen-generated-interface-info.h
+gdbus-test-codegen.o: gdbus-test-codegen-generated.h gdbus-test-codegen-generated-interface-info.h
 gdbus-test-codegen-generated.h: test-codegen.xml Makefile $(top_builddir)/gio/gdbus-2.0/codegen/gdbus-codegen
 	$(AM_V_GEN) UNINSTALLED_GLIB_SRCDIR=$(top_srcdir) \
 		UNINSTALLED_GLIB_BUILDDIR=$(top_builddir) \
@@ -519,9 +552,41 @@ gdbus-test-codegen-generated.h: test-codegen.xml Makefile $(top_builddir)/gio/gd
 		$(NULL)
 gdbus-test-codegen-generated.c: gdbus-test-codegen-generated.h
 	@: # Generated as side-effect of .h
+gdbus-test-codegen-generated-interface-info.h: test-codegen.xml Makefile $(top_builddir)/gio/gdbus-2.0/codegen/gdbus-codegen
+	$(AM_V_GEN) UNINSTALLED_GLIB_SRCDIR=$(top_srcdir) \
+		UNINSTALLED_GLIB_BUILDDIR=$(top_builddir) \
+		$(PYTHON) $(top_builddir)/gio/gdbus-2.0/codegen/gdbus-codegen \
+		--interface-info-header \
+		--annotate "org.project.Bar" Key1 Value1 \
+		--annotate "org.project.Bar" org.gtk.GDBus.Internal Value2 \
+		--annotate "org.project.Bar.HelloWorld()" Key3 Value3 \
+		--annotate "org.project.Bar::TestSignal" Key4 Value4 \
+		--annotate "org.project.Bar:ay" Key5 Value5 \
+		--annotate "org.project.Bar.TestPrimitiveTypes()[val_int32]" Key6 Value6 \
+		--annotate "org.project.Bar.TestPrimitiveTypes()[ret_uint32]" Key7 Value7 \
+		--annotate "org.project.Bar::TestSignal[array_of_strings]" Key8 Value8 \
+		--output $@ \
+		$(srcdir)/test-codegen.xml \
+		$(NULL)
+gdbus-test-codegen-generated-interface-info.c: test-codegen.xml Makefile $(top_builddir)/gio/gdbus-2.0/codegen/gdbus-codegen
+	$(AM_V_GEN) UNINSTALLED_GLIB_SRCDIR=$(top_srcdir) \
+		UNINSTALLED_GLIB_BUILDDIR=$(top_builddir) \
+		$(PYTHON) $(top_builddir)/gio/gdbus-2.0/codegen/gdbus-codegen \
+		--interface-info-body \
+		--annotate "org.project.Bar" Key1 Value1 \
+		--annotate "org.project.Bar" org.gtk.GDBus.Internal Value2 \
+		--annotate "org.project.Bar.HelloWorld()" Key3 Value3 \
+		--annotate "org.project.Bar::TestSignal" Key4 Value4 \
+		--annotate "org.project.Bar:ay" Key5 Value5 \
+		--annotate "org.project.Bar.TestPrimitiveTypes()[val_int32]" Key6 Value6 \
+		--annotate "org.project.Bar.TestPrimitiveTypes()[ret_uint32]" Key7 Value7 \
+		--annotate "org.project.Bar::TestSignal[array_of_strings]" Key8 Value8 \
+		--output $@ \
+		$(srcdir)/test-codegen.xml \
+		$(NULL)
 
 EXTRA_DIST += test-codegen.xml
-CLEANFILES += gdbus-test-codegen-generated.[ch] gdbus-test-codegen-generated-doc-*.xml
+CLEANFILES += gdbus-test-codegen-generated.[ch] gdbus-test-codegen-generated-doc-*.xml gdbus-test-codegen-generated-interface-info.[ch]
 endif # OS_UNIX
 endif # HAVE_DBUS_DAEMON
 
@@ -589,9 +654,12 @@ test-generated.txt: test1.txt
 	$(AM_V_GEN) echo "Generated" > $@ && \
 	  cat $< >> $@
 
+gresource-big-test.txt: gen-big-test-resource.py
+	$(AM_V_GEN) $(PYTHON) $< $@
+
 resources.o: test_resources2.h
 test_resources.c: test2.gresource.xml Makefile $(shell $(glib_compile_resources) --sourcedir=$(srcdir) --generate-dependencies $(srcdir)/test2.gresource.xml)
-	$(AM_V_GEN) $(glib_compile_resources) --target=$@ --sourcedir=$(srcdir) --generate-source --c-name _g_test1 $<
+	$(AM_V_GEN) $(glib_compile_resources) --target=$@ --sourcedir=. --sourcedir=$(srcdir) --generate-source --c-name _g_test1 $<
 
 test_resources2.h test_resources2.c: test3.gresource.xml Makefile $(shell $(glib_compile_resources) --sourcedir=$(srcdir) --generate-dependencies $(srcdir)/test3.gresource.xml)
 	$(AM_V_GEN) $(glib_compile_resources) --target=$@ --sourcedir=$(srcdir) --generate --c-name _g_test2 --manual-register $<
@@ -602,8 +670,21 @@ plugin_resources.c: test4.gresource.xml Makefile $(shell $(glib_compile_resource
 test.gresource: test.gresource.xml Makefile $(shell $(glib_compile_resources) --sourcedir=. --sourcedir=$(srcdir) --generate-dependencies $(srcdir)/test.gresource.xml)
 	$(AM_V_GEN) $(glib_compile_resources) --target=$@ --sourcedir=. --sourcedir=$(srcdir) $<
 
-EXTRA_DIST += test.gresource.xml test1.txt test2.gresource.xml test2.txt test3.gresource.xml test3.txt test4.gresource.xml
-CLEANFILES += test-generated.txt test_resources.c test_resources2.[ch] plugin_resources.c test.gresource
+EXTRA_DIST += test.gresource.xml test1.txt test2.gresource.xml test2.txt test3.gresource.xml test3.txt test4.gresource.xml test5.gresource.xml gen-big-test-resource.py
+CLEANFILES += test-generated.txt test_resources.c test_resources2.[ch] plugin_resources.c test.gresource gresource-big-test.txt
+
+if OS_LINUX
+test5.gresource: test5.gresource.xml Makefile $(shell $(glib_compile_resources) --sourcedir=. --sourcedir=$(srcdir) --generate-dependencies $(srcdir)/test5.gresource.xml)
+	$(AM_V_GEN) $(glib_compile_resources) --target=$@ --sourcedir=. --sourcedir=$(srcdir) $<
+test_resources_binary.c: test5.gresource.xml Makefile $(shell $(glib_compile_resources) --sourcedir=. --sourcedir=$(srcdir) --generate-dependencies $(srcdir)/test5.gresource.xml)
+	$(AM_V_GEN) $(glib_compile_resources) --target=$@ --sourcedir=$(srcdir) --generate-source --c-name _g_binary_test1 $<
+test_resources_binary_data.o: test5.gresource
+	$(AM_V_GEN) ld -r -b binary $< -o $@
+test_resources_binary_data2.o: test_resources_binary.o
+	$(AM_V_GEN) objcopy --add-symbol _g_binary_test1_resource_data=.data:0 -N _binary_test5_gresource_start -N _binary_test5_gresource_size -N _binary_test5_gresource_end $< $@
+nodist_resources_SOURCES += test_resources_binary_data2.o test_resources_binary.c
+endif
+
 endif # !CROSS_COMPILING
 
 BUILT_SOURCES += giotypefuncs.inc
