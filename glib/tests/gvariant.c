@@ -4039,6 +4039,22 @@ test_parse_failures (void)
     "b\"\\\"",                  "0-4:",            "unterminated string constant",
     "b'\\'a",                   "0-5:",            "unterminated string constant",
     "b\"\\\"a",                 "0-5:",            "unterminated string constant",
+    "'\\u-ff4'",                "3:",              "invalid 4-character unicode escape",
+    "'\\u+ff4'",                "3:",              "invalid 4-character unicode escape",
+    "'\\u'",                    "3:",              "invalid 4-character unicode escape",
+    "'\\u0'",                   "3-4:",            "invalid 4-character unicode escape",
+    "'\\uHELLO'",               "3:",              "invalid 4-character unicode escape",
+    "'\\u ff4'",                "3:",              "invalid 4-character unicode escape",
+    "'\\u012'",                 "3-6:",            "invalid 4-character unicode escape",
+    "'\\u0xff4'",               "3-4:",            "invalid 4-character unicode escape",
+    "'\\U-ff4'",                "3:",              "invalid 8-character unicode escape",
+    "'\\U+ff4'",                "3:",              "invalid 8-character unicode escape",
+    "'\\U'",                    "3:",              "invalid 8-character unicode escape",
+    "'\\U0'",                   "3-4:",            "invalid 8-character unicode escape",
+    "'\\UHELLO'",               "3:",              "invalid 8-character unicode escape",
+    "'\\U ff4'",                "3:",              "invalid 8-character unicode escape",
+    "'\\U0123456'",             "3-10:",           "invalid 8-character unicode escape",
+    "'\\U0xff4'",               "3-4:",            "invalid 8-character unicode escape",
   };
   guint i;
 
@@ -4390,67 +4406,67 @@ test_equal (void)
 
   a = untrusted (g_variant_new_byte (5));
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_int16 (G_MININT16));
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_uint16 (0));
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_int32 (G_MININT32));
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_uint32 (0));
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_int64 (G_MININT64));
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_uint64 (0));
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_double (G_MINDOUBLE));
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_string ("abc"));
-  g_assert_true (g_variant_equal (a, a));
+  g_assert_cmpvariant (a, a);
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_object_path ("/abc"));
-  g_assert_true (g_variant_equal (a, a));
+  g_assert_cmpvariant (a, a);
   b = g_variant_get_normal_form (a);
   a = untrusted (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_signature ("g"));
-  g_assert_true (g_variant_equal (a, a));
+  g_assert_cmpvariant (a, a);
   b = g_variant_get_normal_form (a);
   a = untrusted (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
   a = untrusted (g_variant_new_boolean (FALSE));
   b = g_variant_get_normal_form (a);
-  g_assert_true (g_variant_equal (a, b));
+  g_assert_cmpvariant (a, b);
   g_variant_unref (a);
   g_variant_unref (b);
 }
@@ -4674,8 +4690,8 @@ test_print_context (void)
     { NULL, "[1, 2, 3, 'str']", " ^        ^^^^^" },
     { G_VARIANT_TYPE_UINT16, "{ 'abc':'def' }", "  ^^^^^^^^^^^^^^^" },
     { NULL, "<5", "    ^" },
-    { NULL, "'ab\\ux'", "  ^^^^^^^" },
-    { NULL, "'ab\\U00efx'", "  ^^^^^^^^^^^" }
+    { NULL, "'ab\\ux'", "       ^ " },
+    { NULL, "'ab\\U00efx'", "       ^^^^  " }
   };
   GVariant *v;
   gchar *s;

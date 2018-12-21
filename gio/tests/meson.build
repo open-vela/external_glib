@@ -55,7 +55,7 @@ gio_tests = {
   'memory-output-stream' : {},
   'monitor' : {},
   'mount-operation' : {},
-  'network-address' : {},
+  'network-address' : {'extra_sources': ['mock-resolver.c']},
   'network-monitor' : {},
   'network-monitor-race' : {},
   'permission' : {},
@@ -134,6 +134,18 @@ if host_machine.system() != 'windows'
     'unix-mounts' : {},
     'unix-streams' : {},
     'g-file-info-filesystem-readonly' : {},
+    'gsocketclient-slow' : {
+      'depends' : [
+        shared_library('slow-connect-preload',
+          'slow-connect-preload.c',
+          name_prefix : '',
+          dependencies: cc.find_library('dl'),
+        )
+      ],
+      'env' : {
+        'LD_PRELOAD': '@0@/slow-connect-preload.so'.format(meson.current_build_dir())
+      }
+    },
     'gschema-compile' : {'install' : false},
     'trash' : {},
   }
@@ -144,11 +156,9 @@ if host_machine.system() != 'windows'
     gio_tests += {
       'appinfo' : {
         'install' : false,
-        'is_parallel' : false,
       },
       'desktop-app-info' : {
         'install' : false,
-        'is_parallel' : false,
       },
     }
   endif
@@ -171,6 +181,16 @@ if host_machine.system() != 'windows'
   #  Test programs that need to bring up a session bus (requires dbus-daemon)
   have_dbus_daemon = find_program('dbus-daemon', required : false).found()
   if have_dbus_daemon
+    annotate_args = [
+      '--annotate', 'org.project.Bar', 'Key1', 'Value1',
+      '--annotate', 'org.project.Bar', 'org.gtk.GDBus.Internal', 'Value2',
+      '--annotate', 'org.project.Bar.HelloWorld()', 'Key3', 'Value3',
+      '--annotate', 'org.project.Bar::TestSignal', 'Key4', 'Value4',
+      '--annotate', 'org.project.Bar:ay', 'Key5', 'Value5',
+      '--annotate', 'org.project.Bar.TestPrimitiveTypes()[val_int32]', 'Key6', 'Value6',
+      '--annotate', 'org.project.Bar.TestPrimitiveTypes()[ret_uint32]', 'Key7', 'Value7',
+      '--annotate', 'org.project.Bar::TestSignal[array_of_strings]', 'Key8', 'Value8',
+    ]
     # Generate gdbus-test-codegen-generated.{c,h}
     gdbus_test_codegen_generated = custom_target('gdbus-test-codegen-generated',
         input :   ['test-codegen.xml'],
@@ -185,15 +205,29 @@ if host_machine.system() != 'windows'
                    '--c-generate-autocleanup', 'all',
                    '--c-namespace', 'Foo_iGen',
                    '--generate-docbook', 'gdbus-test-codegen-generated-doc',
-                   '--annotate', 'org.project.Bar', 'Key1', 'Value1',
-                   '--annotate', 'org.project.Bar', 'org.gtk.GDBus.Internal', 'Value2',
-                   '--annotate', 'org.project.Bar.HelloWorld()', 'Key3', 'Value3',
-                   '--annotate', 'org.project.Bar::TestSignal', 'Key4', 'Value4',
-                   '--annotate', 'org.project.Bar:ay', 'Key5', 'Value5',
-                   '--annotate', 'org.project.Bar.TestPrimitiveTypes()[val_int32]', 'Key6', 'Value6',
-                   '--annotate', 'org.project.Bar.TestPrimitiveTypes()[ret_uint32]', 'Key7', 'Value7',
-                   '--annotate', 'org.project.Bar::TestSignal[array_of_strings]', 'Key8', 'Value8',
+                   annotate_args,
                    '@INPUT@'])
+
+    gdbus_test_codegen_generated_interface_info = [
+      custom_target('gdbus-test-codegen-generated-interface-info-h',
+          input :   ['test-codegen.xml'],
+          output :  ['gdbus-test-codegen-generated-interface-info.h'],
+          depend_files : gdbus_codegen_built_files,
+          command : [python, gdbus_codegen,
+                     '--interface-info-header',
+                     annotate_args,
+                     '--output', '@OUTPUT@',
+                     '@INPUT@']),
+      custom_target('gdbus-test-codegen-generated-interface-info-c',
+          input :   ['test-codegen.xml'],
+          output :  ['gdbus-test-codegen-generated-interface-info.c'],
+          depend_files : gdbus_codegen_built_files,
+          command : [python, gdbus_codegen,
+                     '--interface-info-body',
+                     annotate_args,
+                     '--output', '@OUTPUT@',
+                     '@INPUT@']),
+    ]
 
     extra_sources = ['gdbus-sessionbus.c', 'gdbus-tests.c']
 
@@ -224,7 +258,7 @@ if host_machine.system() != 'windows'
       'gdbus-proxy-unique-name' : {'extra_sources' : extra_sources},
       'gdbus-proxy-well-known-name' : {'extra_sources' : extra_sources},
       'gdbus-test-codegen' : {
-        'extra_sources' : [extra_sources, gdbus_test_codegen_generated],
+        'extra_sources' : [extra_sources, gdbus_test_codegen_generated, gdbus_test_codegen_generated_interface_info],
       },
       'gdbus-threading' : {
         'extra_sources' : extra_sources,
@@ -239,7 +273,7 @@ if host_machine.system() != 'windows'
       },
       'gdbus-test-codegen-old' : {
         'source' : 'gdbus-test-codegen.c',
-        'extra_sources' : [extra_sources, gdbus_test_codegen_generated],
+        'extra_sources' : [extra_sources, gdbus_test_codegen_generated, gdbus_test_codegen_generated_interface_info],
         'c_args' : ['-DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_36',
                     '-DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_36'],
       },
@@ -361,15 +395,36 @@ if host_machine.system() != 'windows'
   }
 endif
 
+appinfo_test_desktop_files = [
+  'appinfo-test-gnome.desktop',
+  'appinfo-test-notgnome.desktop',
+  'appinfo-test.desktop',
+  'appinfo-test2.desktop',
+]
+
+cdata = configuration_data()
+if installed_tests_enabled
+  cdata.set('installed_tests_dir', installed_tests_execdir)
+else
+  cdata.set('installed_tests_dir', meson.current_build_dir())
+endif
+
+foreach appinfo_test_desktop_file : appinfo_test_desktop_files
+  configure_file(
+    input: appinfo_test_desktop_file + '.in',
+    output: appinfo_test_desktop_file,
+    install_dir: installed_tests_execdir,
+    install: installed_tests_enabled,
+    configuration: cdata,
+  )
+endforeach
+
 if installed_tests_enabled
   install_data(
     'contexts.c',
     'g-icon.c',
     'appinfo-test-actions.desktop',
-    'appinfo-test-gnome.desktop',
-    'appinfo-test-notgnome.desktop',
-    'appinfo-test.desktop',
-    'appinfo-test2.desktop',
+    'appinfo-test-static.desktop',
     'file.c',
     'org.gtk.test.dbusappinfo.desktop',
     install_dir : installed_tests_execdir,
@@ -411,6 +466,13 @@ if not meson.is_cross_build() or meson.has_exe_wrapper()
     install : installed_tests_enabled
   )
 
+  # referenced by test2.gresource.xml
+  big_test_resource = custom_target(
+    'gresource-big-test.txt',
+    input : ['gen-big-test-resource.py'],
+    output : ['gresource-big-test.txt'],
+    command : [python, '@INPUT0@', '@OUTPUT@'])
+
   test_gresource = custom_target('test.gresource',
     input : 'test.gresource.xml',
     output : 'test.gresource',
@@ -446,10 +508,12 @@ if not meson.is_cross_build() or meson.has_exe_wrapper()
 
   test_resources_c = custom_target('test_resources.c',
     input : 'test2.gresource.xml',
+    depends : big_test_resource,
     output : 'test_resources.c',
     command : [glib_compile_resources,
                '--target=@OUTPUT@',
                '--sourcedir=' + meson.current_source_dir(),
+               '--sourcedir=' + meson.current_build_dir(),
                '--generate-source',
                '--c-name', '_g_test1',
                '@INPUT@'])
@@ -460,12 +524,67 @@ if not meson.is_cross_build() or meson.has_exe_wrapper()
     copy : true,
     install : false)
 
-  gio_tests += {
-    'resources' : {
-      'extra_sources' : [test_gresource, test_resources_c, test_resources2_c,
-                         test_resources2_h],
-    },
-  }
+  # Create object file containing resource data
+  # for testing the external data option
+  if build_machine.system() == 'linux'
+    test_gresource_binary = custom_target('test5.gresource',
+      input : 'test5.gresource.xml',
+      output : 'test5.gresource',
+      command : [glib_compile_resources,
+                 '--target=@OUTPUT@',
+                 '--sourcedir=' + meson.current_source_dir(),
+                 '--sourcedir=' + meson.current_build_dir(),
+                 '@INPUT@'],
+      install_dir : installed_tests_execdir,
+      install : installed_tests_enabled)
+
+	# Create resource data file
+    test_resources_binary_c = custom_target('test_resources_binary.c',
+      input : 'test5.gresource.xml',
+      output : 'test_resources_binary.c',
+      command : [glib_compile_resources,
+                 '--target=@OUTPUT@',
+                 '--sourcedir=' + meson.current_source_dir(),
+                 '--sourcedir=' + meson.current_build_dir(),
+                 '--generate-source',
+                 '--external-data',
+                 '--c-name', '_g_binary_test1',
+                 '@INPUT@'])
+
+	# Create object file containing resource data
+    test_resources_binary = custom_target('test_resources.o',
+      input : test_gresource_binary,
+      output : 'test_resources.o',
+      command : ['ld',
+                 '-r',
+                 '-b','binary',
+                 '@INPUT@',
+                 '-o','@OUTPUT@'])
+
+	# Rename symbol to match the one in the C file
+    test_resources_binary2 = custom_target('test_resources2.o',
+      input : test_resources_binary,
+      output : 'test_resources2.o',
+      command : ['objcopy',
+                 '--add-symbol','_g_binary_test1_resource_data=.data:0',
+                 '@INPUT@',
+                 '@OUTPUT@'])
+
+    gio_tests += {
+      'resources' : {
+        'extra_sources' : [test_gresource, test_resources_c, test_resources2_c,
+                           test_resources2_h, test_resources_binary_c,
+                           test_resources_binary2],
+      },
+    }
+  else
+    gio_tests += {
+      'resources' : {
+        'extra_sources' : [test_gresource, test_resources_c, test_resources2_c,
+                           test_resources2_h],
+      },
+    }
+  endif
 endif
 
 foreach test_name, extra_args : gio_tests
@@ -495,12 +614,19 @@ foreach test_name, extra_args : gio_tests
 
   suite = ['gio'] + extra_args.get('suite', [])
   timeout = suite.contains('slow') ? test_timeout_slow : test_timeout
+  local_test_env = test_env
+
+  foreach var, value : extra_args.get('env', {})
+    local_test_env.append(var, value)
+  endforeach
+
   test(test_name, exe,
-    env : test_env,
+    env : local_test_env,
     timeout : timeout,
     suite : suite,
     args : ['--tap'],
     is_parallel : extra_args.get('is_parallel', true),
+    depends : extra_args.get('depends', []),
   )
 endforeach
 
