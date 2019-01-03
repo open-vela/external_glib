@@ -132,15 +132,7 @@ if glib_conf.has('HAVE_EVENTFD')
   }
 endif
 
-if host_machine.system() == 'windows'
-  if winsock2.found()
-    glib_tests += {
-      'gpoll' : {
-        'dependencies' : [winsock2],
-      },
-    }
-  endif
-else
+if host_machine.system() != 'windows'
   glib_tests += {
     'include' : {},
     'unix' : {},
