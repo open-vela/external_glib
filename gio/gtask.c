@@ -1132,8 +1132,7 @@ g_task_get_check_cancellable (GTask *task)
 {
   g_return_val_if_fail (G_IS_TASK (task), FALSE);
 
-  /* Convert from a bit field to a boolean. */
-  return task->check_cancellable ? TRUE : FALSE;
+  return task->check_cancellable;
 }
 
 /**
@@ -1150,8 +1149,7 @@ g_task_get_return_on_cancel (GTask *task)
 {
   g_return_val_if_fail (G_IS_TASK (task), FALSE);
 
-  /* Convert from a bit field to a boolean. */
-  return task->return_on_cancel ? TRUE : FALSE;
+  return task->return_on_cancel;
 }
 
 /**
@@ -1954,8 +1952,7 @@ g_task_get_completed (GTask *task)
 {
   g_return_val_if_fail (G_IS_TASK (task), FALSE);
 
-  /* Convert from a bit field to a boolean. */
-  return task->completed ? TRUE : FALSE;
+  return task->completed;
 }
 
 /**
@@ -2058,7 +2055,7 @@ g_task_get_property (GObject    *object,
   switch ((GTaskProperty) prop_id)
     {
     case PROP_COMPLETED:
-      g_value_set_boolean (value, g_task_get_completed (task));
+      g_value_set_boolean (value, task->completed);
       break;
     }
 }
