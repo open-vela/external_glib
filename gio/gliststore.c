@@ -55,7 +55,6 @@ struct _GListStore
   /* cache */
   guint last_position;
   GSequenceIter *last_iter;
-  gboolean last_position_valid;
 };
 
 enum
@@ -80,8 +79,7 @@ g_list_store_items_changed (GListStore *store,
   if (position <= store->last_position)
     {
       store->last_iter = NULL;
-      store->last_position = 0;
-      store->last_position_valid = FALSE;
+      store->last_position = -1u;
     }
 
   g_list_model_items_changed (G_LIST_MODEL (store), position, removed, added);
@@ -181,7 +179,7 @@ g_list_store_get_item (GListModel *list,
   GListStore *store = G_LIST_STORE (list);
   GSequenceIter *it = NULL;
 
-  if (store->last_position_valid)
+  if (store->last_position != -1u)
     {
       if (position < G_MAXUINT && store->last_position == position + 1)
         it = g_sequence_iter_prev (store->last_iter);
@@ -196,7 +194,6 @@ g_list_store_get_item (GListModel *list,
 
   store->last_iter = it;
   store->last_position = position;
-  store->last_position_valid = TRUE;
 
   if (g_sequence_iter_is_end (it))
     return NULL;
@@ -216,8 +213,7 @@ static void
 g_list_store_init (GListStore *store)
 {
   store->items = g_sequence_new (g_object_unref);
-  store->last_position = 0;
-  store->last_position_valid = FALSE;
+  store->last_position = -1u;
 }
 
 /**
