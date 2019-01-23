@@ -498,7 +498,7 @@ g_dngettext (const gchar *domain,
  *   // Rest of your application.
  * }
  * ]|
- * where `DATADIR` is as typically provided by automake or Meson.
+ * where `DATADIR` is as typically provided by automake.
  *
  * For a library, you only have to call bindtextdomain() and
  * bind_textdomain_codeset() in your initialization function. If your library
