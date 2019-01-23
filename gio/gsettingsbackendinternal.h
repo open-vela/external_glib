@@ -87,8 +87,6 @@ GType                   g_null_settings_backend_get_type                (void);
 
 GType                   g_memory_settings_backend_get_type              (void);
 
-GType                   g_keyfile_settings_backend_get_type             (void);
-
 #ifdef HAVE_COCOA
 GType                   g_nextstep_settings_backend_get_type            (void);
 #endif

@@ -41,7 +41,8 @@
 #include "glibintl.h"
 
 #if defined (_MSC_VER) && !defined (HAVE_DIRENT_H)
-#include "dirent/dirent.h"
+#include "../build/win32/dirent/dirent.h"
+#include "../build/win32/dirent/wdirent.c"
 #endif
 
 #include "glib-private.h" /* g_dir_open_with_errno, g_dir_new_from_dirp */
@@ -189,8 +190,6 @@ g_dir_new_from_dirp (gpointer dirp)
   return dir;
 #else
   g_assert_not_reached ();
-
-  return NULL;
 #endif
 }
 

@@ -1050,7 +1050,7 @@ g_dtls_connection_set_advertised_protocols (GDtlsConnection     *conn,
   if (iface->set_advertised_protocols == NULL)
     return;
 
-  iface->set_advertised_protocols (conn, protocols);
+  return iface->set_advertised_protocols (conn, protocols);
 }
 
 /**
