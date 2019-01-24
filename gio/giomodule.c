@@ -909,7 +909,7 @@ _g_io_module_get_default (const gchar         *extension_point,
   const char *use_this;
   GList *l;
   GIOExtensionPoint *ep;
-  GIOExtension *extension = NULL, *preferred;
+  GIOExtension *extension, *preferred;
   gpointer impl;
 
   g_rec_mutex_lock (&default_modules_lock);
@@ -986,12 +986,9 @@ _g_io_module_get_default (const gchar         *extension_point,
   g_rec_mutex_unlock (&default_modules_lock);
 
   if (impl != NULL)
-    {
-      g_assert (extension != NULL);
-      g_debug ("%s: Found default implementation %s (%s) for ‘%s’",
-               G_STRFUNC, g_io_extension_get_name (extension),
-               G_OBJECT_TYPE_NAME (impl), extension_point);
-    }
+    g_debug ("%s: Found default implementation %s (%s) for ‘%s’",
+             G_STRFUNC, g_io_extension_get_name (extension),
+             G_OBJECT_TYPE_NAME (impl), extension_point);
   else
     g_debug ("%s: Failed to find default implementation for ‘%s’",
              G_STRFUNC, extension_point);
