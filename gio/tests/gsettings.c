@@ -1770,6 +1770,23 @@ test_keyfile (void)
   g_assert_cmpstr (str, ==, "howdy");
   g_free (str);
 
+  /* Now check setting a string without quotes */
+  called = FALSE;
+  g_signal_connect (settings, "changed::greeting", G_CALLBACK (key_changed_cb), &called);
+
+  g_key_file_set_string (keyfile, "tests", "greeting", "he\"l🤗uń");
+  g_free (data);
+  data = g_key_file_to_data (keyfile, &len, NULL);
+  g_file_set_contents ("keyfile/gsettings.store", data, len, &error);
+  g_assert_no_error (error);
+  while (!called)
+    g_main_context_iteration (NULL, FALSE);
+  g_signal_handlers_disconnect_by_func (settings, key_changed_cb, &called);
+
+  str = g_settings_get_string (settings, "greeting");
+  g_assert_cmpstr (str, ==, "he\"l🤗uń");
+  g_free (str);
+
   g_settings_set (settings, "farewell", "s", "cheerio");
   
   called = FALSE;
@@ -2798,12 +2815,8 @@ main (int argc, char *argv[])
       if (!backend_set)
         g_setenv ("GSETTINGS_BACKEND", "memory", TRUE);
 
-/* Meson build defines this, autotools build does not */
-#ifndef GLIB_MKENUMS
-#define GLIB_MKENUMS "../../gobject/glib-mkenums"
-#endif
-
       g_remove ("org.gtk.test.enums.xml");
+      /* #GLIB_MKENUMS is defined in meson.build */
       g_assert (g_spawn_command_line_sync (GLIB_MKENUMS " "
                                            "--template " SRCDIR "/enums.xml.template "
                                            SRCDIR "/testenum.h",
@@ -2820,12 +2833,8 @@ main (int argc, char *argv[])
       g_assert (g_file_set_contents ("org.gtk.test.gschema.override", override_text, -1, NULL));
       g_free (override_text);
 
-/* Meson build defines this, autotools build does not */
-#ifndef GLIB_COMPILE_SCHEMAS
-#define GLIB_COMPILE_SCHEMAS "../glib-compile-schemas"
-#endif
-
       g_remove ("gschemas.compiled");
+      /* #GLIB_COMPILE_SCHEMAS is defined in meson.build */
       g_assert (g_spawn_command_line_sync (GLIB_COMPILE_SCHEMAS " --targetdir=. "
                                            "--schema-file=org.gtk.test.enums.xml "
                                            "--schema-file=org.gtk.test.gschema.xml "
