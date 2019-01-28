@@ -177,7 +177,8 @@ static gchar *
 digest_to_string (guint8 *digest,
                   gsize   digest_len)
 {
-  gsize i, len = digest_len * 2;
+  gint len = digest_len * 2;
+  gint i;
   gchar *retval;
 
   retval = g_new (gchar, len + 1);
