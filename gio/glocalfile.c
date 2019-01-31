@@ -66,8 +66,6 @@
 #include "glibintl.h"
 #ifdef G_OS_UNIX
 #include "glib-unix.h"
-#include "gportalsupport.h"
-#include "gtrashportal.h"
 #endif
 
 #include "glib-private.h"
@@ -1951,9 +1949,6 @@ g_local_file_trash (GFile         *file,
   GVfsClass *class;
   GVfs *vfs;
   int errsv;
-
-  if (glib_should_use_portal ())
-    return g_trash_portal_trash_file (file, error);
 
   if (g_lstat (local->filename, &file_stat) != 0)
     {
