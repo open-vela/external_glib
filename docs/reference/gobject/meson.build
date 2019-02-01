@@ -6,8 +6,7 @@ if get_option('gtk_doc')
     'gatomicarray.h',
     'gobject_probes.h',
     'gobject_trace.h',
-    'gtype-private.h',
-    'gobjectenumtypes.h'
+    'gtype-private.h'
   ]
 
   ignore_decorators = [
@@ -31,6 +30,8 @@ if get_option('gtk_doc')
     'GLIB_AVAILABLE_IN_2_52',
     'GLIB_AVAILABLE_IN_2_54',
     'GLIB_AVAILABLE_IN_2_56',
+    'GLIB_AVAILABLE_IN_2_58',
+    'GLIB_AVAILABLE_IN_2_60',
     'GLIB_DEPRECATED_IN_2_26',
     'GLIB_DEPRECATED_IN_2_26_FOR',
     'GLIB_DEPRECATED_IN_2_28',
@@ -63,6 +64,10 @@ if get_option('gtk_doc')
     'GLIB_DEPRECATED_IN_2_54_FOR',
     'GLIB_DEPRECATED_IN_2_56',
     'GLIB_DEPRECATED_IN_2_56_FOR',
+    'GLIB_DEPRECATED_IN_2_58',
+    'GLIB_DEPRECATED_IN_2_58_FOR',
+    'GLIB_DEPRECATED_IN_2_60',
+    'GLIB_DEPRECATED_IN_2_60_FOR',
   ]
 
   docpath = join_paths(glib_datadir, 'gtk-doc', 'html')
