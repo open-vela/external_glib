@@ -757,12 +757,7 @@ test_ip_sync_dgram (GSocketFamily family)
     m[1].address = NULL;
     m[2].address = NULL;
     len = g_socket_send_messages (client, m, G_N_ELEMENTS (m), 0, NULL, &error);
-    /* This error code may vary between platforms and over time; it is not guaranteed API: */
-#ifndef G_OS_WIN32
     g_assert_error (error, G_IO_ERROR, G_IO_ERROR_FAILED);
-#else
-    g_assert_error (error, G_IO_ERROR, G_IO_ERROR_NOT_CONNECTED);
-#endif
     g_clear_error (&error);
     g_assert_cmpint (len, ==, -1);
 
@@ -829,10 +824,6 @@ test_ip_sync_dgram_timeouts (GSocketFamily family)
   GCancellable *cancellable = NULL;
   GThread *cancellable_thread = NULL;
   gssize len;
-#ifdef G_OS_WIN32
-  GInetAddress *iaddr;
-  GSocketAddress *addr;
-#endif
 
   client = g_socket_new (family,
                          G_SOCKET_TYPE_DATAGRAM,
@@ -843,16 +834,6 @@ test_ip_sync_dgram_timeouts (GSocketFamily family)
   g_assert_cmpint (g_socket_get_family (client), ==, family);
   g_assert_cmpint (g_socket_get_socket_type (client), ==, G_SOCKET_TYPE_DATAGRAM);
   g_assert_cmpint (g_socket_get_protocol (client), ==, G_SOCKET_PROTOCOL_DEFAULT);
-
-#ifdef G_OS_WIN32
-  /* Winsock can't recv() on unbound udp socket */
-  iaddr = g_inet_address_new_loopback (family);
-  addr = g_inet_socket_address_new (iaddr, 0);
-  g_object_unref (iaddr);
-  g_socket_bind (client, addr, TRUE, &error);
-  g_object_unref (addr);
-  g_assert_no_error (error);
-#endif
 
   /* No overall timeout: test the per-operation timeouts instead. */
   g_socket_set_timeout (client, 0);

@@ -271,7 +271,6 @@ find_ifname_and_index (void)
 static void
 test_scope_id (GSocketConnectable *addr)
 {
-#ifndef G_OS_WIN32
   GSocketAddressEnumerator *addr_enum;
   GSocketAddress *saddr;
   GInetSocketAddress *isaddr;
@@ -301,9 +300,6 @@ test_scope_id (GSocketConnectable *addr)
   g_assert (saddr == NULL);
 
   g_object_unref (addr_enum);
-#else
-  g_test_skip ("winsock2 getaddrinfo() can’t understand scope IDs");
-#endif
 }
 
 static void
