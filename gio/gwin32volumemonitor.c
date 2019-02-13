@@ -111,7 +111,7 @@ get_mounts (GVolumeMonitor *volume_monitor)
 {
   DWORD   drives;
   gchar   drive[4] = "A:\\";
-  GQueue  queue = G_QUEUE_INIT;
+  GList *list = NULL;
   
   drives = get_viewable_logical_drives ();
 
@@ -121,13 +121,13 @@ get_mounts (GVolumeMonitor *volume_monitor)
   while (drives && drive[0] <= 'Z')
     {
       if (drives & 1)
-        g_queue_push_tail (&queue, _g_win32_mount_new (volume_monitor, drive, NULL));
-
+      {
+	list = g_list_prepend (list, _g_win32_mount_new (volume_monitor, drive, NULL));
+      }
       drives >>= 1;
       drive[0]++;
     }
-
-  return g_steal_pointer (&queue.head);
+  return list;
 }
 
 /* actually 'mounting' volumes is out of GIOs business on win32, so no volumes are delivered either */
