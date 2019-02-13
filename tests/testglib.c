@@ -843,7 +843,6 @@ test_paths (void)
     gchar *relative_path;
     gchar *canonical_path;
   } canonicalize_filename_checks[] = {
-#ifndef G_OS_WIN32
     { "/etc", "../usr/share", "/usr/share" },
     { "/", "/foo/bar", "/foo/bar" },
     { "/usr/bin", "../../foo/bar", "/foo/bar" },
@@ -858,22 +857,7 @@ test_paths (void)
     { "///triple/slash", ".", "/triple/slash" },
     { "//double/slash", ".", "//double/slash" },
     { "/cwd/../with/./complexities/", "./hello", "/with/complexities/hello" },
-#else
-    { "/etc", "../usr/share", "\\usr\\share" },
-    { "/", "/foo/bar", "\\foo\\bar" },
-    { "/usr/bin", "../../foo/bar", "\\foo\\bar" },
-    { "/", "../../foo/bar", "\\foo\\bar" },
-    { "/double//dash", "../../foo/bar", "\\foo\\bar" },
-    { "/usr/share/foo", ".././././bar", "\\usr\\share\\bar" },
-    { "/foo/bar", "../bar/./.././bar", "\\foo\\bar" },
-    { "/test///dir", "../../././foo/bar", "\\foo\\bar" },
-    { "/test///dir", "../../././/foo///bar", "\\foo\\bar" },
-    { "/etc", "///triple/slash", "\\triple\\slash" },
-    { "/etc", "//double/slash", "//double/slash" },
-    { "///triple/slash", ".", "\\triple\\slash" },
-    { "//double/slash", ".", "//double/slash\\" },
-    { "/cwd/../with/./complexities/", "./hello", "\\with\\complexities\\hello" },
-
+#ifdef G_OS_WIN32
     { "\\etc", "..\\usr\\share", "\\usr\\share" },
     { "\\", "\\foo\\bar", "\\foo\\bar" },
     { "\\usr\\bin", "..\\..\\foo\\bar", "\\foo\\bar" },
@@ -886,8 +870,8 @@ test_paths (void)
     { "\\etc", "\\\\\\triple\\slash", "\\triple\\slash" },
     { "\\etc", "\\\\double\\slash", "\\\\double\\slash" },
     { "\\\\\\triple\\slash", ".", "\\triple\\slash" },
-    { "\\\\double\\slash", ".", "\\\\double\\slash\\" },
-    { "\\cwd\\..\\with\\.\\complexities\\", ".\\hello", "\\with\\complexities\\hello" },
+    { "\\\\double\\slash", ".", "\\\\double\\slash" },
+    { "\\cwd\\..\\with\\.\\complexities\\", ".\\hello", "\\cwd\\with\\complexities\\hello" },
 #endif
   };
   const guint n_canonicalize_filename_checks = G_N_ELEMENTS (canonicalize_filename_checks);
