@@ -1583,7 +1583,7 @@ test_get_available (gconstpointer user_data)
   GError *err = NULL;
   GSocket *listener, *server, *client;
   GInetAddress *addr;
-  GSocketAddress *saddr, *boundaddr;
+  GSocketAddress *saddr;
   gchar data[] = "0123456789abcdef";
   gchar buf[34];
   gssize nread;
@@ -1616,13 +1616,8 @@ test_get_available (gconstpointer user_data)
   g_object_unref (saddr);
   g_object_unref (addr);
 
-  boundaddr = g_socket_get_local_address (listener, &err);
+  saddr = g_socket_get_local_address (listener, &err);
   g_assert_no_error (err);
-
-  addr = g_inet_address_new_loopback (G_SOCKET_FAMILY_IPV4);
-  saddr = g_inet_socket_address_new (addr, g_inet_socket_address_get_port (G_INET_SOCKET_ADDRESS (boundaddr)));
-  g_object_unref (addr);
-  g_object_unref (boundaddr);
 
   if (socket_type == G_SOCKET_TYPE_STREAM)
     {
@@ -1785,7 +1780,7 @@ test_read_write (gconstpointer user_data)
   GError *err = NULL;
   GSocket *listener, *server, *client;
   GInetAddress *addr;
-  GSocketAddress *saddr, *boundaddr;
+  GSocketAddress *saddr;
   TestReadWriteData data;
   guint8 data_write[1024], data_read[1024];
   GSocketConnection *server_stream, *client_stream;
@@ -1814,17 +1809,11 @@ test_read_write (gconstpointer user_data)
   g_object_unref (saddr);
   g_object_unref (addr);
 
-  boundaddr = g_socket_get_local_address (listener, &err);
+  saddr = g_socket_get_local_address (listener, &err);
   g_assert_no_error (err);
 
   g_socket_listen (listener, &err);
   g_assert_no_error (err);
-
-  addr = g_inet_address_new_loopback (G_SOCKET_FAMILY_IPV4);
-  saddr = g_inet_socket_address_new (addr, g_inet_socket_address_get_port (G_INET_SOCKET_ADDRESS (boundaddr)));
-  g_object_unref (addr);
-  g_object_unref (boundaddr);
-
   g_socket_connect (client, saddr, NULL, &err);
   g_assert_no_error (err);
 
