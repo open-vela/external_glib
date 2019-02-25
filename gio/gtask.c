@@ -563,22 +563,15 @@ struct _GTask {
   /* This can’t be in the bit field because we access it from TRACE(). */
   gboolean thread_cancelled;
 
-  /* Protected by the lock when task is threaded: */
-  gboolean thread_complete : 1;
-  gboolean return_on_cancel : 1;
-  gboolean : 0;
-
-  /* Unprotected, but written to when task runs in thread: */
+  gboolean check_cancellable : 1;
   gboolean completed : 1;
+  gboolean return_on_cancel : 1;
+  gboolean synchronous : 1;
+  gboolean thread_complete : 1;
+  gboolean blocking_other_task : 1;
   gboolean had_error : 1;
   gboolean result_set : 1;
   gboolean ever_returned : 1;
-  gboolean : 0;
-
-  /* Read-only once task runs in thread: */
-  gboolean check_cancellable : 1;
-  gboolean synchronous : 1;
-  gboolean blocking_other_task : 1;
 
   GError *error;
   union {
