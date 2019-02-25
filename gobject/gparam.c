@@ -1561,7 +1561,8 @@ g_param_spec_get_default_value (GParamSpec *pspec)
       g_param_value_set_default (pspec, &default_value);
 
       /* store all but the type */
-      memcpy (priv->default_value.data, default_value.data, sizeof (default_value.data));
+      default_value.g_type = 0;
+      priv->default_value = default_value;
 
       g_once_init_leave (&priv->default_value.g_type, pspec->value_type);
     }
