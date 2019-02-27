@@ -418,8 +418,6 @@ pattern_copy (gchar       **out,
   while (brackets);
 }
 
-/* Returns the most general pattern that is subpattern of left and subpattern
- * of right, or NULL if there is no such pattern. */
 static gchar *
 pattern_coalesce (const gchar *left,
                   const gchar *right)
@@ -460,7 +458,7 @@ pattern_coalesce (const gchar *left,
               *out++ = *(*the_other)++;
             }
 
-          else if (**one == 'M' && **the_other != 'm' && **the_other != '*')
+          else if (**one == 'M' && **the_other != 'm')
             {
               (*one)++;
             }
@@ -674,7 +672,18 @@ ast_array_get_pattern (AST    **array,
   gint i;
 
   /* Find the pattern which applies to all children in the array, by l-folding a
-   * coalesce operation.
+   * coalesce operation. This will not always work: for example, the GVariant:
+   *    [[0], [], [nothing]]
+   * has patterns:
+   *    MaMN, Ma*, Mam*
+   * which pairwise coalesce as:
+   *    MaMN + Ma* = MaN
+   *    MaN + Mam* = (doesn’t coalesce)
+   *
+   * However, the pattern MamN coalesces with all three child patterns. Finding
+   * this pattern would require trying all O(n_items^2) pairs, though, which is
+   * expensive. Just let it fail, and require the user to provide type
+   * annotations.
    */
   pattern = ast_get_pattern (array[0], error);
 
@@ -710,10 +719,10 @@ ast_array_get_pattern (AST    **array,
               gchar *tmp2;
               gchar *m;
 
-              /* if 'j' reaches 'i' then we didn't find the pair that failed
-               * to coalesce. This shouldn't happen (see above), but just in
-               * case report an error:
-               */
+              /* if 'j' reaches 'i' then we failed to find the pair, which can
+               * happen due to only trying pairwise coalesces in order rather
+               * than between all pairs (see above). so just report an error
+               * for i. */
               if (j >= i)
                 {
                   ast_set_error (array[i], error, NULL,
