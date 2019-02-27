@@ -49,42 +49,32 @@ typedef struct {
 static GType my_test_get_type (void);
 G_DEFINE_TYPE (GTest, my_test, G_TYPE_OBJECT)
 
-/* Test state */
-typedef struct
-{
-  GClosure *closure;  /* (unowned) */
-  gboolean stopping;
-  gboolean seen_signal_handler;
-  gboolean seen_cleanup;
-  gboolean seen_test_int1;
-  gboolean seen_test_int2;
-  gboolean seen_thread1;
-  gboolean seen_thread2;
-} TestClosureRefcountData;
+/* --- variables --- */
+static volatile gboolean stopping = FALSE;
+static guint             test_signal1 = 0;
+static guint             test_signal2 = 0;
+static gboolean          seen_signal_handler = FALSE;
+static gboolean          seen_cleanup = FALSE;
+static gboolean          seen_test_int1 = FALSE;
+static gboolean          seen_test_int2 = FALSE;
+static gboolean          seen_thread1 = FALSE;
+static gboolean          seen_thread2 = FALSE;
 
 /* --- functions --- */
 static void
 my_test_init (GTest * test)
 {
-  g_test_message ("Init %p", test);
+  g_print ("init %p\n", test);
 
   test->value = 0;
   test->test_pointer1 = TEST_POINTER1;
   test->test_pointer2 = TEST_POINTER2;
 }
 
-typedef enum
-{
-  PROP_TEST_PROP = 1,
-} MyTestProperty;
-
-typedef enum
-{
-  SIGNAL_TEST_SIGNAL1,
-  SIGNAL_TEST_SIGNAL2,
-} MyTestSignal;
-
-static guint signals[SIGNAL_TEST_SIGNAL2 + 1] = { 0, };
+enum {
+  ARG_0,
+  ARG_TEST_PROP
+};
 
 static void
 my_test_set_property (GObject      *object,
@@ -95,7 +85,7 @@ my_test_set_property (GObject      *object,
   GTest *test = MY_TEST (object);
   switch (prop_id)
     {
-    case PROP_TEST_PROP:
+    case ARG_TEST_PROP:
       test->value = g_value_get_int (value);
       break;
     default:
@@ -113,7 +103,7 @@ my_test_get_property (GObject    *object,
   GTest *test = MY_TEST (object);
   switch (prop_id)
     {
-    case PROP_TEST_PROP:
+    case ARG_TEST_PROP:
       g_value_set_int (value, test->value);
       break;
     default:
@@ -132,14 +122,14 @@ static void
 my_test_emit_test_signal1 (GTest *test,
                            gint   vint)
 {
-  g_signal_emit (G_OBJECT (test), signals[SIGNAL_TEST_SIGNAL1], 0, vint);
+  g_signal_emit (G_OBJECT (test), test_signal1, 0, vint);
 }
 
 static void
 my_test_emit_test_signal2 (GTest *test,
                            gint   vint)
 {
-  g_signal_emit (G_OBJECT (test), signals[SIGNAL_TEST_SIGNAL2], 0, vint);
+  g_signal_emit (G_OBJECT (test), test_signal2, 0, vint);
 }
 
 static void
@@ -150,16 +140,14 @@ my_test_class_init (GTestClass *klass)
   gobject_class->set_property = my_test_set_property;
   gobject_class->get_property = my_test_get_property;
 
-  signals[SIGNAL_TEST_SIGNAL1] =
-      g_signal_new ("test-signal1", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST,
-                    G_STRUCT_OFFSET (GTestClass, test_signal1), NULL, NULL,
-                    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
-  signals[SIGNAL_TEST_SIGNAL2] =
-      g_signal_new ("test-signal2", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST,
-                    G_STRUCT_OFFSET (GTestClass, test_signal2), NULL, NULL,
-                    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
+  test_signal1 = g_signal_new ("test-signal1", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST,
+                               G_STRUCT_OFFSET (GTestClass, test_signal1), NULL, NULL,
+                               g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
+  test_signal2 = g_signal_new ("test-signal2", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST,
+                               G_STRUCT_OFFSET (GTestClass, test_signal2), NULL, NULL,
+                               g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
 
-  g_object_class_install_property (G_OBJECT_CLASS (klass), PROP_TEST_PROP,
+  g_object_class_install_property (G_OBJECT_CLASS (klass), ARG_TEST_PROP,
                                    g_param_spec_int ("test-prop", "Test Prop", "Test property",
                                                      0, 1, 0, G_PARAM_READWRITE));
   klass->test_signal2 = my_test_test_signal2;
@@ -178,38 +166,36 @@ test_closure (GClosure *closure)
 }
 
 static gpointer
-thread1_main (gpointer user_data)
+thread1_main (gpointer data)
 {
-  TestClosureRefcountData *data = user_data;
-  guint i = 0;
-
-  for (i = 0; !g_atomic_int_get (&data->stopping); i++)
+  GClosure *closure = data;
+  while (!stopping)
     {
-      test_closure (data->closure);
-      if (i % 10000 == 0)
+      static guint count = 0;
+      test_closure (closure);
+      if (++count % 10000 == 0)
         {
-          g_test_message ("Yielding from thread1");
-          g_thread_yield (); /* force context switch */
-          g_atomic_int_set (&data->seen_thread1, TRUE);
+          g_printerr ("c");
+          g_thread_yield(); /* force context switch */
+          seen_thread1 = TRUE;
         }
     }
   return NULL;
 }
 
 static gpointer
-thread2_main (gpointer user_data)
+thread2_main (gpointer data)
 {
-  TestClosureRefcountData *data = user_data;
-  guint i = 0;
-
-  for (i = 0; !g_atomic_int_get (&data->stopping); i++)
+  GClosure *closure = data;
+  while (!stopping)
     {
-      test_closure (data->closure);
-      if (i % 10000 == 0)
+      static guint count = 0;
+      test_closure (closure);
+      if (++count % 10000 == 0)
         {
-          g_test_message ("Yielding from thread2");
-          g_thread_yield (); /* force context switch */
-          g_atomic_int_set (&data->seen_thread2, TRUE);
+          g_printerr ("C");
+          g_thread_yield(); /* force context switch */
+          seen_thread2 = TRUE;
         }
     }
   return NULL;
@@ -218,26 +204,21 @@ thread2_main (gpointer user_data)
 static void
 test_signal_handler (GTest   *test,
                      gint     vint,
-                     gpointer user_data)
+                     gpointer data)
 {
-  TestClosureRefcountData *data = user_data;
-
-  g_assert_true (test->test_pointer1 == TEST_POINTER1);
-
-  data->seen_signal_handler = TRUE;
-  data->seen_test_int1 |= vint == TEST_INT1;
-  data->seen_test_int2 |= vint == TEST_INT2;
+  g_assert (data == TEST_POINTER2);
+  g_assert (test->test_pointer1 == TEST_POINTER1);
+  seen_signal_handler = TRUE;
+  seen_test_int1 |= vint == TEST_INT1;
+  seen_test_int2 |= vint == TEST_INT2;
 }
 
 static void
-destroy_data (gpointer  user_data,
+destroy_data (gpointer  data,
               GClosure *closure)
 {
-  TestClosureRefcountData *data = user_data;
-
-  data->seen_cleanup = TRUE;
-  g_assert_true (data->closure == closure);
-  g_assert_cmpint (closure->ref_count, ==, 0);
+  seen_cleanup = data == TEST_POINTER2;
+  g_assert (closure->ref_count == 0);
 }
 
 static void
@@ -247,30 +228,28 @@ test_emissions (GTest *test)
   my_test_emit_test_signal2 (test, TEST_INT2);
 }
 
-/* Test that closure refcounting works even when high contested between three
- * threads (the main thread, thread1 and thread2). Both child threads are
- * contesting refs/unrefs, while the main thread periodically emits signals
- * which also do refs/unrefs on closures. */
-static void
-test_closure_refcount (void)
+int
+main (int    argc,
+      char **argv)
 {
   GThread *thread1, *thread2;
-  TestClosureRefcountData test_data = { 0, };
   GClosure *closure;
   GTest *object;
-  guint i, n_iterations;
+  guint i;
+
+  g_print ("START: %s\n", argv[0]);
+  g_log_set_always_fatal (G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL | g_log_set_always_fatal (G_LOG_FATAL_MASK));
 
   object = g_object_new (G_TYPE_TEST, NULL);
-  closure = g_cclosure_new (G_CALLBACK (test_signal_handler), &test_data, destroy_data);
+  closure = g_cclosure_new (G_CALLBACK (test_signal_handler), TEST_POINTER2, destroy_data);
 
   g_signal_connect_closure (object, "test-signal1", closure, FALSE);
   g_signal_connect_closure (object, "test-signal2", closure, FALSE);
 
-  test_data.stopping = FALSE;
-  test_data.closure = closure;
+  stopping = FALSE;
 
-  thread1 = g_thread_new ("thread1", thread1_main, &test_data);
-  thread2 = g_thread_new ("thread2", thread2_main, &test_data);
+  thread1 = g_thread_create (thread1_main, closure, TRUE, NULL);
+  thread2 = g_thread_create (thread2_main, closure, TRUE, NULL);
 
   /* The 16-bit compare-and-swap operations currently used for closure
    * refcounts are really slow on some ARM CPUs, notably Cortex-A57.
@@ -281,32 +260,22 @@ test_closure_refcount (void)
    * https://gitlab.gnome.org/GNOME/glib/issues/1316
    * aka https://bugs.debian.org/880883 */
 #if defined(__aarch64__) || defined(__arm__)
-  n_iterations = 100000;
+  for (i = 0; i < 100000; i++)
 #else
-  n_iterations = 1000000;
+  for (i = 0; i < 1000000; i++)
 #endif
-
-  /* Run the test for a reasonably high number of iterations, and ensure we
-   * don’t terminate until at least 10000 iterations have completed in both
-   * thread1 and thread2. Even though @n_iterations is high, we can’t guarantee
-   * that the scheduler allocates time fairly (or at all!) to thread1 or
-   * thread2. */
-  for (i = 0;
-       i < n_iterations ||
-       !g_atomic_int_get (&test_data.seen_thread1) ||
-       !g_atomic_int_get (&test_data.seen_thread2);
-       i++)
     {
+      static guint count = 0;
       test_emissions (object);
-      if (i % 10000 == 0)
+      if (++count % 10000 == 0)
         {
-          g_test_message ("Yielding from main thread");
-          g_thread_yield (); /* force context switch */
+          g_printerr (".\n");
+          g_thread_yield(); /* force context switch */
         }
     }
 
-  g_atomic_int_set (&test_data.stopping, TRUE);
-  g_test_message ("Stopping");
+  stopping = TRUE;
+  g_print ("\nstopping\n");
 
   /* wait for thread shutdown */
   g_thread_join (thread1);
@@ -315,23 +284,14 @@ test_closure_refcount (void)
   /* finalize object, destroy signals, run cleanup code */
   g_object_unref (object);
 
-  g_test_message ("Stopped");
+  g_print ("stopped\n");
 
-  g_assert_true (g_atomic_int_get (&test_data.seen_thread1));
-  g_assert_true (g_atomic_int_get (&test_data.seen_thread2));
-  g_assert_true (test_data.seen_test_int1);
-  g_assert_true (test_data.seen_test_int2);
-  g_assert_true (test_data.seen_signal_handler);
-  g_assert_true (test_data.seen_cleanup);
-}
+  g_assert (seen_thread1 != FALSE);
+  g_assert (seen_thread2 != FALSE);
+  g_assert (seen_test_int1 != FALSE);
+  g_assert (seen_test_int2 != FALSE);
+  g_assert (seen_signal_handler != FALSE);
+  g_assert (seen_cleanup != FALSE);
 
-int
-main (int argc,
-      char *argv[])
-{
-  g_test_init (&argc, &argv, NULL);
-
-  g_test_add_func ("/closure/refcount", test_closure_refcount);
-
-  return g_test_run ();
+  return 0;
 }
