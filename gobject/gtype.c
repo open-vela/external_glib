@@ -4362,7 +4362,7 @@ gobject_init (void)
   const gchar *env_string;
   GTypeInfo info;
   TypeNode *node;
-  GType type G_GNUC_UNUSED  /* when compiling with G_DISABLE_ASSERT */;
+  GType type;
 
   /* Ensure GLib is initialized first, see
    * https://bugzilla.gnome.org/show_bug.cgi?id=756139
