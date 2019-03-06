@@ -140,9 +140,6 @@ if host_machine.system() == 'windows'
       },
     }
   endif
-  glib_tests += {
-    'win32' : {},
-  }
 else
   glib_tests += {
     'include' : {},
