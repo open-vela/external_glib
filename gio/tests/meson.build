@@ -10,6 +10,7 @@ test_c_args = [
   '-DTEST_SERVICES="@0@/gio/tests/services"'.format(meson.build_root()),
   '-DGLIB_MKENUMS="@0@"'.format(glib_mkenums),
   '-DGLIB_COMPILE_SCHEMAS="@0@"'.format(glib_compile_schemas.full_path()),
+  '-UG_DISABLE_ASSERT',
 ]
 
 if host_machine.system() == 'windows'
@@ -78,7 +79,6 @@ gio_tests = {
   'tls-certificate' : {'extra_sources' : ['gtesttlsbackend.c']},
   'tls-interaction' : {'extra_sources' : ['gtesttlsbackend.c']},
   'tls-database' : {'extra_sources' : ['gtesttlsbackend.c']},
-  'gdbus-address-get-session' : {},
 }
 
 test_extra_programs = {
@@ -284,6 +284,7 @@ if host_machine.system() != 'windows'
                     '-DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_36'],
       },
       'gapplication' : {'extra_sources' : extra_sources},
+      'gdbus-unix-addresses' : {},
     }
 
     if not glib_have_cocoa
