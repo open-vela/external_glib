@@ -150,7 +150,7 @@ mapped_file_new_from_fd (int           fd,
   file->contents = MAP_FAILED;
 
 #ifdef HAVE_MMAP
-  if (sizeof (st.st_size) > sizeof (gsize) && st.st_size > (off_t) G_MAXSIZE)
+  if (st.st_size > G_MAXSIZE)
     {
       errno = EINVAL;
     }

@@ -1938,8 +1938,7 @@ number_get_value (AST                 *ast,
         return number_overflow (ast, type, error);
       if (negative && abs_val > G_MAXINT16)
         return g_variant_new_int16 (G_MININT16);
-      return g_variant_new_int16 (negative ?
-                                  -((gint16) abs_val) : ((gint16) abs_val));
+      return g_variant_new_int16 (negative ? -((gint16) abs_val) : abs_val);
 
     case 'q':
       if (negative || abs_val > G_MAXUINT16)
@@ -1951,8 +1950,7 @@ number_get_value (AST                 *ast,
         return number_overflow (ast, type, error);
       if (negative && abs_val > G_MAXINT32)
         return g_variant_new_int32 (G_MININT32);
-      return g_variant_new_int32 (negative ?
-                                  -((gint32) abs_val) : ((gint32) abs_val));
+      return g_variant_new_int32 (negative ? -((gint32) abs_val) : abs_val);
 
     case 'u':
       if (negative || abs_val > G_MAXUINT32)
@@ -1964,8 +1962,7 @@ number_get_value (AST                 *ast,
         return number_overflow (ast, type, error);
       if (negative && abs_val > G_MAXINT64)
         return g_variant_new_int64 (G_MININT64);
-      return g_variant_new_int64 (negative ?
-                                  -((gint64) abs_val) : ((gint64) abs_val));
+      return g_variant_new_int64 (negative ? -((gint64) abs_val) : abs_val);
 
     case 't':
       if (negative)
@@ -1977,8 +1974,7 @@ number_get_value (AST                 *ast,
         return number_overflow (ast, type, error);
       if (negative && abs_val > G_MAXINT32)
         return g_variant_new_handle (G_MININT32);
-      return g_variant_new_handle (negative ?
-                                   -((gint32) abs_val) : ((gint32) abs_val));
+      return g_variant_new_handle (negative ? -((gint32) abs_val) : abs_val);
 
     default:
       return ast_type_error (ast, type, error);
@@ -2634,7 +2630,7 @@ g_variant_builder_add_parsed (GVariantBuilder *builder,
 static gboolean
 parse_num (const gchar *num,
            const gchar *limit,
-           guint       *result)
+           gint        *result)
 {
   gchar *endptr;
   gint64 bignum;
@@ -2647,7 +2643,7 @@ parse_num (const gchar *num,
   if (bignum < 0 || bignum > G_MAXINT)
     return FALSE;
 
-  *result = (guint) bignum;
+  *result = bignum;
 
   return TRUE;
 }
@@ -2803,7 +2799,7 @@ g_variant_parse_error_print_context (GError      *error,
 
   if (dash == NULL || colon < dash)
     {
-      guint point;
+      gint point;
 
       /* we have a single point */
       if (!parse_num (error->message, colon, &point))
@@ -2821,7 +2817,7 @@ g_variant_parse_error_print_context (GError      *error,
       /* We have one or two ranges... */
       if (comma && comma < colon)
         {
-          guint start1, end1, start2, end2;
+          gint start1, end1, start2, end2;
           const gchar *dash2;
 
           /* Two ranges */
@@ -2837,7 +2833,7 @@ g_variant_parse_error_print_context (GError      *error,
         }
       else
         {
-          guint start, end;
+          gint start, end;
 
           /* One range */
           if (!parse_num (error->message, dash, &start) || !parse_num (dash + 1, colon, &end))
