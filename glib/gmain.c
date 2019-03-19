@@ -476,8 +476,7 @@ GSourceFuncs g_unix_signal_funcs =
   g_unix_signal_watch_prepare,
   g_unix_signal_watch_check,
   g_unix_signal_watch_dispatch,
-  g_unix_signal_watch_finalize,
-  NULL, NULL
+  g_unix_signal_watch_finalize
 };
 #endif /* !G_OS_WIN32 */
 G_LOCK_DEFINE_STATIC (main_context_list);
@@ -488,7 +487,7 @@ GSourceFuncs g_timeout_funcs =
   NULL, /* prepare */
   NULL, /* check */
   g_timeout_dispatch,
-  NULL, NULL, NULL
+  NULL
 };
 
 GSourceFuncs g_child_watch_funcs =
@@ -496,8 +495,7 @@ GSourceFuncs g_child_watch_funcs =
   g_child_watch_prepare,
   g_child_watch_check,
   g_child_watch_dispatch,
-  g_child_watch_finalize,
-  NULL, NULL
+  g_child_watch_finalize
 };
 
 GSourceFuncs g_idle_funcs =
@@ -505,7 +503,7 @@ GSourceFuncs g_idle_funcs =
   g_idle_prepare,
   g_idle_check,
   g_idle_dispatch,
-  NULL, NULL, NULL
+  NULL
 };
 
 /**
@@ -1611,12 +1609,10 @@ g_source_set_callback_indirect (GSource              *source,
     LOCK_CONTEXT (context);
 
   if (callback_funcs != &g_source_callback_funcs)
-    {
-      TRACE (GLIB_SOURCE_SET_CALLBACK_INDIRECT (source, callback_data,
-                                                callback_funcs->ref,
-                                                callback_funcs->unref,
-                                                callback_funcs->get));
-    }
+    TRACE (GLIB_SOURCE_SET_CALLBACK_INDIRECT (source, callback_data,
+                                              callback_funcs->ref,
+                                              callback_funcs->unref,
+                                              callback_funcs->get));
 
   old_cb_data = source->callback_data;
   old_cb_funcs = source->callback_funcs;

@@ -428,8 +428,6 @@ g_string_insert_len (GString     *string,
                      const gchar *val,
                      gssize       len)
 {
-  gsize len_unsigned, pos_unsigned;
-
   g_return_val_if_fail (string != NULL, NULL);
   g_return_val_if_fail (len == 0 || val != NULL, string);
 
@@ -438,15 +436,11 @@ g_string_insert_len (GString     *string,
 
   if (len < 0)
     len = strlen (val);
-  len_unsigned = len;
 
   if (pos < 0)
-    pos_unsigned = string->len;
+    pos = string->len;
   else
-    {
-      pos_unsigned = pos;
-      g_return_val_if_fail (pos_unsigned <= string->len, string);
-    }
+    g_return_val_if_fail (pos <= string->len, string);
 
   /* Check whether val represents a substring of string.
    * This test probably violates chapter and verse of the C standards,
@@ -458,48 +452,45 @@ g_string_insert_len (GString     *string,
       gsize offset = val - string->str;
       gsize precount = 0;
 
-      g_string_maybe_expand (string, len_unsigned);
+      g_string_maybe_expand (string, len);
       val = string->str + offset;
       /* At this point, val is valid again.  */
 
       /* Open up space where we are going to insert.  */
-      if (pos_unsigned < string->len)
-        memmove (string->str + pos_unsigned + len_unsigned,
-                 string->str + pos_unsigned, string->len - pos_unsigned);
+      if (pos < string->len)
+        memmove (string->str + pos + len, string->str + pos, string->len - pos);
 
       /* Move the source part before the gap, if any.  */
-      if (offset < pos_unsigned)
+      if (offset < pos)
         {
-          precount = MIN (len_unsigned, pos_unsigned - offset);
-          memcpy (string->str + pos_unsigned, val, precount);
+          precount = MIN (len, pos - offset);
+          memcpy (string->str + pos, val, precount);
         }
 
       /* Move the source part after the gap, if any.  */
-      if (len_unsigned > precount)
-        memcpy (string->str + pos_unsigned + precount,
-                val + /* Already moved: */ precount +
-                      /* Space opened up: */ len_unsigned,
-                len_unsigned - precount);
+      if (len > precount)
+        memcpy (string->str + pos + precount,
+                val + /* Already moved: */ precount + /* Space opened up: */ len,
+                len - precount);
     }
   else
     {
-      g_string_maybe_expand (string, len_unsigned);
+      g_string_maybe_expand (string, len);
 
       /* If we aren't appending at the end, move a hunk
        * of the old string to the end, opening up space
        */
-      if (pos_unsigned < string->len)
-        memmove (string->str + pos_unsigned + len_unsigned,
-                 string->str + pos_unsigned, string->len - pos_unsigned);
+      if (pos < string->len)
+        memmove (string->str + pos + len, string->str + pos, string->len - pos);
 
       /* insert the new string */
-      if (len_unsigned == 1)
-        string->str[pos_unsigned] = *val;
+      if (len == 1)
+        string->str[pos] = *val;
       else
-        memcpy (string->str + pos_unsigned, val, len_unsigned);
+        memcpy (string->str + pos, val, len);
     }
 
-  string->len += len_unsigned;
+  string->len += len;
 
   string->str[string->len] = 0;
 
@@ -787,8 +778,6 @@ g_string_insert_c (GString *string,
                    gssize   pos,
                    gchar    c)
 {
-  gsize pos_unsigned;
-
   g_return_val_if_fail (string != NULL, NULL);
 
   g_string_maybe_expand (string, 1);
@@ -796,15 +785,13 @@ g_string_insert_c (GString *string,
   if (pos < 0)
     pos = string->len;
   else
-    g_return_val_if_fail ((gsize) pos <= string->len, string);
-  pos_unsigned = pos;
+    g_return_val_if_fail (pos <= string->len, string);
 
   /* If not just an append, move the old stuff */
-  if (pos_unsigned < string->len)
-    memmove (string->str + pos_unsigned + 1,
-             string->str + pos_unsigned, string->len - pos_unsigned);
+  if (pos < string->len)
+    memmove (string->str + pos + 1, string->str + pos, string->len - pos);
 
-  string->str[pos_unsigned] = c;
+  string->str[pos] = c;
 
   string->len += 1;
 
@@ -873,10 +860,10 @@ g_string_insert_unichar (GString  *string,
   if (pos < 0)
     pos = string->len;
   else
-    g_return_val_if_fail ((gsize) pos <= string->len, string);
+    g_return_val_if_fail (pos <= string->len, string);
 
   /* If not just an append, move the old stuff */
-  if ((gsize) pos < string->len)
+  if (pos < string->len)
     memmove (string->str + pos + charlen, string->str + pos, string->len - pos);
 
   dest = string->str + pos;
@@ -983,28 +970,21 @@ g_string_erase (GString *string,
                 gssize   pos,
                 gssize   len)
 {
-  gsize len_unsigned, pos_unsigned;
-
   g_return_val_if_fail (string != NULL, NULL);
   g_return_val_if_fail (pos >= 0, string);
-  pos_unsigned = pos;
-
-  g_return_val_if_fail (pos_unsigned <= string->len, string);
+  g_return_val_if_fail (pos <= string->len, string);
 
   if (len < 0)
-    len_unsigned = string->len - pos_unsigned;
+    len = string->len - pos;
   else
     {
-      len_unsigned = len;
-      g_return_val_if_fail (pos_unsigned + len_unsigned <= string->len, string);
+      g_return_val_if_fail (pos + len <= string->len, string);
 
-      if (pos_unsigned + len_unsigned < string->len)
-        memmove (string->str + pos_unsigned,
-                 string->str + pos_unsigned + len_unsigned,
-                 string->len - (pos_unsigned + len_unsigned));
+      if (pos + len < string->len)
+        memmove (string->str + pos, string->str + pos + len, string->len - (pos + len));
     }
 
-  string->len -= len_unsigned;
+  string->len -= len;
 
   string->str[string->len] = 0;
 
