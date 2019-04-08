@@ -60,7 +60,7 @@ test_platform_argv0 (void)
    * to prevent them from crashing hard on failed assertions,
    * and make them call g_test_skip() instead.
    */
-#if !defined HAVE_PROC_SELF_CMDLINE && !defined __OpenBSD__ && !defined __linux
+#if !defined HAVE_PROC_SELF_CMDLINE && !defined __OpenBSD__
   fatal_errors = FALSE;
 #endif
 
