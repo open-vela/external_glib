@@ -14,8 +14,6 @@ long double rpl_frexpl (long double x, int *expptr)
     return x;
   else if (isinf (x))
     return x;
-#ifndef _MSC_VER
 #undef frexpl
-#endif
   return frexpl (x, expptr);
 }
