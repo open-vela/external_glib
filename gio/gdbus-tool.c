@@ -36,17 +36,6 @@
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-/* Escape values for console colors */
-#define UNDERLINE     "\033[4m"
-#define BLUE          "\033[34m"
-#define CYAN          "\033[36m"
-#define GREEN         "\033[32m"
-#define MAGENTA       "\033[35m"
-#define RED           "\033[31m"
-#define YELLOW        "\033[33m"
-
-/* ---------------------------------------------------------------------------------------------------- */
-
 G_GNUC_UNUSED static void completion_debug (const gchar *format, ...);
 
 /* Uncomment to get debug traces in /tmp/gdbus-completion-debug.txt (nice
@@ -1237,30 +1226,18 @@ static gboolean opt_introspect_xml = FALSE;
 static gboolean opt_introspect_recurse = FALSE;
 static gboolean opt_introspect_only_properties = FALSE;
 
-/* Introspect colors */
-#define RESET_COLOR                 (use_colors? "\033[0m": "")
-#define INTROSPECT_TITLE_COLOR      (use_colors? UNDERLINE: "")
-#define INTROSPECT_NODE_COLOR       (use_colors? RESET_COLOR: "")
-#define INTROSPECT_INTERFACE_COLOR  (use_colors? YELLOW: "")
-#define INTROSPECT_METHOD_COLOR     (use_colors? BLUE: "")
-#define INTROSPECT_SIGNAL_COLOR     (use_colors? BLUE: "")
-#define INTROSPECT_PROPERTY_COLOR   (use_colors? MAGENTA: "")
-#define INTROSPECT_INOUT_COLOR      (use_colors? RESET_COLOR: "")
-#define INTROSPECT_TYPE_COLOR       (use_colors? GREEN: "")
-#define INTROSPECT_ANNOTATION_COLOR (use_colors? RESET_COLOR: "")
-
 static void
 dump_annotation (const GDBusAnnotationInfo *o,
                  guint indent,
-                 gboolean ignore_indent,
-                 gboolean use_colors)
+                 gboolean ignore_indent)
 {
   guint n;
-  g_print ("%*s%s@%s(\"%s\")%s\n",
+  g_print ("%*s@%s(\"%s\")\n",
            ignore_indent ? 0 : indent, "",
-           INTROSPECT_ANNOTATION_COLOR, o->key, o->value, RESET_COLOR);
+           o->key,
+           o->value);
   for (n = 0; o->annotations != NULL && o->annotations[n] != NULL; n++)
-    dump_annotation (o->annotations[n], indent + 2, FALSE, use_colors);
+    dump_annotation (o->annotations[n], indent + 2, FALSE);
 }
 
 static void
@@ -1268,21 +1245,20 @@ dump_arg (const GDBusArgInfo *o,
           guint indent,
           const gchar *direction,
           gboolean ignore_indent,
-          gboolean include_newline,
-          gboolean use_colors)
+          gboolean include_newline)
 {
   guint n;
 
   for (n = 0; o->annotations != NULL && o->annotations[n] != NULL; n++)
     {
-      dump_annotation (o->annotations[n], indent, ignore_indent, use_colors);
+      dump_annotation (o->annotations[n], indent, ignore_indent);
       ignore_indent = FALSE;
     }
 
-  g_print ("%*s%s%s%s%s%s%s %s%s",
+  g_print ("%*s%s%s %s%s",
            ignore_indent ? 0 : indent, "",
-           INTROSPECT_INOUT_COLOR, direction, RESET_COLOR,
-           INTROSPECT_TYPE_COLOR, o->signature, RESET_COLOR,
+           direction,
+           o->signature,
            o->name,
            include_newline ? ",\n" : "");
 }
@@ -1302,8 +1278,7 @@ count_args (GDBusArgInfo **args)
 
 static void
 dump_method (const GDBusMethodInfo *o,
-             guint                  indent,
-             gboolean               use_colors)
+             guint                  indent)
 {
   guint n;
   guint m;
@@ -1311,11 +1286,9 @@ dump_method (const GDBusMethodInfo *o,
   guint total_num_args;
 
   for (n = 0; o->annotations != NULL && o->annotations[n] != NULL; n++)
-    dump_annotation (o->annotations[n], indent, FALSE, use_colors);
+    dump_annotation (o->annotations[n], indent, FALSE);
 
-  g_print ("%*s%s%s%s(",
-           indent, "",
-           INTROSPECT_METHOD_COLOR, o->name, RESET_COLOR);
+  g_print ("%*s%s(", indent, "", o->name);
   name_len = strlen (o->name);
   total_num_args = count_args (o->in_args) + count_args (o->out_args);
   for (n = 0, m = 0; o->in_args != NULL && o->in_args[n] != NULL; n++, m++)
@@ -1327,8 +1300,7 @@ dump_method (const GDBusMethodInfo *o,
                 indent + name_len + 1,
                 "in  ",
                 ignore_indent,
-                include_newline,
-                use_colors);
+                include_newline);
     }
   for (n = 0; o->out_args != NULL && o->out_args[n] != NULL; n++, m++)
     {
@@ -1338,27 +1310,23 @@ dump_method (const GDBusMethodInfo *o,
                 indent + name_len + 1,
                 "out ",
                 ignore_indent,
-                include_newline,
-                use_colors);
+                include_newline);
     }
   g_print (");\n");
 }
 
 static void
 dump_signal (const GDBusSignalInfo *o,
-             guint                  indent,
-             gboolean               use_colors)
+             guint                  indent)
 {
   guint n;
   guint name_len;
   guint total_num_args;
 
   for (n = 0; o->annotations != NULL && o->annotations[n] != NULL; n++)
-    dump_annotation (o->annotations[n], indent, FALSE, use_colors);
+    dump_annotation (o->annotations[n], indent, FALSE);
 
-  g_print ("%*s%s%s%s(",
-           indent, "",
-           INTROSPECT_SIGNAL_COLOR, o->name, RESET_COLOR);
+  g_print ("%*s%s(", indent, "", o->name);
   name_len = strlen (o->name);
   total_num_args = count_args (o->args);
   for (n = 0; o->args != NULL && o->args[n] != NULL; n++)
@@ -1369,8 +1337,7 @@ dump_signal (const GDBusSignalInfo *o,
                 indent + name_len + 1,
                 "",
                 ignore_indent,
-                include_newline,
-                use_colors);
+                include_newline);
     }
   g_print (");\n");
 }
@@ -1378,7 +1345,6 @@ dump_signal (const GDBusSignalInfo *o,
 static void
 dump_property (const GDBusPropertyInfo *o,
                guint                    indent,
-               gboolean                 use_colors,
                GVariant                *value)
 {
   const gchar *access;
@@ -1394,15 +1360,12 @@ dump_property (const GDBusPropertyInfo *o,
     g_assert_not_reached ();
 
   for (n = 0; o->annotations != NULL && o->annotations[n] != NULL; n++)
-    dump_annotation (o->annotations[n], indent, FALSE, use_colors);
+    dump_annotation (o->annotations[n], indent, FALSE);
 
   if (value != NULL)
     {
       gchar *s = g_variant_print (value, FALSE);
-      g_print ("%*s%s %s%s%s %s%s%s = %s;\n", indent, "", access,
-               INTROSPECT_TYPE_COLOR, o->signature, RESET_COLOR,
-               INTROSPECT_PROPERTY_COLOR, o->name, RESET_COLOR,
-               s);
+      g_print ("%*s%s %s %s = %s;\n", indent, "", access, o->signature, o->name, s);
       g_free (s);
     }
   else
@@ -1416,7 +1379,6 @@ dump_interface (GDBusConnection          *c,
                 const gchar              *name,
                 const GDBusInterfaceInfo *o,
                 guint                     indent,
-                gboolean                  use_colors,
                 const gchar              *object_path)
 {
   guint n;
@@ -1497,37 +1459,28 @@ dump_interface (GDBusConnection          *c,
     }
 
   for (n = 0; o->annotations != NULL && o->annotations[n] != NULL; n++)
-    dump_annotation (o->annotations[n], indent, FALSE, use_colors);
+    dump_annotation (o->annotations[n], indent, FALSE);
 
-  g_print ("%*s%sinterface %s%s {\n",
-           indent, "",
-           INTROSPECT_INTERFACE_COLOR, o->name, RESET_COLOR);
+  g_print ("%*sinterface %s {\n", indent, "", o->name);
   if (o->methods != NULL && !opt_introspect_only_properties)
     {
-      g_print ("%*s  %smethods%s:\n",
-               indent, "",
-               INTROSPECT_TITLE_COLOR, RESET_COLOR);
+      g_print ("%*s  methods:\n", indent, "");
       for (n = 0; o->methods[n] != NULL; n++)
-        dump_method (o->methods[n], indent + 4, use_colors);
+        dump_method (o->methods[n], indent + 4);
     }
   if (o->signals != NULL && !opt_introspect_only_properties)
     {
-      g_print ("%*s  %ssignals%s:\n",
-               indent, "",
-               INTROSPECT_TITLE_COLOR, RESET_COLOR);
+      g_print ("%*s  signals:\n", indent, "");
       for (n = 0; o->signals[n] != NULL; n++)
-        dump_signal (o->signals[n], indent + 4, use_colors);
+        dump_signal (o->signals[n], indent + 4);
     }
   if (o->properties != NULL)
     {
-      g_print ("%*s  %sproperties%s:\n",
-               indent, "",
-               INTROSPECT_TITLE_COLOR, RESET_COLOR);
+      g_print ("%*s  properties:\n", indent, "");
       for (n = 0; o->properties[n] != NULL; n++)
         {
           dump_property (o->properties[n],
                          indent + 4,
-                         use_colors,
                          g_hash_table_lookup (properties, (o->properties[n])->name));
         }
     }
@@ -1540,15 +1493,13 @@ dump_interface (GDBusConnection          *c,
 static gboolean
 introspect_do (GDBusConnection *c,
                const gchar     *object_path,
-               guint            indent,
-               gboolean         use_colors);
+               guint            indent);
 
 static void
 dump_node (GDBusConnection      *c,
            const gchar          *name,
            const GDBusNodeInfo  *o,
            guint                 indent,
-           gboolean              use_colors,
            const gchar          *object_path,
            gboolean              recurse)
 {
@@ -1560,13 +1511,9 @@ dump_node (GDBusConnection      *c,
     object_path_to_print = o->path;
 
   for (n = 0; o->annotations != NULL && o->annotations[n] != NULL; n++)
-    dump_annotation (o->annotations[n], indent, FALSE, use_colors);
+    dump_annotation (o->annotations[n], indent, FALSE);
 
-  g_print ("%*s%snode %s%s",
-           indent, "",
-           INTROSPECT_NODE_COLOR,
-           object_path_to_print != NULL ? object_path_to_print : "(not set)",
-           RESET_COLOR);
+  g_print ("%*snode %s", indent, "", object_path_to_print != NULL ? object_path_to_print : "(not set)");
   if (o->interfaces != NULL || o->nodes != NULL)
     {
       g_print (" {\n");
@@ -1575,11 +1522,11 @@ dump_node (GDBusConnection      *c,
           if (opt_introspect_only_properties)
             {
               if (o->interfaces[n]->properties != NULL && o->interfaces[n]->properties[0] != NULL)
-                dump_interface (c, name, o->interfaces[n], indent + 2, use_colors, object_path);
+                dump_interface (c, name, o->interfaces[n], indent + 2, object_path);
             }
           else
             {
-              dump_interface (c, name, o->interfaces[n], indent + 2, use_colors, object_path);
+              dump_interface (c, name, o->interfaces[n], indent + 2, object_path);
             }
         }
       for (n = 0; o->nodes != NULL && o->nodes[n] != NULL; n++)
@@ -1593,7 +1540,7 @@ dump_node (GDBusConnection      *c,
                   /* avoid infinite loops */
                   if (g_str_has_prefix (child_path, object_path))
                     {
-                      introspect_do (c, child_path, indent + 2, use_colors);
+                      introspect_do (c, child_path, indent + 2);
                     }
                   else
                     {
@@ -1607,13 +1554,13 @@ dump_node (GDBusConnection      *c,
                     child_path = g_strdup_printf ("/%s", o->nodes[n]->path);
                   else
                     child_path = g_strdup_printf ("%s/%s", object_path, o->nodes[n]->path);
-                  introspect_do (c, child_path, indent + 2, use_colors);
+                  introspect_do (c, child_path, indent + 2);
                 }
               g_free (child_path);
             }
           else
             {
-              dump_node (NULL, NULL, o->nodes[n], indent + 2, use_colors, NULL, recurse);
+              dump_node (NULL, NULL, o->nodes[n], indent + 2, NULL, recurse);
             }
         }
       g_print ("%*s};\n",
@@ -1638,8 +1585,7 @@ static const GOptionEntry introspect_entries[] =
 static gboolean
 introspect_do (GDBusConnection *c,
                const gchar     *object_path,
-               guint            indent,
-               gboolean         use_colors)
+               guint            indent)
 {
   GError *error;
   GVariant *result;
@@ -1686,7 +1632,7 @@ introspect_do (GDBusConnection *c,
           goto out;
         }
 
-      dump_node (c, opt_introspect_dest, node, indent, use_colors, object_path, opt_introspect_recurse);
+      dump_node (c, opt_introspect_dest, node, indent, object_path, opt_introspect_recurse);
     }
 
   ret = TRUE;
@@ -1713,7 +1659,6 @@ handle_introspect (gint        *argc,
   GDBusConnection *c;
   gboolean complete_names;
   gboolean complete_paths;
-  gboolean color_support;
 
   ret = FALSE;
   c = NULL;
@@ -1849,10 +1794,7 @@ handle_introspect (gint        *argc,
   if (request_completion)
     goto out;
 
-  /* Before we start printing the actual info, check if we can do colors*/
-  color_support = g_log_writer_supports_color (fileno (stdout));
-
-  if (!introspect_do (c, opt_introspect_object_path, 0, color_support))
+  if (!introspect_do (c, opt_introspect_object_path, 0))
     goto out;
 
   ret = TRUE;
