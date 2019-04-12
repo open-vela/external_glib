@@ -62,45 +62,42 @@ G_DEFINE_TYPE_WITH_PRIVATE (GThreadedSocketService,
                             g_threaded_socket_service,
                             G_TYPE_SOCKET_SERVICE)
 
-typedef enum
+enum
 {
-  PROP_MAX_THREADS = 1,
-} GThreadedSocketServiceProperty;
+  PROP_0,
+  PROP_MAX_THREADS
+};
 
 G_LOCK_DEFINE_STATIC(job_count);
 
 typedef struct
 {
-  GThreadedSocketService *service;  /* (owned) */
-  GSocketConnection *connection;  /* (owned) */
-  GObject *source_object;  /* (owned) (nullable) */
+  GSocketConnection *connection;
+  GObject *source_object;
 } GThreadedSocketServiceData;
 
 static void
-g_threaded_socket_service_data_free (GThreadedSocketServiceData *data)
+g_threaded_socket_service_func (gpointer _data,
+				gpointer user_data)
 {
-  g_clear_object (&data->service);
-  g_clear_object (&data->connection);
-  g_clear_object (&data->source_object);
-  g_slice_free (GThreadedSocketServiceData, data);
-}
-
-static void
-g_threaded_socket_service_func (gpointer job_data,
-                                gpointer user_data)
-{
-  GThreadedSocketServiceData *data = job_data;
+  GThreadedSocketService *threaded = user_data;
+  GThreadedSocketServiceData *data = _data;
   gboolean result;
 
-  g_signal_emit (data->service, g_threaded_socket_service_run_signal,
+  g_signal_emit (threaded, g_threaded_socket_service_run_signal,
                  0, data->connection, data->source_object, &result);
 
+  g_object_unref (data->connection);
+  if (data->source_object)
+    g_object_unref (data->source_object);
+  g_slice_free (GThreadedSocketServiceData, data);
+
   G_LOCK (job_count);
-  if (data->service->priv->job_count-- == data->service->priv->max_threads)
-    g_socket_service_start (G_SOCKET_SERVICE (data->service));
+  if (threaded->priv->job_count-- == threaded->priv->max_threads)
+    g_socket_service_start (G_SOCKET_SERVICE (threaded));
   G_UNLOCK (job_count);
 
-  g_threaded_socket_service_data_free (data);
+  g_object_unref (threaded);
 }
 
 static gboolean
@@ -110,27 +107,28 @@ g_threaded_socket_service_incoming (GSocketService    *service,
 {
   GThreadedSocketService *threaded;
   GThreadedSocketServiceData *data;
-  GError *local_error = NULL;
 
   threaded = G_THREADED_SOCKET_SERVICE (service);
 
-  data = g_slice_new0 (GThreadedSocketServiceData);
-  data->service = g_object_ref (threaded);
+  data = g_slice_new (GThreadedSocketServiceData);
+
+  /* Ref the socket service for the thread */
+  g_object_ref (service);
+
   data->connection = g_object_ref (connection);
-  data->source_object = (source_object != NULL) ? g_object_ref (source_object) : NULL;
+  if (source_object)
+    data->source_object = g_object_ref (source_object);
+  else
+    data->source_object = NULL;
 
   G_LOCK (job_count);
   if (++threaded->priv->job_count == threaded->priv->max_threads)
     g_socket_service_stop (service);
   G_UNLOCK (job_count);
 
-  if (!g_thread_pool_push (threaded->priv->thread_pool, data, &local_error))
-    {
-      g_warning ("Error handling incoming socket: %s", local_error->message);
-      g_threaded_socket_service_data_free (data);
-    }
+  g_thread_pool_push (threaded->priv->thread_pool, data, NULL);
 
-  g_clear_error (&local_error);
+
 
   return FALSE;
 }
@@ -149,7 +147,7 @@ g_threaded_socket_service_constructed (GObject *object)
 
   service->priv->thread_pool =
     g_thread_pool_new  (g_threaded_socket_service_func,
-			NULL,
+			service,
 			service->priv->max_threads,
 			FALSE,
 			NULL);
@@ -161,8 +159,6 @@ g_threaded_socket_service_finalize (GObject *object)
 {
   GThreadedSocketService *service = G_THREADED_SOCKET_SERVICE (object);
 
-  /* All jobs in the pool hold a reference to this #GThreadedSocketService, so
-   * this should only be called once the pool is empty: */
   g_thread_pool_free (service->priv->thread_pool, FALSE, FALSE);
 
   G_OBJECT_CLASS (g_threaded_socket_service_parent_class)
@@ -177,7 +173,7 @@ g_threaded_socket_service_get_property (GObject    *object,
 {
   GThreadedSocketService *service = G_THREADED_SOCKET_SERVICE (object);
 
-  switch ((GThreadedSocketServiceProperty) prop_id)
+  switch (prop_id)
     {
       case PROP_MAX_THREADS:
 	g_value_set_int (value, service->priv->max_threads);
@@ -196,7 +192,7 @@ g_threaded_socket_service_set_property (GObject      *object,
 {
   GThreadedSocketService *service = G_THREADED_SOCKET_SERVICE (object);
 
-  switch ((GThreadedSocketServiceProperty) prop_id)
+  switch (prop_id)
     {
       case PROP_MAX_THREADS:
 	service->priv->max_threads = g_value_get_int (value);
