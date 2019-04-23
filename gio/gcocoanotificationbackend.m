@@ -258,6 +258,7 @@ g_cocoa_notification_backend_withdraw_notification (GNotificationBackend *backen
         }
     }
 
+  [notifications release];
   [str_id release];
 }
 
