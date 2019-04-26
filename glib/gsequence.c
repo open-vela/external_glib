@@ -827,7 +827,7 @@ g_sequence_search (GSequence        *seq,
 /**
  * g_sequence_lookup:
  * @seq: a #GSequence
- * @data: data to look up
+ * @data: data to lookup
  * @cmp_func: the function used to compare items in the sequence
  * @cmp_data: user data passed to @cmp_func
  *
@@ -1115,7 +1115,7 @@ g_sequence_search_iter (GSequence                *seq,
 /**
  * g_sequence_lookup_iter:
  * @seq: a #GSequence
- * @data: data to look up
+ * @data: data to lookup
  * @iter_cmp: the function used to compare iterators in the sequence
  * @cmp_data: user data passed to @iter_cmp
  *
