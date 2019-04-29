@@ -4540,8 +4540,7 @@ input_message_from_msghdr (const struct msghdr  *msg,
  * @messages: (array length=num_messages) (nullable): a pointer to an
  *   array of #GSocketControlMessages, or %NULL.
  * @num_messages: number of elements in @messages, or -1.
- * @flags: an int containing #GSocketMsgFlags flags, which may additionally
- *    contain [other platform specific flags](http://man7.org/linux/man-pages/man2/recv.2.html)
+ * @flags: an int containing #GSocketMsgFlags flags
  * @cancellable: (nullable): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
@@ -4630,8 +4629,7 @@ g_socket_send_message (GSocket                *socket,
  * @messages: (array length=num_messages) (nullable): a pointer to an
  *   array of #GSocketControlMessages, or %NULL.
  * @num_messages: number of elements in @messages, or -1.
- * @flags: an int containing #GSocketMsgFlags flags, which may additionally
- *    contain [other platform specific flags](http://man7.org/linux/man-pages/man2/recv.2.html)
+ * @flags: an int containing #GSocketMsgFlags flags
  * @timeout_us: the maximum time (in microseconds) to wait, or -1
  * @bytes_written: (out) (optional): location to store the number of bytes that were written to the socket
  * @cancellable: (nullable): a %GCancellable or %NULL
@@ -4864,8 +4862,7 @@ g_socket_send_message_with_timeout (GSocket                *socket,
  * @socket: a #GSocket
  * @messages: (array length=num_messages): an array of #GOutputMessage structs
  * @num_messages: the number of elements in @messages
- * @flags: an int containing #GSocketMsgFlags flags, which may additionally
- *    contain [other platform specific flags](http://man7.org/linux/man-pages/man2/recv.2.html)
+ * @flags: an int containing #GSocketMsgFlags flags
  * @cancellable: (nullable): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore.
  *
@@ -5365,9 +5362,7 @@ g_socket_receive_message_with_timeout (GSocket                 *socket,
  * @socket: a #GSocket
  * @messages: (array length=num_messages): an array of #GInputMessage structs
  * @num_messages: the number of elements in @messages
- * @flags: an int containing #GSocketMsgFlags flags for the overall operation,
- *    which may additionally contain
- *    [other platform specific flags](http://man7.org/linux/man-pages/man2/recv.2.html)
+ * @flags: an int containing #GSocketMsgFlags flags for the overall operation
  * @cancellable: (nullable): a %GCancellable or %NULL
  * @error: #GError for error reporting, or %NULL to ignore
  *
@@ -5653,9 +5648,7 @@ g_socket_receive_messages_with_timeout (GSocket        *socket,
  *    which may be filled with an array of #GSocketControlMessages, or %NULL
  * @num_messages: (out): a pointer which will be filled with the number of
  *    elements in @messages, or %NULL
- * @flags: (inout): a pointer to an int containing #GSocketMsgFlags flags,
- *    which may additionally contain
- *    [other platform specific flags](http://man7.org/linux/man-pages/man2/recv.2.html)
+ * @flags: (inout): a pointer to an int containing #GSocketMsgFlags flags
  * @cancellable: a %GCancellable or %NULL
  * @error: a #GError pointer, or %NULL
  *
