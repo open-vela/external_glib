@@ -147,7 +147,7 @@ if host_machine.system() != 'windows'
           shared_library('slow-connect-preload',
             'slow-connect-preload.c',
             name_prefix : '',
-            dependencies: cc.find_library('dl', required: host_machine.system() != 'openbsd'),
+            dependencies: cc.find_library('dl'),
             install_dir : installed_tests_execdir,
             install: installed_tests_enabled,
           )
