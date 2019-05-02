@@ -519,10 +519,8 @@ g_queue_push_nth_link (GQueue *queue,
   if (queue->head->prev)
     queue->head = queue->head->prev;
 
-  /* The case where we’re pushing @link_ at the end of @queue is handled above
-   * using g_queue_push_tail_link(), so we should never have to manually adjust
-   * queue->tail. */
-  g_assert (queue->tail->next == NULL);
+  if (queue->tail->next)
+    queue->tail = queue->tail->next;
   
   queue->length++;
 }
