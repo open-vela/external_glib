@@ -204,7 +204,8 @@ foreach test_name, extra_args : glib_tests
 
   suite = ['glib'] + extra_args.get('suite', [])
   timeout = suite.contains('slow') ? test_timeout_slow : test_timeout
-  test(test_name, exe, env : test_env, timeout : timeout, suite : suite)
+  test(test_name, exe, env : test_env, timeout : timeout, suite : suite,
+    args : ['--tap'])
 endforeach
 
 # test-spawn-echo helper binary required by the spawn tests above
@@ -228,7 +229,7 @@ if not meson.is_cross_build() and host_system != 'windows'
   if xmllint.found()
     tmpsample_xml = custom_target('tmpsample.xml',
       output : 'tmpsample.xml',
-      command : [ gtester, '-k', '--quiet', '--i-know-this-is-deprecated', '-o', '@OUTPUT@',
+      command : [ gtester, '-k', '--quiet', '-o', '@OUTPUT@',
                   '--test-arg=--gtester-selftest', gtester])
 
     test('gtester-xmllint-check', xmllint,
