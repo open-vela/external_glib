@@ -2459,9 +2459,7 @@ g_settings_get_child (GSettings   *settings,
  * You should free the return value with g_strfreev() when you are done
  * with it.
  *
- * Returns: (transfer full) (element-type utf8): a list of the keys on
- *    @settings, in no defined order
- * Deprecated: 2.46: Use g_settings_schema_list_keys instead().
+ * Returns: (transfer full) (element-type utf8): a list of the keys on @settings
  */
 gchar **
 g_settings_list_keys (GSettings *settings)
@@ -2485,8 +2483,7 @@ g_settings_list_keys (GSettings *settings)
  * You should free the return value with g_strfreev() when you are done
  * with it.
  *
- * Returns: (transfer full) (element-type utf8): a list of the children on
- *    @settings, in no defined order
+ * Returns: (transfer full) (element-type utf8): a list of the children on @settings
  */
 gchar **
 g_settings_list_children (GSettings *settings)
