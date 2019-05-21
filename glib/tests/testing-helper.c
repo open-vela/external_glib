@@ -17,7 +17,6 @@
  */
 
 #include <glib.h>
-#include <locale.h>
 #ifdef G_OS_WIN32
 #include <fcntl.h>
 #include <io.h>
@@ -47,21 +46,11 @@ test_incomplete (void)
   g_test_incomplete ("mind reading not implemented yet");
 }
 
-static void
-test_summary (void)
-{
-  g_test_summary ("Tests that g_test_summary() works with TAP, by outputting a "
-                  "known summary message in testing-helper, and checking for "
-                  "it in the TAP output later.");
-}
-
 int
 main (int   argc,
       char *argv[])
 {
   char *argv1;
-
-  setlocale (LC_ALL, "");
 
 #ifdef G_OS_WIN32
   /* Windows opens std streams in text mode, with \r\n EOLs.
@@ -121,10 +110,6 @@ main (int   argc,
       g_test_add_func ("/b/b", test_pass);
       g_test_add_func ("/c/a", test_pass);
       g_test_add_func ("/d/a", test_pass);
-    }
-  else if (g_strcmp0 (argv1, "summary") == 0)
-    {
-      g_test_add_func ("/summary", test_summary);
     }
   else
     {
