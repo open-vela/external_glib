@@ -20,7 +20,7 @@
 
 #include <locale.h>
 #include <string.h>
-#ifdef HAVE_WCHAR_H
+#ifdef __STDC_ISO_10646__
 #include <wchar.h>
 #endif
 
@@ -35,7 +35,9 @@
 #include "gstrfuncs.h"
 #include "gtestutils.h"
 #include "gcharset.h"
+#ifndef __STDC_ISO_10646__
 #include "gconvert.h"
+#endif
 
 
 #ifdef _MSC_VER
@@ -99,7 +101,7 @@ g_utf8_collate (const gchar *str1,
   g_free (str2_utf16);
   g_free (str1_utf16);
 
-#elif defined(HAVE_WCHAR_H) && SIZEOF_WCHAR_T == 4
+#elif defined(__STDC_ISO_10646__)
 
   gunichar *str1_norm;
   gunichar *str2_norm;
@@ -115,7 +117,7 @@ g_utf8_collate (const gchar *str1,
   g_free (str1_norm);
   g_free (str2_norm);
 
-#else
+#else /* !__STDC_ISO_10646__ */
 
   const gchar *charset;
   gchar *str1_norm;
@@ -152,12 +154,12 @@ g_utf8_collate (const gchar *str1,
   g_free (str1_norm);
   g_free (str2_norm);
 
-#endif
+#endif /* __STDC_ISO_10646__ */
 
   return result;
 }
 
-#if defined(HAVE_WCHAR_H) && SIZEOF_WCHAR_T == 4
+#if defined(__STDC_ISO_10646__)
 /* We need UTF-8 encoding of numbers to encode the weights if
  * we are using wcsxfrm. However, we aren't encoding Unicode
  * characters, so we can't simply use g_unichar_to_utf8.
@@ -204,7 +206,7 @@ utf8_encode (char *buf, wchar_t val)
 
   return retval;
 }
-#endif
+#endif /* __STDC_ISO_10646__ */
 
 #ifdef HAVE_CARBON
 
@@ -380,7 +382,7 @@ g_utf8_collate_key (const gchar *str,
   g_return_val_if_fail (str != NULL, NULL);
   result = carbon_collate_key (str, len);
 
-#elif defined(HAVE_WCHAR_H) && SIZEOF_WCHAR_T == 4
+#elif defined(__STDC_ISO_10646__)
 
   gsize xfrm_len;
   gunichar *str_norm;
@@ -410,7 +412,7 @@ g_utf8_collate_key (const gchar *str,
   g_free (str_norm);
 
   return result;
-#else
+#else /* !__STDC_ISO_10646__ */
 
   gsize xfrm_len;
   const gchar *charset;
@@ -464,7 +466,7 @@ g_utf8_collate_key (const gchar *str,
     }
 
   g_free (str_norm);
-#endif
+#endif /* __STDC_ISO_10646__ */
 
   return result;
 }
