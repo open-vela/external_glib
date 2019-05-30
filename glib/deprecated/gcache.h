@@ -33,13 +33,13 @@
 
 G_BEGIN_DECLS
 
-typedef struct _GCache          GCache GLIB_DEPRECATED_TYPE_IN_2_26_FOR(GHashTable);
+#ifndef G_DISABLE_DEPRECATED
 
-typedef gpointer        (*GCacheNewFunc)        (gpointer       key) GLIB_DEPRECATED_TYPE_IN_2_26;
-typedef gpointer        (*GCacheDupFunc)        (gpointer       value) GLIB_DEPRECATED_TYPE_IN_2_26;
-typedef void            (*GCacheDestroyFunc)    (gpointer       value) GLIB_DEPRECATED_TYPE_IN_2_26;
+typedef struct _GCache          GCache;
 
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+typedef gpointer        (*GCacheNewFunc)        (gpointer       key);
+typedef gpointer        (*GCacheDupFunc)        (gpointer       value);
+typedef void            (*GCacheDestroyFunc)    (gpointer       value);
 
 /* Caches
  */
@@ -68,7 +68,7 @@ void     g_cache_value_foreach (GCache            *cache,
                                 GHFunc             func,
                                 gpointer           user_data);
 
-G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
 G_END_DECLS
 

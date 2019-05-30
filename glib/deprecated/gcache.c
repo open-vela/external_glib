@@ -28,9 +28,6 @@
 
 #include "config.h"
 
-/* we know we are deprecated here, no need for warnings */
-#define GLIB_DISABLE_DEPRECATION_WARNINGS
-
 #include "gcache.h"
 
 #include "gslice.h"

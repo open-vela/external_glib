@@ -24,10 +24,6 @@
 
 #include "config.h"
 
-/* For the #GDesktopAppInfoLookup macros; since macro deprecation is implemented
- * in the preprocessor, we need to define this before including glib.h*/
-#define GLIB_DISABLE_DEPRECATION_WARNINGS
-
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
@@ -4559,9 +4555,6 @@ g_app_info_get_all (void)
  *
  * #GDesktopAppInfoLookup is an opaque data structure and can only be accessed
  * using the following functions.
- *
- * Deprecated: 2.28: The #GDesktopAppInfoLookup interface is deprecated and
- *    unused by GIO.
  **/
 
 G_GNUC_BEGIN_IGNORE_DEPRECATIONS
@@ -4582,18 +4575,17 @@ g_desktop_app_info_lookup_default_init (GDesktopAppInfoLookupInterface *iface)
  * @uri_scheme: a string containing a URI scheme.
  *
  * Gets the default application for launching applications
- * using this URI scheme for a particular #GDesktopAppInfoLookup
+ * using this URI scheme for a particular GDesktopAppInfoLookup
  * implementation.
  *
- * The #GDesktopAppInfoLookup interface and this function is used
+ * The GDesktopAppInfoLookup interface and this function is used
  * to implement g_app_info_get_default_for_uri_scheme() backends
  * in a GIO module. There is no reason for applications to use it
  * directly. Applications should use g_app_info_get_default_for_uri_scheme().
  *
  * Returns: (transfer full): #GAppInfo for given @uri_scheme or %NULL on error.
  *
- * Deprecated: 2.28: The #GDesktopAppInfoLookup interface is deprecated and
- *    unused by GIO.
+ * Deprecated: The #GDesktopAppInfoLookup interface is deprecated and unused by gio.
  */
 GAppInfo *
 g_desktop_app_info_lookup_get_default_for_uri_scheme (GDesktopAppInfoLookup *lookup,

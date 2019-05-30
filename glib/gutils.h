@@ -194,10 +194,7 @@ gchar *g_format_size        (guint64          size);
 GLIB_DEPRECATED_IN_2_30_FOR(g_format_size)
 gchar *g_format_size_for_display (goffset size);
 
-#define g_ATEXIT(proc)	(atexit (proc)) GLIB_DEPRECATED_MACRO_IN_2_32
-#define g_memmove(dest,src,len) \
-  G_STMT_START { memmove ((dest), (src), (len)); } G_STMT_END  GLIB_DEPRECATED_MACRO_IN_2_40_FOR(memmove)
-
+#ifndef G_DISABLE_DEPRECATED
 /**
  * GVoidFunc:
  *
@@ -205,13 +202,10 @@ gchar *g_format_size_for_display (goffset size);
  * and has no return value. It is used to specify the type
  * function passed to g_atexit().
  */
-typedef void (*GVoidFunc) (void) GLIB_DEPRECATED_TYPE_IN_2_32;
-#define ATEXIT(proc) g_ATEXIT(proc) GLIB_DEPRECATED_MACRO_IN_2_32
-
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+typedef void (*GVoidFunc) (void);
+#define ATEXIT(proc) g_ATEXIT(proc)
 GLIB_DEPRECATED
 void	g_atexit		(GVoidFunc    func);
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 #ifdef G_OS_WIN32
 /* It's a bad idea to wrap atexit() on Windows. If the GLib DLL calls
@@ -223,7 +217,9 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 #if (defined(__MINGW_H) && !defined(_STDLIB_H_)) || (defined(_MSC_VER) && !defined(_INC_STDLIB))
 int atexit (void (*)(void));
 #endif
-#define g_atexit(func) atexit(func) GLIB_DEPRECATED_MACRO_IN_2_32
+#define g_atexit(func) atexit(func)
+#endif
+
 #endif
 
 
@@ -315,6 +311,8 @@ void g_abort (void) G_GNUC_NORETURN G_ANALYZER_NORETURN;
 #endif
 #endif
 
+#ifndef G_DISABLE_DEPRECATED
+
 /*
  * This macro is deprecated. This DllMain() is too complex. It is
  * recommended to write an explicit minimal DLlMain() that just saves
@@ -333,7 +331,7 @@ void g_abort (void) G_GNUC_NORETURN G_ANALYZER_NORETURN;
  */
 
 #ifndef G_PLATFORM_WIN32
-# define G_WIN32_DLLMAIN_FOR_DLL_NAME(static, dll_name) GLIB_DEPRECATED_MACRO_IN_2_26
+# define G_WIN32_DLLMAIN_FOR_DLL_NAME(static, dll_name)
 #else
 # define G_WIN32_DLLMAIN_FOR_DLL_NAME(static, dll_name)			\
 static char *dll_name;							\
@@ -356,7 +354,10 @@ DllMain (HINSTANCE hinstDLL,						\
     }									\
 									\
   return TRUE;								\
-} GLIB_DEPRECATED_MACRO_IN_2_26
+}
+
+#endif	/* !G_DISABLE_DEPRECATED */
+
 #endif /* G_PLATFORM_WIN32 */
 
 G_END_DECLS
