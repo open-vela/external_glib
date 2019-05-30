@@ -2017,7 +2017,6 @@ g_object_new_with_properties (GType          object_type,
  * Deprecated: 2.54: Use g_object_new_with_properties() instead.
  * deprecated. See #GParameter for more information.
  */
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 gpointer
 g_object_newv (GType       object_type,
                guint       n_parameters,
@@ -2069,7 +2068,6 @@ g_object_newv (GType       object_type,
 
   return object;
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * g_object_new_valist: (skip)

@@ -148,8 +148,10 @@ GHashTable* g_hash_table_ref               (GHashTable     *hash_table);
 GLIB_AVAILABLE_IN_ALL
 void        g_hash_table_unref             (GHashTable     *hash_table);
 
-#define g_hash_table_freeze(hash_table) ((void)0) GLIB_DEPRECATED_MACRO_IN_2_26
-#define g_hash_table_thaw(hash_table) ((void)0) GLIB_DEPRECATED_MACRO_IN_2_26
+#ifndef G_DISABLE_DEPRECATED
+#define g_hash_table_freeze(hash_table) ((void)0)
+#define g_hash_table_thaw(hash_table) ((void)0)
+#endif
 
 /* Hash Functions
  */

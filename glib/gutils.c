@@ -218,7 +218,6 @@ _glib_get_dll_directory (void)
  *
  * Deprecated:2.32: It is best to avoid g_atexit().
  */
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 void
 g_atexit (GVoidFunc func)
 {
@@ -233,7 +232,6 @@ g_atexit (GVoidFunc func)
                g_strerror (errsv));
     }
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /* Based on execvp() from GNU Libc.
  * Some of this code is cut-and-pasted into gspawn.c
