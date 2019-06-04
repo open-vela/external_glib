@@ -531,8 +531,7 @@ xdg_mime_get_mime_type_for_data (const void *data,
 
   if (len == 0)
     {
-      if (result_prio != NULL)
-        *result_prio = 100;
+      *result_prio = 100;
       return XDG_MIME_TYPE_EMPTY;
     }
 
