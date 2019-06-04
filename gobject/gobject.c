@@ -2565,15 +2565,9 @@ g_object_set_property (GObject	    *object,
  * @property_name: the name of the property to get
  * @value: return location for the property value
  *
- * Gets a property of an object.
- *
- * The @value can be:
- *
- *  - an empty #GValue initialized by %G_VALUE_INIT, which will be
- *    automatically initialized with the expected type of the property
- *  - a #GValue initialized with the expected type of the property
- *  - a #GValue initialized with a type to which the expected type
- *    of the property can be transformed
+ * Gets a property of an object. @value must have been initialized to the
+ * expected type of the property (or a type to which the expected type can be
+ * transformed) using g_value_init().
  *
  * In general, a copy is made of the property contents and the caller is
  * responsible for freeing the memory by calling g_value_unset().
@@ -2590,7 +2584,7 @@ g_object_get_property (GObject	   *object,
   
   g_return_if_fail (G_IS_OBJECT (object));
   g_return_if_fail (property_name != NULL);
-  g_return_if_fail (value != NULL);
+  g_return_if_fail (G_IS_VALUE (value));
   
   g_object_ref (object);
   
@@ -2603,38 +2597,33 @@ g_object_get_property (GObject	   *object,
     {
       GValue *prop_value, tmp_value = G_VALUE_INIT;
       
-      if (G_VALUE_TYPE (value) == G_TYPE_INVALID)
-        {
-          /* uninitialized value */
-          g_value_init (value, pspec->value_type);
-          prop_value = value;
-        }
-      else if (G_VALUE_TYPE (value) == pspec->value_type)
-        {
-          /* auto-conversion of the callers value type */
-          g_value_reset (value);
-          prop_value = value;
-        }
+      /* auto-conversion of the callers value type
+       */
+      if (G_VALUE_TYPE (value) == pspec->value_type)
+	{
+	  g_value_reset (value);
+	  prop_value = value;
+	}
       else if (!g_value_type_transformable (pspec->value_type, G_VALUE_TYPE (value)))
-        {
-          g_warning ("%s: can't retrieve property '%s' of type '%s' as value of type '%s'",
-                     G_STRFUNC, pspec->name,
-                     g_type_name (pspec->value_type),
-                     G_VALUE_TYPE_NAME (value));
-          g_object_unref (object);
-          return;
-        }
+	{
+	  g_warning ("%s: can't retrieve property '%s' of type '%s' as value of type '%s'",
+		     G_STRFUNC, pspec->name,
+		     g_type_name (pspec->value_type),
+		     G_VALUE_TYPE_NAME (value));
+	  g_object_unref (object);
+	  return;
+	}
       else
-        {
-          g_value_init (&tmp_value, pspec->value_type);
-          prop_value = &tmp_value;
-        }
+	{
+	  g_value_init (&tmp_value, pspec->value_type);
+	  prop_value = &tmp_value;
+	}
       object_get_property (object, pspec, prop_value);
       if (prop_value != value)
-        {
-          g_value_transform (prop_value, value);
-          g_value_unset (&tmp_value);
-        }
+	{
+	  g_value_transform (prop_value, value);
+	  g_value_unset (&tmp_value);
+	}
     }
   
   g_object_unref (object);
