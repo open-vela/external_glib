@@ -3633,6 +3633,10 @@ g_file_copy_finish (GFile         *file,
  * If the flag #G_FILE_COPY_OVERWRITE is specified an already
  * existing @destination file is overwritten.
  *
+ * If the flag #G_FILE_COPY_NOFOLLOW_SYMLINKS is specified then symlinks
+ * will be copied as symlinks, otherwise the target of the
+ * @source symlink will be copied.
+ *
  * If @cancellable is not %NULL, then the operation can be cancelled by
  * triggering the cancellable object from another thread. If the operation
  * was cancelled, the error %G_IO_ERROR_CANCELLED will be returned.
@@ -3736,7 +3740,7 @@ g_file_move (GFile                  *source,
       return FALSE;
     }
 
-  flags |= G_FILE_COPY_ALL_METADATA | G_FILE_COPY_NOFOLLOW_SYMLINKS;
+  flags |= G_FILE_COPY_ALL_METADATA;
   if (!g_file_copy (source, destination, flags, cancellable,
                     progress_callback, progress_callback_data,
                     error))

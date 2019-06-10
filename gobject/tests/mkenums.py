@@ -22,7 +22,6 @@
 
 import collections
 import os
-import shutil
 import subprocess
 import tempfile
 import textwrap
@@ -58,7 +57,7 @@ class TestMkenums(unittest.TestCase):
                 os.path.join(os.environ['G_TEST_BUILDDIR'], '..',
                              'glib-mkenums')
         else:
-            self.__mkenums = shutil.which('glib-mkenums')
+            self.__mkenums = os.path.join('/', 'usr', 'bin', 'glib-mkenums')
         print('rspfile: {}, mkenums:'.format(self.rspfile), self.__mkenums)
 
     def tearDown(self):
