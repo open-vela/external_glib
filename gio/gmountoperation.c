@@ -25,7 +25,6 @@
 #include "gmountoperation.h"
 #include "gioenumtypes.h"
 #include "glibintl.h"
-#include "gmarshal-internal.h"
 
 
 /**
@@ -322,12 +321,9 @@ g_mount_operation_class_init (GMountOperationClass *klass)
 		  G_SIGNAL_RUN_LAST,
 		  G_STRUCT_OFFSET (GMountOperationClass, ask_password),
 		  NULL, NULL,
-		  _g_cclosure_marshal_VOID__STRING_STRING_STRING_FLAGS,
+		  NULL,
 		  G_TYPE_NONE, 4,
 		  G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_ASK_PASSWORD_FLAGS);
-  g_signal_set_va_marshaller (signals[ASK_PASSWORD],
-                              G_TYPE_FROM_CLASS (object_class),
-                              _g_cclosure_marshal_VOID__STRING_STRING_STRING_FLAGSv);
 		  
   /**
    * GMountOperation::ask-question:
@@ -348,12 +344,9 @@ g_mount_operation_class_init (GMountOperationClass *klass)
 		  G_SIGNAL_RUN_LAST,
 		  G_STRUCT_OFFSET (GMountOperationClass, ask_question),
 		  NULL, NULL,
-		  _g_cclosure_marshal_VOID__STRING_BOXED,
+		  NULL,
 		  G_TYPE_NONE, 2,
 		  G_TYPE_STRING, G_TYPE_STRV);
-  g_signal_set_va_marshaller (signals[ASK_QUESTION],
-                              G_TYPE_FROM_CLASS (object_class),
-                              _g_cclosure_marshal_VOID__STRING_BOXEDv);
 		  
   /**
    * GMountOperation::reply:
@@ -368,7 +361,7 @@ g_mount_operation_class_init (GMountOperationClass *klass)
 		  G_SIGNAL_RUN_LAST,
 		  G_STRUCT_OFFSET (GMountOperationClass, reply),
 		  NULL, NULL,
-		  NULL,
+		  g_cclosure_marshal_VOID__ENUM,
 		  G_TYPE_NONE, 1,
 		  G_TYPE_MOUNT_OPERATION_RESULT);
 
@@ -389,7 +382,7 @@ g_mount_operation_class_init (GMountOperationClass *klass)
 		  G_SIGNAL_RUN_LAST,
 		  G_STRUCT_OFFSET (GMountOperationClass, aborted),
 		  NULL, NULL,
-		  NULL,
+		  g_cclosure_marshal_VOID__VOID,
 		  G_TYPE_NONE, 0);
 
   /**
@@ -421,12 +414,9 @@ g_mount_operation_class_init (GMountOperationClass *klass)
 		  G_SIGNAL_RUN_LAST,
 		  G_STRUCT_OFFSET (GMountOperationClass, show_processes),
 		  NULL, NULL,
-		  _g_cclosure_marshal_VOID__STRING_BOXED_BOXED,
+		  NULL,
 		  G_TYPE_NONE, 3,
 		  G_TYPE_STRING, G_TYPE_ARRAY, G_TYPE_STRV);
-  g_signal_set_va_marshaller (signals[SHOW_PROCESSES],
-                              G_TYPE_FROM_CLASS (object_class),
-                              _g_cclosure_marshal_VOID__STRING_BOXED_BOXEDv);
 
   /**
    * GMountOperation::show-unmount-progress:
@@ -462,13 +452,9 @@ g_mount_operation_class_init (GMountOperationClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (GMountOperationClass, show_unmount_progress),
-                  NULL, NULL,
-                  _g_cclosure_marshal_VOID__STRING_INT64_INT64,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 3,
                   G_TYPE_STRING, G_TYPE_INT64, G_TYPE_INT64);
-  g_signal_set_va_marshaller (signals[SHOW_UNMOUNT_PROGRESS],
-                              G_TYPE_FROM_CLASS (object_class),
-                              _g_cclosure_marshal_VOID__STRING_INT64_INT64v);
 
   /**
    * GMountOperation:username:
