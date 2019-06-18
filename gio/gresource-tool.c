@@ -41,7 +41,9 @@
 #include <glib/gstdio.h>
 #include <gi18n.h>
 
+#ifdef G_OS_WIN32
 #include "glib/glib-private.h"
+#endif
 
 #if defined(HAVE_LIBELF) && defined(HAVE_MMAP)
 #define USE_LIBELF
@@ -608,7 +610,7 @@ main (int argc, char *argv[])
   gchar *tmp;
 #endif
 
-  setlocale (LC_ALL, GLIB_DEFAULT_LOCALE);
+  setlocale (LC_ALL, "");
   textdomain (GETTEXT_PACKAGE);
 
 #ifdef G_OS_WIN32

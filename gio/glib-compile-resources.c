@@ -43,7 +43,10 @@
 #include "gvdb/gvdb-builder.h"
 
 #include "gconstructor_as_data.h"
+
+#ifdef G_OS_WIN32
 #include "glib/glib-private.h"
+#endif
 
 typedef struct
 {
@@ -751,7 +754,7 @@ main (int argc, char **argv)
   gchar *tmp;
 #endif
 
-  setlocale (LC_ALL, GLIB_DEFAULT_LOCALE);
+  setlocale (LC_ALL, "");
   textdomain (GETTEXT_PACKAGE);
 
 #ifdef G_OS_WIN32
