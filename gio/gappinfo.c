@@ -27,7 +27,6 @@
 #include "gcancellable.h"
 
 #include "glibintl.h"
-#include "gmarshal-internal.h"
 #include <gioerror.h>
 #include <gfile.h>
 
@@ -1178,13 +1177,9 @@ g_app_launch_context_class_init (GAppLaunchContextClass *klass)
                                     G_OBJECT_CLASS_TYPE (object_class),
                                     G_SIGNAL_RUN_LAST,
                                     G_STRUCT_OFFSET (GAppLaunchContextClass, launched),
-                                    NULL, NULL,
-                                    _g_cclosure_marshal_VOID__OBJECT_VARIANT,
+                                    NULL, NULL, NULL,
                                     G_TYPE_NONE, 2,
                                     G_TYPE_APP_INFO, G_TYPE_VARIANT);
-  g_signal_set_va_marshaller (signals[LAUNCHED],
-                              G_TYPE_FROM_CLASS (klass),
-                              _g_cclosure_marshal_VOID__OBJECT_VARIANTv);
 }
 
 static void

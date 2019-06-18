@@ -64,7 +64,6 @@
 #include "gsocketlistener.h"
 #include "gsocketconnection.h"
 #include "glibintl.h"
-#include "gmarshal-internal.h"
 
 struct _GSocketServicePrivate
 {
@@ -347,12 +346,8 @@ g_socket_service_class_init (GSocketServiceClass *class)
     g_signal_new (I_("incoming"), G_TYPE_FROM_CLASS (class), G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (GSocketServiceClass, incoming),
                   g_signal_accumulator_true_handled, NULL,
-                  _g_cclosure_marshal_BOOLEAN__OBJECT_OBJECT,
-                  G_TYPE_BOOLEAN,
+                  NULL, G_TYPE_BOOLEAN,
                   2, G_TYPE_SOCKET_CONNECTION, G_TYPE_OBJECT);
-  g_signal_set_va_marshaller (g_socket_service_incoming_signal,
-                              G_TYPE_FROM_CLASS (class),
-                              _g_cclosure_marshal_BOOLEAN__OBJECT_OBJECTv);
 
   /**
    * GSocketService:active:
