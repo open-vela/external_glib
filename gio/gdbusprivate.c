@@ -701,7 +701,7 @@ _g_dbus_worker_do_read_cb (GInputStream  *input_stream,
            worker);
 #endif
 
-  /* The read failed, which could mean the dbus-daemon was sent SIGTERM. */
+  /* TODO: hmm, hmm... */
   if (bytes_read == 0)
     {
       g_set_error (&error,
