@@ -37,8 +37,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <utime.h>
-
-#define G_TEST_DIR_MODE 0555
 #endif
 #include <fcntl.h>
 #ifdef G_OS_WIN32
@@ -51,8 +49,6 @@
 #ifndef F_OK
 #define F_OK 0
 #endif
-
-#define G_TEST_DIR_MODE (S_IWRITE | S_IREAD)
 #endif
 
 #define S G_DIR_SEPARATOR_S
@@ -940,7 +936,7 @@ test_stdio_wrappers (void)
   g_free (cwd);
   g_free (path);
 
-  ret = g_creat ("test-creat", G_TEST_DIR_MODE);
+  ret = g_creat ("test-creat", 0555);
   g_close (ret, &error);
   g_assert_no_error (error);
 
