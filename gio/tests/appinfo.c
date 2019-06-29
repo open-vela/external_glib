@@ -87,7 +87,7 @@ test_launch_no_app_id (void)
     "Comment=GAppInfo example\n"
     "Comment[de]=GAppInfo Beispiel\n"
     "Icon=testicon.svg\n"
-    "Terminal=false\n"
+    "Terminal=true\n"
     "StartupNotify=true\n"
     "StartupWMClass=appinfo-class\n"
     "MimeType=image/png;image/jpeg;\n"
