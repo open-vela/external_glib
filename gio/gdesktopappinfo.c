@@ -2518,43 +2518,34 @@ prepend_terminal_to_vector (int    *argc,
   term_argv = g_new0 (char *, 3);
 
   check = g_find_program_in_path ("gnome-terminal");
+  if (check == NULL)
+    check = g_find_program_in_path ("mate-terminal");
+  if (check == NULL)
+    check = g_find_program_in_path ("xfce4-terminal");
   if (check != NULL)
     {
       term_argv[0] = check;
-      /* Since 2017, gnome-terminal has preferred `--` over `-x` or `-e`. */
-      term_argv[1] = g_strdup ("--");
+      /* Note that gnome-terminal takes -x and
+       * as -e in gnome-terminal is broken we use that. */
+      term_argv[1] = g_strdup ("-x");
     }
   else
     {
       if (check == NULL)
-        check = g_find_program_in_path ("mate-terminal");
+        check = g_find_program_in_path ("nxterm");
       if (check == NULL)
-        check = g_find_program_in_path ("xfce4-terminal");
-      if (check != NULL)
+        check = g_find_program_in_path ("color-xterm");
+      if (check == NULL)
+        check = g_find_program_in_path ("rxvt");
+      if (check == NULL)
+        check = g_find_program_in_path ("dtterm");
+      if (check == NULL)
         {
-          term_argv[0] = check;
-          /* Note that gnome-terminal takes -x and
-           * as -e in gnome-terminal is broken we use that. */
-          term_argv[1] = g_strdup ("-x");
+          check = g_strdup ("xterm");
+          g_debug ("Couldn’t find a terminal: falling back to xterm");
         }
-      else
-        {
-          if (check == NULL)
-            check = g_find_program_in_path ("nxterm");
-          if (check == NULL)
-            check = g_find_program_in_path ("color-xterm");
-          if (check == NULL)
-            check = g_find_program_in_path ("rxvt");
-          if (check == NULL)
-            check = g_find_program_in_path ("dtterm");
-          if (check == NULL)
-            {
-              check = g_strdup ("xterm");
-              g_debug ("Couldn’t find a terminal: falling back to xterm");
-            }
-          term_argv[0] = check;
-          term_argv[1] = g_strdup ("-e");
-        }
+      term_argv[0] = check;
+      term_argv[1] = g_strdup ("-e");
     }
 
   real_argc = term_argc + *argc;
