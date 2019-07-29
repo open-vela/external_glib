@@ -2631,24 +2631,39 @@ g_source_query_unix_fd (GSource  *source,
  * Equivalent to the UNIX gettimeofday() function, but portable.
  *
  * You may find g_get_real_time() to be more convenient.
- *
- * Deprecated: 2.62: #GTimeVal is not year-2038-safe. Use g_get_real_time()
- *    instead.
  **/
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 void
 g_get_current_time (GTimeVal *result)
 {
-  gint64 tv;
+#ifndef G_OS_WIN32
+  struct timeval r;
 
   g_return_if_fail (result != NULL);
 
-  tv = g_get_real_time ();
+  /*this is required on alpha, there the timeval structs are int's
+    not longs and a cast only would fail horribly*/
+  gettimeofday (&r, NULL);
+  result->tv_sec = r.tv_sec;
+  result->tv_usec = r.tv_usec;
+#else
+  FILETIME ft;
+  guint64 time64;
 
-  result->tv_sec = tv / 1000000;
-  result->tv_usec = tv % 1000000;
+  g_return_if_fail (result != NULL);
+
+  GetSystemTimeAsFileTime (&ft);
+  memmove (&time64, &ft, sizeof (FILETIME));
+
+  /* Convert from 100s of nanoseconds since 1601-01-01
+   * to Unix epoch. Yes, this is Y2038 unsafe.
+   */
+  time64 -= G_GINT64_CONSTANT (116444736000000000);
+  time64 /= 10;
+
+  result->tv_sec = time64 / 1000000;
+  result->tv_usec = time64 % 1000000;
+#endif
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * g_get_real_time:
@@ -2670,29 +2685,11 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 gint64
 g_get_real_time (void)
 {
-#ifndef G_OS_WIN32
-  struct timeval r;
+  GTimeVal tv;
 
-  /* this is required on alpha, there the timeval structs are ints
-   * not longs and a cast only would fail horribly */
-  gettimeofday (&r, NULL);
+  g_get_current_time (&tv);
 
-  return (((gint64) r.tv_sec) * 1000000) + r.tv_usec;
-#else
-  FILETIME ft;
-  guint64 time64;
-
-  GetSystemTimeAsFileTime (&ft);
-  memmove (&time64, &ft, sizeof (FILETIME));
-
-  /* Convert from 100s of nanoseconds since 1601-01-01
-   * to Unix epoch. This is Y2038 safe.
-   */
-  time64 -= G_GINT64_CONSTANT (116444736000000000);
-  time64 /= 10;
-
-  return time64;
-#endif
+  return (((gint64) tv.tv_sec) * 1000000) + tv.tv_usec;
 }
 
 /**
@@ -4415,14 +4412,12 @@ g_main_context_remove_poll_unlocked (GMainContext *context,
  *
  * Deprecated: 2.28: use g_source_get_time() instead
  **/
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 void
 g_source_get_current_time (GSource  *source,
 			   GTimeVal *timeval)
 {
   g_get_current_time (timeval);
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * g_source_get_time:

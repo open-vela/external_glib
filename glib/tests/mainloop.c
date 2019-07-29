@@ -695,9 +695,7 @@ typedef struct {
 
   GSource *timeout1, *timeout2;
   gint64 time1;
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-  GTimeVal tv;  /* needed for g_source_get_current_time() */
-G_GNUC_END_IGNORE_DEPRECATIONS
+  GTimeVal tv;
 } TimeTestData;
 
 static gboolean
@@ -732,9 +730,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     }
   else
     {
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
       GTimeVal tv;
-G_GNUC_END_IGNORE_DEPRECATIONS
 
       /* Second iteration */
       g_assert_true (g_source_is_destroyed (data->timeout2));
