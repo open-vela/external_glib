@@ -62,16 +62,14 @@ gboolean g_timer_is_active       (GTimer      *timer);
 GLIB_AVAILABLE_IN_ALL
 void     g_usleep                (gulong       microseconds);
 
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-GLIB_DEPRECATED_IN_2_62
+GLIB_AVAILABLE_IN_ALL
 void     g_time_val_add          (GTimeVal    *time_, 
                                   glong        microseconds);
-GLIB_DEPRECATED_IN_2_62_FOR(g_date_time_new_from_iso8601)
+GLIB_AVAILABLE_IN_ALL
 gboolean g_time_val_from_iso8601 (const gchar *iso_date,
 				  GTimeVal    *time_);
-GLIB_DEPRECATED_IN_2_62_FOR(g_date_time_format)
+GLIB_AVAILABLE_IN_ALL
 gchar*   g_time_val_to_iso8601   (GTimeVal    *time_) G_GNUC_MALLOC;
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 G_END_DECLS
 
