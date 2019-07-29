@@ -1373,6 +1373,9 @@ g_application_finalize (GObject *object)
 {
   GApplication *application = G_APPLICATION (object);
 
+  if (application->priv->inactivity_timeout_id)
+    g_source_remove (application->priv->inactivity_timeout_id);
+
   g_slist_free_full (application->priv->option_groups, (GDestroyNotify) g_option_group_unref);
   if (application->priv->main_options)
     g_option_group_unref (application->priv->main_options);
@@ -1394,8 +1397,6 @@ g_application_finalize (GObject *object)
 
   if (application->priv->actions)
     g_object_unref (application->priv->actions);
-
-  g_clear_object (&application->priv->remote_actions);
 
   if (application->priv->notifications)
     g_object_unref (application->priv->notifications);
