@@ -39,14 +39,13 @@ _g_win32_subst_pid_and_event (char       *debugger,
   gsize pid_str_len;
   char event_str[STR_BUFFER_SIZE] = {0};
   gsize event_str_len;
-
-  _snprintf_s (pid_str, STR_BUFFER_SIZE, G_N_ELEMENTS (pid_str), "%lu", pid);
+#undef STR_BUFFER_SIZE
+  snprintf (pid_str, G_N_ELEMENTS (pid_str), "%lu", pid);
   pid_str[G_N_ELEMENTS (pid_str) - 1] = 0;
   pid_str_len = strlen (pid_str);
-  _snprintf_s (event_str, STR_BUFFER_SIZE, G_N_ELEMENTS (pid_str), "%Iu", event);
+  snprintf (event_str, G_N_ELEMENTS (pid_str), "%Iu", event);
   event_str[G_N_ELEMENTS (pid_str) - 1] = 0;
   event_str_len = strlen (event_str);
-#undef STR_BUFFER_SIZE
 
   while (cmdline[i] != 0 && dbg_i < debugger_size)
     {
