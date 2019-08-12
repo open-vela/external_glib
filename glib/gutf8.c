@@ -1773,7 +1773,6 @@ g_utf8_strreverse (const gchar *str,
     {
       gchar *m, skip = g_utf8_skip[*(guchar*) p];
       r -= skip;
-      g_assert (r >= result);
       for (m = r; skip; skip--)
         *m++ = *p++;
     }

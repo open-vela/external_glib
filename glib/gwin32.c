@@ -1120,35 +1120,35 @@ g_win32_veh_handler (PEXCEPTION_POINTERS ExceptionInfo)
       return EXCEPTION_CONTINUE_EXECUTION;
     }
 
-  fprintf_s (stderr,
-             "Exception code=0x%lx flags=0x%lx at 0x%p",
-             er->ExceptionCode,
-             er->ExceptionFlags,
-             er->ExceptionAddress);
+  fprintf (stderr,
+           "Exception code=0x%lx flags=0x%lx at 0x%p",
+           er->ExceptionCode,
+           er->ExceptionFlags,
+           er->ExceptionAddress);
 
   switch (er->ExceptionCode)
     {
     case EXCEPTION_ACCESS_VIOLATION:
-      fprintf_s (stderr,
-                 ". Access violation - attempting to %s at address 0x%p\n",
-                 er->ExceptionInformation[0] == 0 ? "read data" :
-                 er->ExceptionInformation[0] == 1 ? "write data" :
-                 er->ExceptionInformation[0] == 8 ? "execute data" :
-                 "do something bad",
-                 (void *) er->ExceptionInformation[1]);
+      fprintf (stderr,
+               ". Access violation - attempting to %s at address 0x%p\n",
+               er->ExceptionInformation[0] == 0 ? "read data" :
+               er->ExceptionInformation[0] == 1 ? "write data" :
+               er->ExceptionInformation[0] == 8 ? "execute data" :
+               "do something bad",
+               (void *) er->ExceptionInformation[1]);
       break;
     case EXCEPTION_IN_PAGE_ERROR:
-      fprintf_s (stderr,
-                 ". Page access violation - attempting to %s at address 0x%p with status %Ix\n",
-                 er->ExceptionInformation[0] == 0 ? "read from an inaccessible page" :
-                 er->ExceptionInformation[0] == 1 ? "write to an inaccessible page" :
-                 er->ExceptionInformation[0] == 8 ? "execute data in page" :
-                 "do something bad with a page",
-                 (void *) er->ExceptionInformation[1],
-                 er->ExceptionInformation[2]);
+      fprintf (stderr,
+               ". Page access violation - attempting to %s at address 0x%p with status %Ix\n",
+               er->ExceptionInformation[0] == 0 ? "read from an inaccessible page" :
+               er->ExceptionInformation[0] == 1 ? "write to an inaccessible page" :
+               er->ExceptionInformation[0] == 8 ? "execute data in page" :
+               "do something bad with a page",
+               (void *) er->ExceptionInformation[1],
+               er->ExceptionInformation[2]);
       break;
     default:
-      fprintf_s (stderr, "\n");
+      fprintf (stderr, "\n");
       break;
     }
 
