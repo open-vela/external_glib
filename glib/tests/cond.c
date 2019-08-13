@@ -316,10 +316,8 @@ test_wait_until_errno (void)
   gboolean result;
   GMutex lock;
   GCond cond;
-  struct sigaction act = { };
 
-  /* important: no SA_RESTART (we want EINTR) */
-  act.sa_handler = signal_handler;
+  struct sigaction act = { { signal_handler, } }; /* important: no SA_RESTART (we want EINTR) */
 
   g_test_summary ("Check proper handling of errno in g_cond_wait_until with a contended mutex");
   g_test_bug_base ("https://gitlab.gnome.org/GNOME/glib/");
