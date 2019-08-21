@@ -25,7 +25,7 @@
 #ifndef __G_PRINTFINT_H__
 #define __G_PRINTFINT_H__
 
-#ifdef USE_SYSTEM_PRINTF
+#ifdef HAVE_GOOD_PRINTF
 
 #define _g_printf    printf
 #define _g_fprintf   fprintf
