@@ -39,6 +39,12 @@
 #include <sys/cygwin.h>
 #endif
 
+/* Default family is DESKTOP_APP which is DESKTOP | APP
+ * We want to know when we're only building for apps */
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#define G_WINAPI_ONLY_APP
+#endif
+
 static void
 set_error (const gchar *format,
 	   ...)
@@ -127,11 +133,8 @@ find_in_any_module_using_toolhelp (const gchar *symbol_name)
   HANDLE snapshot; 
   MODULEENTRY32 me32;
 
-  gpointer p = NULL;
+  gpointer p;
 
-  /* Under UWP, Module32Next and Module32First are not available since we're
-   * not allowed to search in the address space of arbitrary loaded DLLs */
-#if !defined(G_WINAPI_ONLY_APP)
   if ((snapshot = CreateToolhelp32Snapshot (TH32CS_SNAPMODULE, 0)) == (HANDLE) -1)
     return NULL;
 
@@ -146,7 +149,6 @@ find_in_any_module_using_toolhelp (const gchar *symbol_name)
     }
 
   CloseHandle (snapshot);
-#endif
 
   return p;
 }

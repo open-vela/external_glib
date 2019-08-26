@@ -93,7 +93,6 @@
 #include <gio/gmemoryoutputstream.h>
 #include <gio/gmount.h>
 #include <gio/gmountoperation.h>
-#include <gio/gnativesocketaddress.h>
 #include <gio/gnativevolumemonitor.h>
 #include <gio/gnetworkaddress.h>
 #include <gio/gnetworkmonitor.h>
