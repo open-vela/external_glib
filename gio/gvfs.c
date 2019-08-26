@@ -236,7 +236,7 @@ g_vfs_get_file_for_uri (GVfs       *vfs,
                         const char *uri)
 {
   GVfsClass *class;
-  GFile *ret = NULL;
+  GFile *ret;
  
   g_return_val_if_fail (G_IS_VFS (vfs), NULL);
   g_return_val_if_fail (uri != NULL, NULL);
@@ -244,12 +244,10 @@ g_vfs_get_file_for_uri (GVfs       *vfs,
   class = G_VFS_GET_CLASS (vfs);
 
   ret = get_file_for_uri_internal (vfs, uri);
-  if (!ret)
-    ret = (* class->get_file_for_uri) (vfs, uri);
+  if (ret)
+    return ret;
 
-  g_assert (ret != NULL);
-
-  return g_steal_pointer (&ret);
+  return (* class->get_file_for_uri) (vfs, uri);
 }
 
 /**
