@@ -409,11 +409,9 @@ test_g_rec_mutex_locker (void)
       g_thread_join (thread);
     }
 
-  /* Verify that the mutex is unlocked again */
-  thread = g_thread_new ("rec mutex unlocked", rec_mutex_unlocked_thread, &rec_mutex);
-  g_thread_join (thread);
-
-  g_rec_mutex_clear (&rec_mutex);
+    /* Verify that the mutex is unlocked again */
+    thread = g_thread_new ("rec mutex unlocked", rec_mutex_unlocked_thread, &rec_mutex);
+    g_thread_join (thread);
 }
 
 /* Thread function to check that an rw lock given in @data cannot be writer locked */
@@ -480,8 +478,6 @@ test_g_rw_lock_lockers (void)
    * the locks taken above have been correctly released. */
   g_assert_true (g_rw_lock_writer_trylock (&lock));
   g_rw_lock_writer_unlock (&lock);
-
-  g_rw_lock_clear (&lock);
 }
 
 static void

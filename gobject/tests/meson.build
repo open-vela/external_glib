@@ -117,7 +117,7 @@ foreach test_name : python_tests
     python,
     args: ['-B', files(test_name)],
     env: test_env,
-    suite: ['gobject', 'no-valgrind'],
+    suite: ['gobject'],
   )
 
   if installed_tests_enabled
