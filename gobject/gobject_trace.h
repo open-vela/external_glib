@@ -25,9 +25,7 @@
 #error "config.h must be included prior to gobject_trace.h"
 #endif
 
-/* Ignore probes when doing static analysis, as they do weird things which
- * confuses the analyser. */
-#if defined(HAVE_DTRACE) && !defined(__clang_analyzer__)
+#ifdef HAVE_DTRACE
 
 /* include the generated probes header and put markers in code */
 #include "gobject_probes.h"

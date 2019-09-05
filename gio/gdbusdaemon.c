@@ -170,7 +170,6 @@ name_new (GDBusDaemon *daemon, const char *str)
 static Name *
 name_ref (Name *name)
 {
-  g_assert (name->refcount > 0);
   name->refcount++;
   return name;
 }
@@ -178,7 +177,6 @@ name_ref (Name *name)
 static void
 name_unref (Name *name)
 {
-  g_assert (name->refcount > 0);
   if (--name->refcount == 0)
     {
       g_hash_table_remove (name->daemon->names, name->name);
@@ -1465,11 +1463,10 @@ filter_function (GDBusConnection *connection,
 		 gpointer         user_data)
 {
   Client *client = user_data;
+  const char *types[] = {"invalid", "method_call", "method_return", "error", "signal" };
 
   if (0)
-    {
-      const char *types[] = {"invalid", "method_call", "method_return", "error", "signal" };
-      g_printerr ("%s%s %s %d(%d) sender: %s destination: %s %s %s.%s\n",
+    g_printerr ("%s%s %s %d(%d) sender: %s destination: %s %s %s.%s\n",
 		client->id,
 		incoming? "->" : "<-",
 		types[g_dbus_message_get_message_type (message)],
@@ -1480,7 +1477,6 @@ filter_function (GDBusConnection *connection,
 		g_dbus_message_get_path (message),
 		g_dbus_message_get_interface (message),
 		g_dbus_message_get_member (message));
-    }
 
   if (incoming)
     {
