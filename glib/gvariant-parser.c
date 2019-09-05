@@ -2527,8 +2527,6 @@ g_variant_new_parsed_va (const gchar *format,
   if (*stream.stream)
     g_error ("g_variant_new_parsed: trailing text after value");
 
-  g_clear_error (&error);
-
   return result;
 }
 

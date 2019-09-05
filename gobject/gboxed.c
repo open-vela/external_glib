@@ -346,7 +346,8 @@ g_boxed_copy (GType         boxed_type,
   g_return_val_if_fail (src_boxed != NULL, NULL);
 
   value_table = g_type_value_table_peek (boxed_type);
-  g_assert (value_table != NULL);
+  if (!value_table)
+    g_return_val_if_fail (G_TYPE_IS_VALUE_TYPE (boxed_type), NULL);
 
   /* check if our proxying implementation is used, we can short-cut here */
   if (value_table->value_copy == boxed_proxy_value_copy)
@@ -403,7 +404,8 @@ g_boxed_free (GType    boxed_type,
   g_return_if_fail (boxed != NULL);
 
   value_table = g_type_value_table_peek (boxed_type);
-  g_assert (value_table != NULL);
+  if (!value_table)
+    g_return_if_fail (G_TYPE_IS_VALUE_TYPE (boxed_type));
 
   /* check if our proxying implementation is used, we can short-cut here */
   if (value_table->value_free == boxed_proxy_value_free)

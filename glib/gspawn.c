@@ -435,6 +435,8 @@ g_spawn_sync (const gchar          *working_directory,
          (outpipe >= 0 ||
           errpipe >= 0))
     {
+      ret = 0;
+          
       FD_ZERO (&fds);
       if (outpipe >= 0)
         FD_SET (outpipe, &fds);
