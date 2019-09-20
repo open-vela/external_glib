@@ -2462,7 +2462,7 @@ g_charset_converter_get_type
 
 <SECTION>
 <FILE>gconverterinputstream</FILE>
-<TITLE>GConverterInputStream</TITLE>
+<TITLE>GConverterInputstream</TITLE>
 GConverterInputStream
 g_converter_input_stream_new
 g_converter_input_stream_get_converter
@@ -2481,7 +2481,7 @@ g_converter_input_stream_get_type
 
 <SECTION>
 <FILE>gconverteroutputstream</FILE>
-<TITLE>GConverterOutputStream</TITLE>
+<TITLE>GConverterOutputstream</TITLE>
 GConverterOutputStream
 g_converter_output_stream_new
 g_converter_output_stream_get_converter
