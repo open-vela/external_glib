@@ -846,102 +846,58 @@ test_async_delete (void)
   g_object_unref (file);
 }
 
+#ifdef G_OS_UNIX
 static void
 test_copy_preserve_mode (void)
 {
-#ifdef G_OS_UNIX
-  mode_t current_umask = umask (0);
-  const struct
-    {
-      guint32 source_mode;
-      guint32 expected_destination_mode;
-      gboolean create_destination_before_copy;
-      GFileCopyFlags copy_flags;
-    }
-  vectors[] =
-    {
-      /* Overwriting the destination file should copy the permissions from the
-       * source file, even if %G_FILE_COPY_ALL_METADATA is set: */
-      { 0600, 0600, TRUE, G_FILE_COPY_OVERWRITE | G_FILE_COPY_NOFOLLOW_SYMLINKS | G_FILE_COPY_ALL_METADATA },
-      { 0600, 0600, TRUE, G_FILE_COPY_OVERWRITE | G_FILE_COPY_NOFOLLOW_SYMLINKS },
-      /* The same behaviour should hold if the destination file is not being
-       * overwritten because it doesn’t already exist: */
-      { 0600, 0600, FALSE, G_FILE_COPY_NOFOLLOW_SYMLINKS | G_FILE_COPY_ALL_METADATA },
-      { 0600, 0600, FALSE, G_FILE_COPY_NOFOLLOW_SYMLINKS },
-      /* Anything with %G_FILE_COPY_TARGET_DEFAULT_PERMS should use the current
-       * umask for the destination file: */
-      { 0600, 0666 & ~current_umask, TRUE, G_FILE_COPY_TARGET_DEFAULT_PERMS | G_FILE_COPY_OVERWRITE | G_FILE_COPY_NOFOLLOW_SYMLINKS | G_FILE_COPY_ALL_METADATA },
-      { 0600, 0666 & ~current_umask, TRUE, G_FILE_COPY_TARGET_DEFAULT_PERMS | G_FILE_COPY_OVERWRITE | G_FILE_COPY_NOFOLLOW_SYMLINKS },
-      { 0600, 0666 & ~current_umask, FALSE, G_FILE_COPY_TARGET_DEFAULT_PERMS | G_FILE_COPY_NOFOLLOW_SYMLINKS | G_FILE_COPY_ALL_METADATA },
-      { 0600, 0666 & ~current_umask, FALSE, G_FILE_COPY_TARGET_DEFAULT_PERMS | G_FILE_COPY_NOFOLLOW_SYMLINKS },
-    };
-  gsize i;
+  GFile *tmpfile;
+  GFile *dest_tmpfile;
+  GFileInfo *dest_info;
+  GFileIOStream *iostream;
+  GError *local_error = NULL;
+  GError **error = &local_error;
+  guint32 romode = S_IFREG | 0600;
+  guint32 dest_mode;
 
-  /* Reset the umask after querying it above. There’s no way to query it without
-   * changing it. */
-  umask (current_umask);
-  g_test_message ("Current umask: %u", current_umask);
+  tmpfile = g_file_new_tmp ("tmp-copy-preserve-modeXXXXXX",
+                            &iostream, error);
+  g_assert_no_error (local_error);
+  g_io_stream_close ((GIOStream*)iostream, NULL, error);
+  g_assert_no_error (local_error);
+  g_clear_object (&iostream);
 
-  for (i = 0; i < G_N_ELEMENTS (vectors); i++)
-    {
-      GFile *tmpfile;
-      GFile *dest_tmpfile;
-      GFileInfo *dest_info;
-      GFileIOStream *iostream;
-      GError *local_error = NULL;
-      guint32 romode = vectors[i].source_mode;
-      guint32 dest_mode;
+  g_file_set_attribute (tmpfile, G_FILE_ATTRIBUTE_UNIX_MODE, G_FILE_ATTRIBUTE_TYPE_UINT32,
+                        &romode, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                        NULL, error);
+  g_assert_no_error (local_error);
 
-      g_test_message ("Vector %" G_GSIZE_FORMAT, i);
+  dest_tmpfile = g_file_new_tmp ("tmp-copy-preserve-modeXXXXXX",
+                                 &iostream, error);
+  g_assert_no_error (local_error);
+  g_io_stream_close ((GIOStream*)iostream, NULL, error);
+  g_assert_no_error (local_error);
+  g_clear_object (&iostream);
 
-      tmpfile = g_file_new_tmp ("tmp-copy-preserve-modeXXXXXX",
-                                &iostream, &local_error);
-      g_assert_no_error (local_error);
-      g_io_stream_close ((GIOStream*)iostream, NULL, &local_error);
-      g_assert_no_error (local_error);
-      g_clear_object (&iostream);
+  g_file_copy (tmpfile, dest_tmpfile, G_FILE_COPY_OVERWRITE | G_FILE_COPY_NOFOLLOW_SYMLINKS | G_FILE_COPY_ALL_METADATA,
+               NULL, NULL, NULL, error);
+  g_assert_no_error (local_error);
 
-      g_file_set_attribute (tmpfile, G_FILE_ATTRIBUTE_UNIX_MODE, G_FILE_ATTRIBUTE_TYPE_UINT32,
-                            &romode, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-                            NULL, &local_error);
-      g_assert_no_error (local_error);
+  dest_info = g_file_query_info (dest_tmpfile, G_FILE_ATTRIBUTE_UNIX_MODE, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+                                 NULL, error);
+  g_assert_no_error (local_error);
 
-      dest_tmpfile = g_file_new_tmp ("tmp-copy-preserve-modeXXXXXX",
-                                     &iostream, &local_error);
-      g_assert_no_error (local_error);
-      g_io_stream_close ((GIOStream*)iostream, NULL, &local_error);
-      g_assert_no_error (local_error);
-      g_clear_object (&iostream);
+  dest_mode = g_file_info_get_attribute_uint32 (dest_info, G_FILE_ATTRIBUTE_UNIX_MODE);
+  
+  g_assert_cmpint (dest_mode, ==, romode);
 
-      if (!vectors[i].create_destination_before_copy)
-        {
-          g_file_delete (dest_tmpfile, NULL, &local_error);
-          g_assert_no_error (local_error);
-        }
-
-      g_file_copy (tmpfile, dest_tmpfile, vectors[i].copy_flags,
-                   NULL, NULL, NULL, &local_error);
-      g_assert_no_error (local_error);
-
-      dest_info = g_file_query_info (dest_tmpfile, G_FILE_ATTRIBUTE_UNIX_MODE, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-                                     NULL, &local_error);
-      g_assert_no_error (local_error);
-
-      dest_mode = g_file_info_get_attribute_uint32 (dest_info, G_FILE_ATTRIBUTE_UNIX_MODE);
-
-      g_assert_cmpint (dest_mode, ==, vectors[i].expected_destination_mode);
-
-      (void) g_file_delete (tmpfile, NULL, NULL);
-      (void) g_file_delete (dest_tmpfile, NULL, NULL);
-
-      g_clear_object (&tmpfile);
-      g_clear_object (&dest_tmpfile);
-      g_clear_object (&dest_info);
-    }
-#else  /* if !G_OS_UNIX */
-  g_test_skip ("File permissions tests can only be run on Unix")
-#endif
+  (void) g_file_delete (tmpfile, NULL, NULL);
+  (void) g_file_delete (dest_tmpfile, NULL, NULL);
+  
+  g_clear_object (&tmpfile);
+  g_clear_object (&dest_tmpfile);
+  g_clear_object (&dest_info);
 }
+#endif
 
 static gchar *
 splice_to_string (GInputStream   *stream,
@@ -1799,7 +1755,9 @@ main (int argc, char *argv[])
   g_test_add_func ("/file/replace-load", test_replace_load);
   g_test_add_func ("/file/replace-cancel", test_replace_cancel);
   g_test_add_func ("/file/async-delete", test_async_delete);
+#ifdef G_OS_UNIX
   g_test_add_func ("/file/copy-preserve-mode", test_copy_preserve_mode);
+#endif
   g_test_add_func ("/file/measure", test_measure);
   g_test_add_func ("/file/measure-async", test_measure_async);
   g_test_add_func ("/file/load-bytes", test_load_bytes);

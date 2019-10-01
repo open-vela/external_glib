@@ -3188,7 +3188,6 @@ file_copy_fallback (GFile                  *source,
   const char *target;
   char *attrs_to_read;
   gboolean do_set_attributes = FALSE;
-  GFileCreateFlags create_flags;
 
   /* need to know the file type */
   info = g_file_query_info (source,
@@ -3278,38 +3277,19 @@ file_copy_fallback (GFile                  *source,
    *
    * If a future API like g_file_replace_with_info() is added, switch
    * this code to use that.
-   *
-   * Use %G_FILE_CREATE_PRIVATE unless
-   *  - we were told to create the file with default permissions (i.e. the
-   *    process’ umask),
-   *  - or if the source file is on a file system which doesn’t support
-   *    `unix::mode` (in which case it probably also makes sense to create the
-   *    destination with default permissions because the source cannot be
-   *    private),
-   *  - or if the destination file is a `GLocalFile`, in which case we can
-   *    directly open() it with the permissions from the source file.
    */
-  create_flags = G_FILE_CREATE_NONE;
-  if (!(flags & G_FILE_COPY_TARGET_DEFAULT_PERMS) &&
-      g_file_info_has_attribute (info, G_FILE_ATTRIBUTE_UNIX_MODE) &&
-      !G_IS_LOCAL_FILE (destination))
-    create_flags |= G_FILE_CREATE_PRIVATE;
-  if (flags & G_FILE_COPY_OVERWRITE)
-    create_flags |= G_FILE_CREATE_REPLACE_DESTINATION;
-
   if (G_IS_LOCAL_FILE (destination))
     {
       if (flags & G_FILE_COPY_OVERWRITE)
         out = (GOutputStream*)_g_local_file_output_stream_replace (_g_local_file_get_filename (G_LOCAL_FILE (destination)),
                                                                    FALSE, NULL,
                                                                    flags & G_FILE_COPY_BACKUP,
-                                                                   create_flags,
-                                                                   (flags & G_FILE_COPY_TARGET_DEFAULT_PERMS) ? NULL : info,
+                                                                   G_FILE_CREATE_REPLACE_DESTINATION |
+                                                                   G_FILE_CREATE_PRIVATE, info,
                                                                    cancellable, error);
       else
         out = (GOutputStream*)_g_local_file_output_stream_create (_g_local_file_get_filename (G_LOCAL_FILE (destination)),
-                                                                  FALSE, create_flags,
-                                                                  (flags & G_FILE_COPY_TARGET_DEFAULT_PERMS) ? NULL : info,
+                                                                  FALSE, G_FILE_CREATE_PRIVATE, info,
                                                                   cancellable, error);
     }
   else if (flags & G_FILE_COPY_OVERWRITE)
@@ -3317,12 +3297,13 @@ file_copy_fallback (GFile                  *source,
       out = (GOutputStream *)g_file_replace (destination,
                                              NULL,
                                              flags & G_FILE_COPY_BACKUP,
-                                             create_flags,
+                                             G_FILE_CREATE_REPLACE_DESTINATION |
+                                             G_FILE_CREATE_PRIVATE,
                                              cancellable, error);
     }
   else
     {
-      out = (GOutputStream *)g_file_create (destination, create_flags, cancellable, error);
+      out = (GOutputStream *)g_file_create (destination, G_FILE_CREATE_PRIVATE, cancellable, error);
     }
 
   if (!out)
@@ -4046,7 +4027,7 @@ g_file_make_symbolic_link (GFile         *file,
     {
       g_set_error_literal (error, G_IO_ERROR,
                            G_IO_ERROR_NOT_SUPPORTED,
-                           _("Symbolic links not supported"));
+                           _("Operation not supported"));
       return FALSE;
     }
 

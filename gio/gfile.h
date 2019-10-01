@@ -111,13 +111,10 @@ typedef struct _GFileIface    		GFileIface;
  * @make_directory: Makes a directory.
  * @make_directory_async: Asynchronously makes a directory.
  * @make_directory_finish: Finishes making a directory asynchronously.
- * @make_symbolic_link: (nullable): Makes a symbolic link. %NULL if symbolic
- *    links are unsupported.
+ * @make_symbolic_link: Makes a symbolic link.
  * @_make_symbolic_link_async: Asynchronously makes a symbolic link
  * @_make_symbolic_link_finish: Finishes making a symbolic link asynchronously.
- * @copy: (nullable): Copies a file. %NULL if copying is unsupported, which will
- *     cause `GFile` to use a fallback copy method where it reads from the
- *     source and writes to the destination.
+ * @copy: Copies a file.
  * @copy_async: Asynchronously copies a file.
  * @copy_finish: Finishes an asynchronous copy operation.
  * @move: Moves a file.
