@@ -2027,8 +2027,6 @@ elif host_system == 'cygwin'
   export_dynamic_ldflags = ['-Wl,--export-all-symbols']
 elif host_system == 'darwin'
   export_dynamic_ldflags = []
-elif host_system == 'sunos'
-  export_dynamic_ldflags = []
 else
   export_dynamic_ldflags = ['-Wl,--export-dynamic']
 endif
