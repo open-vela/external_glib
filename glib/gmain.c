@@ -675,7 +675,7 @@ g_main_context_new (void)
 GMainContext *
 g_main_context_default (void)
 {
-  static GMainContext *default_main_context = NULL;
+  static GMainContext *default_main_context;
 
   if (g_once_init_enter (&default_main_context))
     {
@@ -690,7 +690,8 @@ g_main_context_default (void)
         g_print ("default context=%p\n", context);
 #endif
 
-      g_once_init_leave (&default_main_context, context);
+      g_once_init_leave ((gsize *) &default_main_context, (gsize) context);
+
     }
 
   return default_main_context;
