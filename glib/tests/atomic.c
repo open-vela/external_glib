@@ -80,9 +80,6 @@ test_types (void)
   g_atomic_pointer_set (&vp, 0);
   vp2 = g_atomic_pointer_get (&vp);
   g_assert_true (vp2 == 0);
-  res = g_atomic_pointer_compare_and_exchange (&vp, &s, &s);
-  g_assert_false (res);
-  g_assert_true (vp == 0);
   res = g_atomic_pointer_compare_and_exchange (&vp, 0, 0);
   g_assert_true (res);
   g_assert_true (vp == 0);
@@ -188,9 +185,6 @@ G_GNUC_END_IGNORE_DEPRECATIONS
   g_atomic_pointer_set (&vp, 0);
   vp2 = g_atomic_pointer_get (&vp);
   g_assert_true (vp2 == 0);
-  res = g_atomic_pointer_compare_and_exchange (&vp, &s, &s);
-  g_assert_false (res);
-  g_assert_true (vp == 0);
   res = g_atomic_pointer_compare_and_exchange (&vp, 0, 0);
   g_assert_true (res);
   g_assert_true (vp == 0);
