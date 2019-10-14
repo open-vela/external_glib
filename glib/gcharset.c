@@ -549,15 +549,10 @@ append_locale_variants (GPtrArray *array,
  * Returns a list of derived variants of @locale, which can be used to
  * e.g. construct locale-dependent filenames or search paths. The returned
  * list is sorted from most desirable to least desirable.
- * This function handles territory, charset and extra locale modifiers. See
- * [`setlocale(3)`](man:setlocale) for information about locales and their format.
+ * This function handles territory, charset and extra locale modifiers.
  *
- * @locale itself is guaranteed to be returned in the output.
- *
- * For example, if @locale is `fr_BE`, then the returned list
- * is `fr_BE`, `fr`. If @locale is `en_GB.UTF-8@euro`, then the returned list
- * is `en_GB.UTF-8@euro`, `en_GB.UTF-8`, `en_GB@euro`, `en_GB`, `en.UTF-8@euro`,
- * `en.UTF-8`, `en@euro`, `en`.
+ * For example, if @locale is "fr_BE", then the returned list
+ * is "fr_BE", "fr".
  *
  * If you need the list of variants for the current locale,
  * use g_get_language_names().
