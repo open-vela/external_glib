@@ -50,7 +50,6 @@ gobject_tests = {
   'signals' : {
     'source' : ['signals.c', marshalers_h, marshalers_c],
   },
-  'testing' : {},
 }
 
 if cc.get_id() != 'msvc'
