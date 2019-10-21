@@ -18,7 +18,6 @@ RUN apt-get update -qq && apt-get install --no-install-recommends -qq -y \
     itstool \
     lcov \
     libattr1-dev \
-    libdbus-1-dev \
     libelf-dev \
     libffi-dev \
     libgamin-dev \
