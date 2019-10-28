@@ -29,6 +29,7 @@ check_property (const char *output,
   if (g_param_value_defaults (pspec, value))
       return;
 
+  g_value_init (&default_value, G_PARAM_SPEC_VALUE_TYPE (pspec));
   g_param_value_set_default (pspec, &default_value);
 
   v = g_strdup_value_contents (value);
