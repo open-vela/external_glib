@@ -912,11 +912,8 @@ param_value_array_validate (GParamSpec *pspec,
 		  g_param_value_set_default (element_spec, element);
 		  changed++;
 		}
-              else
-                {
-	          /* validate array value against element_spec */
-	          changed += g_param_value_validate (element_spec, element);
-                }
+	      /* validate array value against element_spec */
+	      changed += g_param_value_validate (element_spec, element);
 	    }
 	}
     }
@@ -2095,10 +2092,7 @@ g_param_spec_enum (const gchar *name,
 				 blurb,
 				 flags);
   if (espec == NULL)
-    {
-      g_type_class_unref (enum_class);
-      return NULL;
-    }
+    return NULL;
   
   espec->enum_class = enum_class;
   espec->default_value = default_value;
@@ -2146,10 +2140,7 @@ g_param_spec_flags (const gchar *name,
 				 blurb,
 				 flags);
   if (fspec == NULL)
-    {
-      g_type_class_unref (flags_class);
-      return NULL;
-    }
+    return NULL;
   
   fspec->flags_class = flags_class;
   fspec->default_value = default_value;
