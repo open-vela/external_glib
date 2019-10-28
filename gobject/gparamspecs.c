@@ -2095,7 +2095,10 @@ g_param_spec_enum (const gchar *name,
 				 blurb,
 				 flags);
   if (espec == NULL)
-    return NULL;
+    {
+      g_type_class_unref (enum_class);
+      return NULL;
+    }
   
   espec->enum_class = enum_class;
   espec->default_value = default_value;
@@ -2143,7 +2146,10 @@ g_param_spec_flags (const gchar *name,
 				 blurb,
 				 flags);
   if (fspec == NULL)
-    return NULL;
+    {
+      g_type_class_unref (flags_class);
+      return NULL;
+    }
   
   fspec->flags_class = flags_class;
   fspec->default_value = default_value;
