@@ -1033,9 +1033,6 @@ do_test_peer (void)
 static void
 test_peer (void)
 {
-  test_guid = g_dbus_generate_guid ();
-  loop = g_main_loop_new (NULL, FALSE);
-
   /* Run this test multiple times using different address formats to ensure
    * they all work.
    */
@@ -1052,9 +1049,6 @@ test_peer (void)
   do_test_peer ();
   teardown_test_address ();
 #endif
-
-  g_main_loop_unref (loop);
-  g_free (test_guid);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -1069,9 +1063,6 @@ test_peer_signals (void)
   GThread *service_thread;
 
   g_test_bug ("https://gitlab.gnome.org/GNOME/glib/issues/1620");
-
-  test_guid = g_dbus_generate_guid ();
-  loop = g_main_loop_new (NULL, FALSE);
 
   setup_test_address ();
   memset (&data, '\0', sizeof (PeerData));
@@ -1128,9 +1119,6 @@ test_peer_signals (void)
   g_thread_join (service_thread);
 
   teardown_test_address ();
-
-  g_main_loop_unref (loop);
-  g_free (test_guid);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -1272,9 +1260,6 @@ delayed_message_processing (void)
   GThread *service_thread;
   guint n;
 
-  test_guid = g_dbus_generate_guid ();
-  loop = g_main_loop_new (NULL, FALSE);
-
   setup_test_address ();
 
   data = g_new0 (DmpData, 1);
@@ -1322,9 +1307,6 @@ delayed_message_processing (void)
   g_thread_join (service_thread);
   dmp_data_free (data);
   teardown_test_address ();
-
-  g_main_loop_unref (loop);
-  g_free (test_guid);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -1422,9 +1404,6 @@ test_nonce_tcp (void)
   gchar *nonce_file;
   gboolean res;
   const gchar *address;
-
-  test_guid = g_dbus_generate_guid ();
-  loop = g_main_loop_new (NULL, FALSE);
 
   memset (&data, '\0', sizeof (PeerData));
   data.current_connections = g_ptr_array_new_with_free_func (g_object_unref);
@@ -1533,9 +1512,6 @@ test_nonce_tcp (void)
   g_thread_join (service_thread);
 
   g_ptr_array_unref (data.current_connections);
-
-  g_main_loop_unref (loop);
-  g_free (test_guid);
 }
 
 static void
@@ -1620,9 +1596,6 @@ test_tcp_anonymous (void)
   GDBusConnection *connection;
   GError *error;
 
-  test_guid = g_dbus_generate_guid ();
-  loop = g_main_loop_new (NULL, FALSE);
-
   seen_connection = FALSE;
   service_thread = g_thread_new ("tcp-anon-service",
                                  tcp_anonymous_service_thread_func,
@@ -1650,9 +1623,6 @@ test_tcp_anonymous (void)
   server = NULL;
 
   g_thread_join (service_thread);
-
-  g_main_loop_unref (loop);
-  g_free (test_guid);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -1797,9 +1767,6 @@ codegen_test_peer (void)
   GVariant            *value;
   const gchar         *s;
 
-  test_guid = g_dbus_generate_guid ();
-  loop = g_main_loop_new (NULL, FALSE);
-
   setup_test_address ();
 
   /* bring up a server - we run the server in a different thread to avoid deadlocks */
@@ -1907,9 +1874,6 @@ codegen_test_peer (void)
   g_thread_join (service_thread);
 
   teardown_test_address ();
-
-  g_main_loop_unref (loop);
-  g_free (test_guid);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -1922,11 +1886,16 @@ main (int   argc,
   gint ret;
   GDBusNodeInfo *introspection_data = NULL;
 
-  g_test_init (&argc, &argv, G_TEST_OPTION_ISOLATE_DIRS, NULL);
+  g_test_init (&argc, &argv, NULL);
 
   introspection_data = g_dbus_node_info_new_for_xml (test_interface_introspection_xml, NULL);
   g_assert (introspection_data != NULL);
   test_interface_introspection_data = introspection_data->interfaces[0];
+
+  test_guid = g_dbus_generate_guid ();
+
+  /* all the tests rely on a shared main loop */
+  loop = g_main_loop_new (NULL, FALSE);
 
   g_test_add_func ("/gdbus/peer-to-peer", test_peer);
   g_test_add_func ("/gdbus/peer-to-peer/signals", test_peer_signals);
@@ -1937,8 +1906,10 @@ main (int   argc,
   g_test_add_func ("/gdbus/credentials", test_credentials);
   g_test_add_func ("/gdbus/codegen-peer-to-peer", codegen_test_peer);
 
-  ret = g_test_run ();
+  ret = g_test_run();
 
+  g_main_loop_unref (loop);
+  g_free (test_guid);
   g_dbus_node_info_unref (introspection_data);
 
   return ret;
