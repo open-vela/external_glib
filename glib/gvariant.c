@@ -2765,10 +2765,7 @@ g_variant_equal (gconstpointer one,
       data_one = g_variant_get_data ((GVariant *) one);
       data_two = g_variant_get_data ((GVariant *) two);
 
-      if (size_one)
-        equal = memcmp (data_one, data_two, size_one) == 0;
-      else
-        equal = TRUE;
+      equal = memcmp (data_one, data_two, size_one) == 0;
     }
   else
     {
