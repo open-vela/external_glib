@@ -124,6 +124,7 @@ class GHashPrinter:
                 self.value = None
                 return v
             while long(self.pos) < long(self.size):
+                self.pos = self.pos + 1
                 if long (self.hashes[self.pos]) >= 2:
                     key = self.keys[self.pos]
                     val = self.values[self.pos]
@@ -134,12 +135,8 @@ class GHashPrinter:
                     # Queue value for next result
                     self.value = ('[%dv]'% (self.pos), val)
 
-                    # Increment pos and return key
-                    key = ('[%dk]'% (self.pos), key)
-                    self.pos += 1
-                    return key
-
-                self.pos += 1
+                    # Return key
+                    return ('[%dk]'% (self.pos), key)
             raise StopIteration
 
         __next__ = next
