@@ -1588,7 +1588,7 @@ g_ascii_strup (const gchar *str,
 gboolean
 g_str_is_ascii (const gchar *str)
 {
-  gsize i;
+  gint i;
 
   for (i = 0; str[i]; i++)
     if (str[i] & 0x80)
@@ -2518,7 +2518,7 @@ g_strfreev (gchar **str_array)
 {
   if (str_array)
     {
-      gsize i;
+      int i;
 
       for (i = 0; str_array[i] != NULL; i++)
         g_free (str_array[i]);
@@ -2543,7 +2543,7 @@ g_strdupv (gchar **str_array)
 {
   if (str_array)
     {
-      gsize i;
+      gint i;
       gchar **retval;
 
       i = 0;
@@ -2597,7 +2597,7 @@ g_strjoinv (const gchar  *separator,
 
   if (*str_array)
     {
-      gsize i;
+      gint i;
       gsize len;
       gsize separator_len;
 
