@@ -929,8 +929,7 @@ test_copy_preserve_mode (void)
 
       dest_mode = g_file_info_get_attribute_uint32 (dest_info, G_FILE_ATTRIBUTE_UNIX_MODE);
 
-      g_assert_cmpint (dest_mode & ~S_IFMT, ==, vectors[i].expected_destination_mode);
-      g_assert_cmpint (dest_mode & S_IFMT, ==, S_IFREG);
+      g_assert_cmpint (dest_mode, ==, vectors[i].expected_destination_mode);
 
       (void) g_file_delete (tmpfile, NULL, NULL);
       (void) g_file_delete (dest_tmpfile, NULL, NULL);
