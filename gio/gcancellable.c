@@ -642,19 +642,20 @@ typedef struct {
   GSource       source;
 
   GCancellable *cancellable;
-  gulong        cancelled_handler;
+  guint         cancelled_handler;
 } GCancellableSource;
 
 /*
- * The reference count of the GSource might be 0 at this point but it is not
- * finalized yet and its dispose function did not run yet, or otherwise we
- * would have disconnected the signal handler already and due to the signal
- * emission lock it would be impossible to call the signal handler at that
- * point. That is: at this point we either have a fully valid GSource, or
- * it's not disposed or finalized yet and we can still resurrect it as needed.
- *
- * As such we first ensure that we have a strong reference to the GSource in
- * here before calling any other GSource API.
+ * We can't guarantee that the source still has references, so we are
+ * relying on the fact that g_source_set_ready_time() no longer makes
+ * assertions about the reference count - the source might be in the
+ * window between last-unref and finalize, during which its refcount
+ * is officially 0. However, we *can* guarantee that it's OK to
+ * dereference it in a limited way, because we know we haven't yet reached
+ * cancellable_source_finalize() - if we had, then we would have waited
+ * for signal emission to finish, then disconnected the signal handler
+ * under the lock.
+ * See https://bugzilla.gnome.org/show_bug.cgi?id=791754
  */
 static void
 cancellable_source_cancelled (GCancellable *cancellable,
@@ -662,9 +663,7 @@ cancellable_source_cancelled (GCancellable *cancellable,
 {
   GSource *source = user_data;
 
-  g_source_ref (source);
   g_source_set_ready_time (source, 0);
-  g_source_unref (source);
 }
 
 static gboolean
@@ -680,15 +679,15 @@ cancellable_source_dispatch (GSource     *source,
 }
 
 static void
-cancellable_source_dispose (GSource *source)
+cancellable_source_finalize (GSource *source)
 {
   GCancellableSource *cancellable_source = (GCancellableSource *)source;
 
   if (cancellable_source->cancellable)
     {
-      g_clear_signal_handler (&cancellable_source->cancelled_handler,
-                              cancellable_source->cancellable);
-      g_clear_object (&cancellable_source->cancellable);
+      g_cancellable_disconnect (cancellable_source->cancellable,
+                                cancellable_source->cancelled_handler);
+      g_object_unref (cancellable_source->cancellable);
     }
 }
 
@@ -721,7 +720,7 @@ static GSourceFuncs cancellable_source_funcs =
   NULL,
   NULL,
   cancellable_source_dispatch,
-  NULL,
+  cancellable_source_finalize,
   (GSourceFunc)cancellable_source_closure_callback,
 };
 
@@ -751,7 +750,6 @@ g_cancellable_source_new (GCancellable *cancellable)
 
   source = g_source_new (&cancellable_source_funcs, sizeof (GCancellableSource));
   g_source_set_name (source, "GCancellable");
-  g_source_set_dispose_function (source, cancellable_source_dispose);
   cancellable_source = (GCancellableSource *)source;
 
   if (cancellable)
