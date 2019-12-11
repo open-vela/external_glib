@@ -62,7 +62,7 @@ def generate_header_guard(header_name):
 class HeaderCodeGenerator:
     def __init__(self, ifaces, namespace, generate_objmanager,
                  generate_autocleanup, header_name, input_files_basenames,
-                 use_pragma, glib_min_version, outfile):
+                 use_pragma, outfile):
         self.ifaces = ifaces
         self.namespace, self.ns_upper, self.ns_lower = generate_namespace(namespace)
         self.generate_objmanager = generate_objmanager
@@ -70,7 +70,6 @@ class HeaderCodeGenerator:
         self.header_guard = generate_header_guard(header_name)
         self.input_files_basenames = input_files_basenames
         self.use_pragma = use_pragma
-        self.glib_min_version = glib_min_version
         self.outfile = outfile
 
     # ----------------------------------------------------------------------------------------------------
@@ -619,13 +618,12 @@ class HeaderCodeGenerator:
 # ----------------------------------------------------------------------------------------------------
 
 class InterfaceInfoHeaderCodeGenerator:
-    def __init__(self, ifaces, namespace, header_name, input_files_basenames, use_pragma, glib_min_version, outfile):
+    def __init__(self, ifaces, namespace, header_name, input_files_basenames, use_pragma, outfile):
         self.ifaces = ifaces
         self.namespace, self.ns_upper, self.ns_lower = generate_namespace(namespace)
         self.header_guard = generate_header_guard(header_name)
         self.input_files_basenames = input_files_basenames
         self.use_pragma = use_pragma
-        self.glib_min_version = glib_min_version
         self.outfile = outfile
 
     # ----------------------------------------------------------------------------------------------------
@@ -673,12 +671,11 @@ class InterfaceInfoHeaderCodeGenerator:
 # ----------------------------------------------------------------------------------------------------
 
 class InterfaceInfoBodyCodeGenerator:
-    def __init__(self, ifaces, namespace, header_name, input_files_basenames, glib_min_version, outfile):
+    def __init__(self, ifaces, namespace, header_name, input_files_basenames, outfile):
         self.ifaces = ifaces
         self.namespace, self.ns_upper, self.ns_lower = generate_namespace(namespace)
         self.header_name = header_name
         self.input_files_basenames = input_files_basenames
-        self.glib_min_version = glib_min_version
         self.outfile = outfile
 
     # ----------------------------------------------------------------------------------------------------
@@ -906,14 +903,13 @@ class InterfaceInfoBodyCodeGenerator:
 
 class CodeGenerator:
     def __init__(self, ifaces, namespace, generate_objmanager, header_name,
-                 input_files_basenames, docbook_gen, glib_min_version, outfile):
+                 input_files_basenames, docbook_gen, outfile):
         self.ifaces = ifaces
         self.namespace, self.ns_upper, self.ns_lower = generate_namespace(namespace)
         self.generate_objmanager = generate_objmanager
         self.header_name = header_name
         self.input_files_basenames = input_files_basenames
         self.docbook_gen = docbook_gen
-        self.glib_min_version = glib_min_version
         self.outfile = outfile
 
     # ----------------------------------------------------------------------------------------------------

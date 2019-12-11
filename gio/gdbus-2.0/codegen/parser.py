@@ -36,7 +36,7 @@ class DBusXMLParser:
     STATE_ANNOTATION = 'annotation'
     STATE_IGNORED = 'ignored'
 
-    def __init__(self, xml_data, h_type_implies_unix_fd=True):
+    def __init__(self, xml_data):
         self._parser = xml.parsers.expat.ParserCreate()
         self._parser.CommentHandler = self.handle_comment
         self._parser.CharacterDataHandler = self.handle_char_data
@@ -52,8 +52,6 @@ class DBusXMLParser:
         self._cur_object_stack = []
 
         self.doc_comment_last_symbol = ''
-
-        self._h_type_implies_unix_fd = h_type_implies_unix_fd
 
         self._parser.Parse(xml_data)
 
@@ -165,8 +163,7 @@ class DBusXMLParser:
         elif self.state == DBusXMLParser.STATE_INTERFACE:
             if name == DBusXMLParser.STATE_METHOD:
                 self.state = DBusXMLParser.STATE_METHOD
-                method = dbustypes.Method(attrs['name'],
-                                          h_type_implies_unix_fd=self._h_type_implies_unix_fd)
+                method = dbustypes.Method(attrs['name'])
                 self._cur_object.methods.append(method)
                 self._cur_object = method
             elif name == DBusXMLParser.STATE_SIGNAL:
@@ -291,6 +288,6 @@ class DBusXMLParser:
         self.state = self.state_stack.pop()
         self._cur_object = self._cur_object_stack.pop()
 
-def parse_dbus_xml(xml_data, h_type_implies_unix_fd):
-    parser = DBusXMLParser(xml_data, h_type_implies_unix_fd)
+def parse_dbus_xml(xml_data):
+    parser = DBusXMLParser(xml_data)
     return parser.parsed_interfaces

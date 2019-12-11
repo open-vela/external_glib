@@ -5726,19 +5726,17 @@ g_dbus_connection_call_done (GObject      *source,
       _g_dbus_debug_print_lock ();
       g_print ("========================================================================\n"
                "GDBus-debug:Call:\n"
-               " <<<< ASYNC COMPLETE %s()",
-               state->method_name);
-
+               " <<<< ASYNC COMPLETE %s() (serial %d)\n"
+               "      ",
+               state->method_name,
+               g_dbus_message_get_reply_serial (reply));
       if (reply != NULL)
         {
-          g_print (" (serial %d)\n"
-                   "      SUCCESS\n",
-                   g_dbus_message_get_reply_serial (reply));
+          g_print ("SUCCESS\n");
         }
       else
         {
-          g_print ("\n"
-                   "      FAILED: %s\n",
+          g_print ("FAILED: %s\n",
                    error->message);
         }
       _g_dbus_debug_print_unlock ();
