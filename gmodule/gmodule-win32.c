@@ -113,7 +113,8 @@ _g_module_self (void)
 }
 
 static void
-_g_module_close (gpointer handle)
+_g_module_close (gpointer handle,
+		 gboolean is_unref)
 {
   if (handle != null_module_handle)
     if (!FreeLibrary (handle))

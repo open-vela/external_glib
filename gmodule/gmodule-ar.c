@@ -141,10 +141,19 @@ _g_module_self (void)
 }
 
 static void
-_g_module_close (gpointer handle)
+_g_module_close (gpointer handle,
+		 gboolean is_unref)
 {
-  if (dlclose (handle) != 0)
-    g_module_set_error (fetch_dlerror (TRUE));
+  /* are there any systems out there that have dlopen()/dlclose()
+   * without a reference count implementation?
+   */
+  is_unref |= 1;
+  
+  if (is_unref)
+    {
+      if (dlclose (handle) != 0)
+	g_module_set_error (fetch_dlerror (TRUE));
+    }
 }
 
 static gpointer
