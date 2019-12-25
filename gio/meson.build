@@ -12,7 +12,7 @@ gnetworking_h_conf = configuration_data()
 
 gnetworking_h_nameser_compat_include = ''
 
-if host_system not in ['windows', 'android']
+if host_system != 'windows' and not host_system.contains('android')
   # Don't check for C_IN on Android since it does not define it in public
   # headers, we define it ourselves wherever necessary
   if not cc.compiles('''#include <sys/types.h>
@@ -148,7 +148,7 @@ if host_system != 'windows'
 
 endif
 
-if host_system == 'android'
+if host_system.contains('android')
   # struct ip_mreq_source definition is broken on Android NDK <= r16
   # See https://bugzilla.gnome.org/show_bug.cgi?id=740791
   if not cc.compiles('''#include <netinet/in.h>
@@ -430,16 +430,12 @@ else
                     cc.find_library('dnsapi'),
                     iphlpapi_dep,
                     winsock2]
-  platform_deps += uwp_gio_deps
-
   win32_sources += files(
     'gwin32registrykey.c',
     'gwin32mount.c',
     'gwin32volumemonitor.c',
     'gwin32inputstream.c',
     'gwin32outputstream.c',
-    'gwin32file-sync-stream.c',
-    'gwin32packageparser.c',
     'gwin32networkmonitor.c',
     'gwin32networkmonitor.h',
     'gwin32notificationbackend.c',

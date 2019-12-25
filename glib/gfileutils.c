@@ -897,12 +897,10 @@ get_contents_posix (const gchar  *filename,
   if (fd < 0)
     {
       int saved_errno = errno;
-
-      if (error)
-        set_file_error (error,
-                        filename,
-                        _("Failed to open file “%s”: %s"),
-                        saved_errno);
+      set_file_error (error,
+                      filename,
+                      _("Failed to open file “%s”: %s"),
+                      saved_errno);
 
       return FALSE;
     }
@@ -911,11 +909,10 @@ get_contents_posix (const gchar  *filename,
   if (fstat (fd, &stat_buf) < 0)
     {
       int saved_errno = errno;
-      if (error)
-        set_file_error (error,
-                        filename,
-                        _("Failed to get attributes of file “%s”: fstat() failed: %s"),
-                        saved_errno);
+      set_file_error (error,
+                      filename,
+                      _("Failed to get attributes of file “%s”: fstat() failed: %s"),
+                      saved_errno);
       close (fd);
 
       return FALSE;
@@ -942,11 +939,10 @@ get_contents_posix (const gchar  *filename,
       if (f == NULL)
         {
           int saved_errno = errno;
-          if (error)
-            set_file_error (error,
-                            filename,
-                            _("Failed to open file “%s”: fdopen() failed: %s"),
-                            saved_errno);
+          set_file_error (error,
+                          filename,
+                          _("Failed to open file “%s”: fdopen() failed: %s"),
+                          saved_errno);
 
           return FALSE;
         }
@@ -973,11 +969,10 @@ get_contents_win32 (const gchar  *filename,
   if (f == NULL)
     {
       int saved_errno = errno;
-      if (error)
-        set_file_error (error,
-                        filename,
-                        _("Failed to open file “%s”: %s"),
-                        saved_errno);
+      set_file_error (error,
+                      filename,
+                      _("Failed to open file “%s”: %s"),
+                      saved_errno);
 
       return FALSE;
     }
@@ -1170,10 +1165,9 @@ write_to_file (const gchar  *contents,
           if (saved_errno == EINTR)
             continue;
 
-          if (err)
-            set_file_error (err,
-                            dest_file, _("Failed to write file “%s”: write() failed: %s"),
-                            saved_errno);
+          set_file_error (err,
+                          dest_file, _("Failed to write file “%s”: write() failed: %s"),
+                          saved_errno);
           close (fd);
 
           return FALSE;
@@ -1191,10 +1185,9 @@ write_to_file (const gchar  *contents,
   if (do_fsync && g_fsync (fd) != 0)
     {
       int saved_errno = errno;
-      if (err)
-        set_file_error (err,
-                        dest_file, _("Failed to write file “%s”: fsync() failed: %s"),
-                        saved_errno);
+      set_file_error (err,
+                      dest_file, _("Failed to write file “%s”: fsync() failed: %s"),
+                      saved_errno);
       close (fd);
 
       return FALSE;
@@ -1360,10 +1353,9 @@ g_file_set_contents_full (const gchar            *filename,
       if (fd == -1)
         {
           int saved_errno = errno;
-          if (error)
-            set_file_error (error,
-                            tmp_filename, _("Failed to create file “%s”: %s"),
-                            saved_errno);
+          set_file_error (error,
+                          tmp_filename, _("Failed to create file “%s”: %s"),
+                          saved_errno);
           retval = FALSE;
           goto consistent_out;
         }
@@ -1404,11 +1396,10 @@ g_file_set_contents_full (const gchar            *filename,
           if (g_unlink (filename) == -1)
             {
               int saved_errno = errno;
-              if (error)
-                set_file_error (error,
-                                filename,
-                                _("Existing file “%s” could not be removed: g_unlink() failed: %s"),
-                                saved_errno);
+              set_file_error (error,
+                              filename,
+                              _("Existing file “%s” could not be removed: g_unlink() failed: %s"),
+                              saved_errno);
               g_unlink (tmp_filename);
               retval = FALSE;
               goto consistent_out;
@@ -1471,10 +1462,9 @@ consistent_out:
                                              mode, error);
 #endif  /* O_NOFOLLOW */
 
-          if (error)
-            set_file_error (error,
-                            filename, _("Failed to open file “%s”: %s"),
-                            saved_errno);
+          set_file_error (error,
+                          filename, _("Failed to open file “%s”: %s"),
+                          saved_errno);
           return FALSE;
         }
 
@@ -1774,11 +1764,10 @@ g_get_tmp_name (const gchar      *tmpl,
   if (retval == -1)
     {
       int saved_errno = errno;
-      if (error)
-        set_file_error (error,
-                        fulltemplate,
-                        _("Failed to create file “%s”: %s"),
-                        saved_errno);
+      set_file_error (error,
+                      fulltemplate,
+                      _("Failed to create file “%s”: %s"),
+                      saved_errno);
       g_free (fulltemplate);
       return -1;
     }
@@ -2312,11 +2301,10 @@ g_file_read_link (const gchar  *filename,
       if (read_size < 0)
         {
           int saved_errno = errno;
-          if (error)
-            set_file_error (error,
-                            filename,
-                            _("Failed to read the symbolic link “%s”: %s"),
-                            saved_errno);
+          set_file_error (error,
+                          filename,
+                          _("Failed to read the symbolic link “%s”: %s"),
+                          saved_errno);
           g_free (buffer);
           return NULL;
         }
@@ -2341,11 +2329,10 @@ g_file_read_link (const gchar  *filename,
   if (read_size < 0)
     {
       int saved_errno = errno;
-      if (error)
-        set_file_error (error,
-                        filename,
-                        _("Failed to read the symbolic link “%s”: %s"),
-                        saved_errno);
+      set_file_error (error,
+                      filename,
+                      _("Failed to read the symbolic link “%s”: %s"),
+                      saved_errno);
       return NULL;
     }
   else if (read_size == 0)

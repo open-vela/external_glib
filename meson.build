@@ -94,7 +94,7 @@ installed_tests_template = files('template.test.in')
 installed_tests_template_tap = files('template-tap.test.in')
 
 # Don’t build the tests unless we can run them (either natively, in an exe wrapper, or by installing them for later use)
-build_tests = get_option('tests') and (not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper()) or installed_tests_enabled)
+build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper()) or installed_tests_enabled
 
 add_project_arguments('-D_GNU_SOURCE', language: 'c')
 
@@ -275,7 +275,6 @@ headers = [
   'pwd.h',
   'sched.h',
   'spawn.h',
-  'stdatomic.h',
   'stdint.h',
   'stdlib.h',
   'string.h',
@@ -467,12 +466,9 @@ if host_system == 'windows'
     glib_conf.set('G_WINAPI_ONLY_APP', true)
     # We require Windows 10+ on WinRT
     glib_conf.set('_WIN32_WINNT', '0x0A00')
-    uwp_gio_deps = [cc.find_library('shcore'),
-                    cc.find_library('runtimeobject')]
   else
     # We require Windows 7+ on Win32
     glib_conf.set('_WIN32_WINNT', '0x0601')
-    uwp_gio_deps = []
   endif
 endif
 
@@ -609,7 +605,7 @@ endif
 # When building for Android-20 and earlier, require Meson 0.54.2 or newer.
 # This is needed, because Meson build versions prior to 0.54.2 return false
 # positive for stpcpy has_function check when building for legacy Android.
-if host_system == 'android'
+if host_system.startswith('android-')
     android_is_older = cc.compiles('''#if __ANDROID_API__ >= 21
                                         #error Android is 21 or newer
                                     #endif''')
@@ -1274,7 +1270,7 @@ sizet_size = cc.sizeof('size_t')
 if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
   ssizet_size = cc.sizeof('SSIZE_T', prefix : '#include <BaseTsd.h>')
 else
-  ssizet_size = cc.sizeof('ssize_t', prefix : '#include <unistd.h>')
+  ssizet_size = cc.sizeof('ssize_t')
 endif
 
 # Some platforms (Apple) hard-code int64_t to long long instead of

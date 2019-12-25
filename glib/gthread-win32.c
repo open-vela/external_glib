@@ -580,8 +580,7 @@ SetThreadName (DWORD  dwThreadID,
 #ifdef _MSC_VER
    __try
      {
-       RaiseException (EXCEPTION_SET_THREAD_NAME, 0, infosize,
-                       (const ULONG_PTR *) &info);
+       RaiseException (EXCEPTION_SET_THREAD_NAME, 0, infosize, (DWORD *) &info);
      }
    __except (EXCEPTION_EXECUTE_HANDLER)
      {
