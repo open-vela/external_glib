@@ -1395,14 +1395,10 @@ g_logv (const gchar   *log_domain,
 #if defined(G_OS_WIN32) && (defined(_DEBUG) || !defined(G_WINAPI_ONLY_APP))
               if (win32_keep_fatal_message)
                 {
-                  WCHAR *wide_msg;
+                  gchar *locale_msg = g_locale_from_utf8 (fatal_msg_buf, -1, NULL, NULL, NULL);
 
-                  wide_msg = g_utf8_to_utf16 (fatal_msg_buf, -1, NULL, NULL, NULL);
-
-                  MessageBoxW (NULL, wide_msg, NULL,
-                               MB_ICONERROR | MB_SETFOREGROUND);
-
-                  g_free (wide_msg);
+                  MessageBox (NULL, locale_msg, NULL,
+                              MB_ICONERROR|MB_SETFOREGROUND);
                 }
 #endif
 
@@ -2793,13 +2789,12 @@ handled:
 #if defined(G_OS_WIN32) && (defined(_DEBUG) || !defined(G_WINAPI_ONLY_APP))
       if (!g_test_initialized ())
         {
-          WCHAR *wide_msg;
+          gchar *locale_msg = NULL;
 
-          wide_msg = g_utf8_to_utf16 (fatal_msg_buf, -1, NULL, NULL, NULL);
-
-          MessageBoxW (NULL, wide_msg, NULL, MB_ICONERROR | MB_SETFOREGROUND);
-
-          g_free (wide_msg);
+          locale_msg = g_locale_from_utf8 (fatal_msg_buf, -1, NULL, NULL, NULL);
+          MessageBox (NULL, locale_msg, NULL,
+                      MB_ICONERROR | MB_SETFOREGROUND);
+          g_free (locale_msg);
         }
 #endif /* !G_OS_WIN32 */
 

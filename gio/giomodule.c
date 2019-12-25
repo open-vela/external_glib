@@ -477,7 +477,9 @@ g_io_modules_scan_all_in_directory_with_scope (const char     *dirname,
 
   filename = g_build_filename (dirname, "giomodule.cache", NULL);
 
-  cache = NULL;
+  cache = g_hash_table_new_full (g_str_hash, g_str_equal,
+				 g_free, (GDestroyNotify)g_strfreev);
+
   cache_time = 0;
   if (g_stat (filename, &statbuf) == 0 &&
       g_file_get_contents (filename, &data, NULL, NULL))
@@ -521,10 +523,6 @@ g_io_modules_scan_all_in_directory_with_scope (const char     *dirname,
 	  while (g_ascii_isspace (*colon))
 	    colon++;
 
-          if (G_UNLIKELY (!cache))
-            cache = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                           g_free, (GDestroyNotify)g_strfreev);
-
 	  extension_points = g_strsplit (colon, ",", -1);
 	  g_hash_table_insert (cache, file, extension_points);
 	}
@@ -538,15 +536,13 @@ g_io_modules_scan_all_in_directory_with_scope (const char     *dirname,
 	  GIOExtensionPoint *extension_point;
 	  GIOModule *module;
 	  gchar *path;
-	  char **extension_points = NULL;
+	  char **extension_points;
 	  int i;
 
 	  path = g_build_filename (dirname, name, NULL);
 	  module = g_io_module_new (path);
 
-          if (cache)
-            extension_points = g_hash_table_lookup (cache, name);
-
+	  extension_points = g_hash_table_lookup (cache, name);
 	  if (extension_points != NULL &&
 	      g_stat (path, &statbuf) == 0 &&
 	      statbuf.st_ctime <= cache_time)
@@ -581,8 +577,7 @@ g_io_modules_scan_all_in_directory_with_scope (const char     *dirname,
 
   g_dir_close (dir);
 
-  if (cache)
-    g_hash_table_destroy (cache);
+  g_hash_table_destroy (cache);
 
   g_free (filename);
 }
