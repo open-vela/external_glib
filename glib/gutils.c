@@ -681,7 +681,7 @@ g_get_user_database_entry (void)
             e.user_name = g_strdup (pw->pw_name);
 
 #ifndef __BIONIC__
-            if (pw->pw_gecos && *pw->pw_gecos != '\0' && pw->pw_name)
+            if (pw->pw_gecos && *pw->pw_gecos != '\0')
               {
                 gchar **gecos_fields;
                 gchar **name_parts;
