@@ -21,8 +21,6 @@
 #ifndef __G_THREADPRIVATE_H__
 #define __G_THREADPRIVATE_H__
 
-#include "config.h"
-
 #include "deprecated/gthread.h"
 
 typedef struct _GRealThread GRealThread;
@@ -42,8 +40,7 @@ struct  _GRealThread
 typedef struct _GThreadSchedulerSettings GThreadSchedulerSettings;
 
 /* TODO: Add the same for macOS and the BSDs */
-#if defined(HAVE_SYS_SCHED_GETATTR)
-/* This is for modern Linux */
+#if defined(__linux__)
 struct _GThreadSchedulerSettings
 {
   struct sched_attr *attr;
