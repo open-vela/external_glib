@@ -366,12 +366,7 @@ request_name_cb (GObject      *source_object,
         connection = g_object_ref (client->connection);
       G_UNLOCK (lock);
 
-      /* Start listening to NameLost and NameAcquired messages. We hold
-       * references to the Client in the signal closures, since it’s possible
-       * for a signal to be in-flight after unsubscribing the signal handler.
-       * This creates a reference count cycle, but that’s explicitly broken by
-       * disconnecting the signal handlers before calling client_unref() in
-       * g_bus_unown_name(). */
+      /* start listening to NameLost and NameAcquired messages */
       if (connection != NULL)
         {
           client->name_lost_subscription_id =
@@ -383,8 +378,8 @@ request_name_cb (GObject      *source_object,
                                                 client->name,
                                                 G_DBUS_SIGNAL_FLAGS_NONE,
                                                 on_name_lost_or_acquired,
-                                                client_ref (client),
-                                                (GDestroyNotify) client_unref);
+                                                client,
+                                                NULL);
           client->name_acquired_subscription_id =
             g_dbus_connection_signal_subscribe (connection,
                                                 "org.freedesktop.DBus",
@@ -394,8 +389,8 @@ request_name_cb (GObject      *source_object,
                                                 client->name,
                                                 G_DBUS_SIGNAL_FLAGS_NONE,
                                                 on_name_lost_or_acquired,
-                                                client_ref (client),
-                                                (GDestroyNotify) client_unref);
+                                                client,
+                                                NULL);
           g_object_unref (connection);
         }
     }
