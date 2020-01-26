@@ -18,11 +18,11 @@ test_basic_for_file (GFile       *file,
   g_free (s);
 
   s = g_file_get_uri (file);
-  g_assert_true (g_str_has_prefix (s, "file://"));
-  g_assert_true (g_str_has_suffix (s, suffix));
+  g_assert (g_str_has_prefix (s, "file://"));
+  g_assert (g_str_has_suffix (s, suffix));
   g_free (s);
 
-  g_assert_true (g_file_has_uri_scheme (file, "file"));
+  g_assert (g_file_has_uri_scheme (file, "file"));
   s = g_file_get_uri_scheme (file);
   g_assert_cmpstr (s, ==, "file");
   g_free (s);
@@ -64,13 +64,13 @@ test_parent (void)
   file2 = g_file_new_for_path ("./some/directory");
   root = g_file_new_for_path ("/");
 
-  g_assert_true (g_file_has_parent (file, file2));
+  g_assert (g_file_has_parent (file, file2));
 
   parent = g_file_get_parent (file);
-  g_assert_true (g_file_equal (parent, file2));
+  g_assert (g_file_equal (parent, file2));
   g_object_unref (parent);
 
-  g_assert_null (g_file_get_parent (root));
+  g_assert (g_file_get_parent (root) == NULL);
 
   g_object_unref (file);
   g_object_unref (file2);
@@ -86,10 +86,10 @@ test_child (void)
 
   file = g_file_new_for_path ("./some/directory");
   child = g_file_get_child (file, "child");
-  g_assert_true (g_file_has_parent (child, file));
+  g_assert (g_file_has_parent (child, file));
 
   child2 = g_file_get_child_for_display_name (file, "child2", NULL);
-  g_assert_true (g_file_has_parent (child2, file));
+  g_assert (g_file_has_parent (child2, file));
 
   g_object_unref (child);
   g_object_unref (child2);
@@ -137,18 +137,18 @@ test_parse_name (void)
 
   file = g_file_parse_name ("~foo");
   name = g_file_get_parse_name (file);
-  g_assert_nonnull (name);
+  g_assert (name != NULL);
   g_object_unref (file);
   g_free (name);
 }
 
 typedef struct
 {
-  GMainContext *context;
   GFile *file;
   GFileMonitor *monitor;
   GOutputStream *ostream;
   GInputStream *istream;
+  GMainLoop *loop;
   gint buffersize;
   gint monitor_created;
   gint monitor_deleted;
@@ -158,8 +158,6 @@ typedef struct
   const gchar *data;
   gchar *buffer;
   guint timeout;
-  gboolean file_deleted;
-  gboolean timed_out;
 } CreateDeleteData;
 
 static void
@@ -185,8 +183,18 @@ monitor_changed (GFileMonitor      *monitor,
     data->monitor_deleted++;
   if (event_type == G_FILE_MONITOR_EVENT_CHANGED)
     data->monitor_changed++;
+}
 
-  g_main_context_wakeup (data->context);
+
+static gboolean
+quit_idle (gpointer user_data)
+{
+  CreateDeleteData *data = user_data;
+
+  g_source_remove (data->timeout); 
+  g_main_loop_quit (data->loop);
+
+  return FALSE;
 }
 
 static void
@@ -201,16 +209,19 @@ iclosed_cb (GObject      *source,
   error = NULL;
   ret = g_input_stream_close_finish (data->istream, res, &error);
   g_assert_no_error (error);
-  g_assert_true (ret);
+  g_assert (ret);
 
-  g_assert_true (g_input_stream_is_closed (data->istream));
+  g_assert (g_input_stream_is_closed (data->istream));
 
   ret = g_file_delete (data->file, NULL, &error);
-  g_assert_true (ret);
+  g_assert (ret);
   g_assert_no_error (error);
 
-  data->file_deleted = TRUE;
-  g_main_context_wakeup (data->context);
+  /* work around file monitor bug:
+   * inotify events are only processed every 1000 ms, regardless
+   * of the rate limit set on the file monitor
+   */
+  g_timeout_add (2000, quit_idle, data);
 }
 
 static void
@@ -240,7 +251,7 @@ read_cb (GObject      *source,
   else
     {
       g_assert_cmpstr (data->buffer, ==, data->data);
-      g_assert_false (g_input_stream_is_closed (data->istream));
+      g_assert (!g_input_stream_is_closed (data->istream));
       g_input_stream_close_async (data->istream, 0, NULL, iclosed_cb, data);
     }
 }
@@ -335,8 +346,8 @@ oclosed_cb (GObject      *source,
   error = NULL;
   ret = g_output_stream_close_finish (data->ostream, res, &error);
   g_assert_no_error (error);
-  g_assert_true (ret);
-  g_assert_true (g_output_stream_is_closed (data->ostream));
+  g_assert (ret);
+  g_assert (g_output_stream_is_closed (data->ostream));
 
   g_file_read_async (data->file, 0, NULL, opened_cb, data);
 }
@@ -367,7 +378,7 @@ written_cb (GObject      *source,
     }
   else
     {
-      g_assert_false (g_output_stream_is_closed (data->ostream));
+      g_assert (!g_output_stream_is_closed (data->ostream));
       g_output_stream_close_async (data->ostream, 0, NULL, oclosed_cb, data);
     }
 }
@@ -398,7 +409,7 @@ created_cb (GObject      *source,
   error = NULL;
   base = g_file_create_finish (G_FILE (source), res, &error);
   g_assert_no_error (error);
-  g_assert_true (g_file_query_exists (data->file, NULL));
+  g_assert (g_file_query_exists  (data->file, NULL));
 
   if (data->buffersize == 0)
     data->ostream = G_OUTPUT_STREAM (g_object_ref (base));
@@ -424,14 +435,11 @@ created_cb (GObject      *source,
 }
 
 static gboolean
-stop_timeout (gpointer user_data)
+stop_timeout (gpointer data)
 {
-  CreateDeleteData *data = user_data;
+  g_assert_not_reached ();
 
-  data->timed_out = TRUE;
-  g_main_context_wakeup (data->context);
-
-  return G_SOURCE_REMOVE;
+  return FALSE;
 }
 
 /*
@@ -453,13 +461,13 @@ test_create_delete (gconstpointer d)
 
   data->file = g_file_new_tmp ("g_file_create_delete_XXXXXX",
 			       &iostream, NULL);
-  g_assert_nonnull (data->file);
+  g_assert (data->file != NULL);
   g_object_unref (iostream);
 
   data->monitor_path = g_file_get_path (data->file);
   remove (data->monitor_path);
 
-  g_assert_false (g_file_query_exists (data->file, NULL));
+  g_assert (!g_file_query_exists  (data->file, NULL));
 
   error = NULL;
   data->monitor = g_file_monitor_file (data->file, 0, NULL, &error);
@@ -487,32 +495,23 @@ test_create_delete (gconstpointer d)
 
   g_signal_connect (data->monitor, "changed", G_CALLBACK (monitor_changed), data);
 
-  /* Use the global default main context */
-  data->context = NULL;
-  data->timeout = g_timeout_add_seconds (10, stop_timeout, data);
+  data->loop = g_main_loop_new (NULL, FALSE);
+
+  data->timeout = g_timeout_add (10000, stop_timeout, NULL);
 
   g_file_create_async (data->file, 0, 0, NULL, created_cb, data);
 
-  while (!data->timed_out &&
-         (data->monitor_created == 0 ||
-          data->monitor_deleted == 0 ||
-          data->monitor_changed == 0 ||
-          !data->file_deleted))
-    g_main_context_iteration (data->context, TRUE);
+  g_main_loop_run (data->loop);
 
-  g_source_remove (data->timeout);
-
-  g_assert_false (data->timed_out);
-  g_assert_true (data->file_deleted);
   g_assert_cmpint (data->monitor_created, ==, 1);
   g_assert_cmpint (data->monitor_deleted, ==, 1);
   g_assert_cmpint (data->monitor_changed, >, 0);
 
-  g_assert_false (g_file_monitor_is_cancelled (data->monitor));
+  g_assert (!g_file_monitor_is_cancelled (data->monitor));
   g_file_monitor_cancel (data->monitor);
-  g_assert_true (g_file_monitor_is_cancelled (data->monitor));
+  g_assert (g_file_monitor_is_cancelled (data->monitor));
 
-  g_clear_pointer (&data->context, g_main_context_unref);
+  g_main_loop_unref (data->loop);
   g_object_unref (data->ostream);
   g_object_unref (data->istream);
 
@@ -583,7 +582,7 @@ loaded_cb (GObject      *source,
 
   error = NULL;
   ret = g_file_load_contents_finish (data->file, res, &contents, &length, NULL, &error);
-  g_assert_true (ret);
+  g_assert (ret);
   g_assert_no_error (error);
   g_assert_cmpint (length, ==, strlen (data->data));
   g_assert_cmpstr (contents, ==, data->data);
@@ -610,8 +609,8 @@ loaded_cb (GObject      *source,
        error = NULL;
        ret = g_file_delete (data->file, NULL, &error);
        g_assert_no_error (error);
-       g_assert_true (ret);
-       g_assert_false (g_file_query_exists (data->file, NULL));
+       g_assert (ret);
+       g_assert (!g_file_query_exists (data->file, NULL));
 
        g_main_loop_quit (data->loop);
     }
@@ -645,13 +644,13 @@ test_replace_load (void)
 
   data->file = g_file_new_tmp ("g_file_replace_load_XXXXXX",
 			       &iostream, NULL);
-  g_assert_nonnull (data->file);
+  g_assert (data->file != NULL);
   g_object_unref (iostream);
 
   path = g_file_peek_path (data->file);
   remove (path);
 
-  g_assert_false (g_file_query_exists (data->file, NULL));
+  g_assert (!g_file_query_exists (data->file, NULL));
 
   data->loop = g_main_loop_new (NULL, FALSE);
 
@@ -718,11 +717,11 @@ test_replace_cancel (void)
 
   info = g_file_enumerator_next_file (fenum, NULL, &error);
   g_assert_no_error (error);
-  g_assert_nonnull (info);
+  g_assert (info != NULL);
   g_object_unref (info);
   info = g_file_enumerator_next_file (fenum, NULL, &error);
   g_assert_no_error (error);
-  g_assert_nonnull (info);
+  g_assert (info != NULL);
   g_object_unref (info);
 
   g_file_enumerator_close (fenum, NULL, &error);
@@ -737,7 +736,7 @@ test_replace_cancel (void)
   while (TRUE)
     {
       gboolean ret = g_file_enumerator_iterate (fenum, &info, NULL, NULL, &error);
-      g_assert_true (ret);
+      g_assert (ret);
       g_assert_no_error (error);
       if (!info)
         break;
@@ -759,13 +758,13 @@ test_replace_cancel (void)
       GFile *child;
       gboolean ret = g_file_enumerator_iterate (fenum, NULL, &child, NULL, &error);
 
-      g_assert_true (ret);
+      g_assert (ret);
       g_assert_no_error (error);
 
       if (!child)
         break;
 
-      g_assert_true (G_IS_FILE (child));
+      g_assert (G_IS_FILE (child));
       count++;
     }
   g_assert_cmpint (count, ==, 2);
@@ -833,7 +832,7 @@ test_async_delete (void)
   g_assert_no_error (local_error);
   g_object_unref (iostream);
 
-  g_assert_true (g_file_query_exists (file, NULL));
+  g_assert (g_file_query_exists (file, NULL));
 
   loop = g_main_loop_new (NULL, TRUE);
 
@@ -841,7 +840,7 @@ test_async_delete (void)
 
   g_main_loop_run (loop);
 
-  g_assert_false (g_file_query_exists (file, NULL));
+  g_assert (!g_file_query_exists (file, NULL));
 
   g_main_loop_unref (loop);
   g_object_unref (file);
@@ -1035,7 +1034,7 @@ test_measure (void)
                                   &num_dirs,
                                   &num_files,
                                   &error);
-  g_assert_true (ok);
+  g_assert (ok);
   g_assert_no_error (error);
 
   if (size > 0)
@@ -1088,7 +1087,7 @@ measure_done (GObject      *source,
   gboolean ok;
 
   ok = g_file_measure_disk_usage_finish (G_FILE (source), res, &num_bytes, &num_dirs, &num_files, &error);
-  g_assert_true (ok);
+  g_assert (ok);
   g_assert_no_error (error);
 
   if (data->expected_bytes > 0)
@@ -1161,7 +1160,7 @@ test_load_bytes (void)
   file = g_file_new_for_path (filename);
   bytes = g_file_load_bytes (file, NULL, NULL, &error);
   g_assert_no_error (error);
-  g_assert_nonnull (bytes);
+  g_assert (bytes != NULL);
   g_assert_cmpint (len, ==, g_bytes_get_size (bytes));
   g_assert_cmpstr ("test_load_bytes", ==, (gchar *)g_bytes_get_data (bytes, NULL));
 
@@ -1189,7 +1188,7 @@ test_load_bytes_cb (GObject      *object,
 
   data->bytes = g_file_load_bytes_finish (file, result, NULL, &error);
   g_assert_no_error (error);
-  g_assert_nonnull (data->bytes);
+  g_assert (data->bytes != NULL);
 
   g_main_loop_quit (data->main_loop);
 }

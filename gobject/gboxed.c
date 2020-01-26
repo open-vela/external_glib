@@ -256,7 +256,8 @@ boxed_proxy_lcopy_value (const GValue *value,
 {
   gpointer *boxed_p = collect_values[0].v_pointer;
 
-  g_return_val_if_fail (boxed_p != NULL, g_strdup_printf ("value location for '%s' passed as NULL", G_VALUE_TYPE_NAME (value)));
+  if (!boxed_p)
+    return g_strdup_printf ("value location for '%s' passed as NULL", G_VALUE_TYPE_NAME (value));
 
   if (!value->data[0].v_pointer)
     *boxed_p = NULL;
