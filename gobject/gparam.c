@@ -871,7 +871,8 @@ value_param_lcopy_value (const GValue *value,
 {
   GParamSpec **param_p = collect_values[0].v_pointer;
 
-  g_return_val_if_fail (param_p != NULL, g_strdup_printf ("value location for '%s' passed as NULL", G_VALUE_TYPE_NAME (value)));
+  if (!param_p)
+    return g_strdup_printf ("value location for '%s' passed as NULL", G_VALUE_TYPE_NAME (value));
 
   if (!value->data[0].v_pointer)
     *param_p = NULL;
