@@ -119,7 +119,7 @@ struct _GMarkupParseContext
 {
   const GMarkupParser *parser;
 
-  gint ref_count;  /* (atomic) */
+  volatile gint ref_count;
 
   GMarkupParseFlags flags;
 

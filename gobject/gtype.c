@@ -221,9 +221,9 @@ typedef enum
 /* --- structures --- */
 struct _TypeNode
 {
-  guint        ref_count;  /* (atomic) */
+  guint volatile ref_count;
 #ifdef G_ENABLE_DEBUG
-  guint        instance_count;  /* (atomic) */
+  guint volatile instance_count;
 #endif
   GTypePlugin *plugin;
   guint        n_children; /* writable with lock */
@@ -233,7 +233,7 @@ struct _TypeNode
   guint        is_instantiatable : 1;
   guint        mutatable_check_cache : 1;	/* combines some common path checks */
   GType       *children; /* writable with lock */
-  TypeData    *data;
+  TypeData * volatile data;
   GQuark       qname;
   GData       *global_gdata;
   union {
@@ -286,7 +286,7 @@ struct _IFaceEntry
 };
 
 struct _IFaceEntries {
-  gsize offset_index;
+  guint offset_index;
   IFaceEntry entry[1];
 };
 
@@ -322,7 +322,7 @@ struct _ClassData
   CommonData         common;
   guint16            class_size;
   guint16            class_private_size;
-  int                init_state;  /* (atomic) - g_type_class_ref reads it unlocked */
+  int volatile       init_state; /* atomic - g_type_class_ref reads it unlocked */
   GBaseInitFunc      class_init_base;
   GBaseFinalizeFunc  class_finalize_base;
   GClassInitFunc     class_init;
@@ -336,7 +336,7 @@ struct _InstanceData
   CommonData         common;
   guint16            class_size;
   guint16            class_private_size;
-  int                init_state;  /* (atomic) - g_type_class_ref reads it unlocked */
+  int volatile       init_state; /* atomic - g_type_class_ref reads it unlocked */
   GBaseInitFunc      class_init_base;
   GBaseFinalizeFunc  class_finalize_base;
   GClassInitFunc     class_init;
@@ -442,10 +442,6 @@ type_node_any_new_W (TypeNode             *pnode,
       node = G_STRUCT_MEMBER_P (node, SIZEOF_FUNDAMENTAL_INFO);
       static_fundamental_type_nodes[ftype >> G_TYPE_FUNDAMENTAL_SHIFT] = node;
       type = ftype;
-
-#if ENABLE_VALGRIND
-      VALGRIND_MALLOCLIKE_BLOCK (node, node_size - SIZEOF_FUNDAMENTAL_INFO, FALSE, TRUE);
-#endif
     }
   else
     type = (GType) node;
@@ -573,13 +569,13 @@ type_node_new_W (TypeNode    *pnode,
 }
 
 static inline IFaceEntry*
-lookup_iface_entry_I (IFaceEntries *entries,
-                      TypeNode     *iface_node)
+lookup_iface_entry_I (volatile IFaceEntries *entries,
+		      TypeNode *iface_node)
 {
   guint8 *offsets;
-  gsize offset_index;
+  guint offset_index;
   IFaceEntry *check;
-  gsize index;
+  int index;
   IFaceEntry *entry;
 
   if (entries == NULL)
@@ -1280,7 +1276,7 @@ type_data_ref_U (TypeNode *node)
 
 static gboolean
 iface_node_has_available_offset_L (TypeNode *iface_node,
-				   gsize offset,
+				   int offset,
 				   int for_index)
 {
   guint8 *offsets;
@@ -1299,29 +1295,27 @@ iface_node_has_available_offset_L (TypeNode *iface_node,
   return FALSE;
 }
 
-static gsize
+static int
 find_free_iface_offset_L (IFaceEntries *entries)
 {
   IFaceEntry *entry;
   TypeNode *iface_node;
-  gsize offset;
+  int offset;
   int i;
   int n_entries;
 
   n_entries = IFACE_ENTRIES_N_ENTRIES (entries);
-  offset = 0;
+  offset = -1;
   do
     {
+      offset++;
       for (i = 0; i < n_entries; i++)
 	{
 	  entry = &entries->entry[i];
 	  iface_node = lookup_type_node_I (entry->iface_type);
 
 	  if (!iface_node_has_available_offset_L (iface_node, offset, i))
-            {
-              offset++;
-              break;
-            }
+	    break;
 	}
     }
   while (i != n_entries);
@@ -1331,12 +1325,12 @@ find_free_iface_offset_L (IFaceEntries *entries)
 
 static void
 iface_node_set_offset_L (TypeNode *iface_node,
-			 gsize offset,
+			 int offset,
 			 int index)
 {
   guint8 *offsets, *old_offsets;
-  gsize new_size, old_size;
-  gsize i;
+  int new_size, old_size;
+  int i;
 
   old_offsets = G_ATOMIC_ARRAY_GET_LOCKED (&iface_node->_prot.offsets, guint8);
   if (old_offsets == NULL)
@@ -1371,7 +1365,7 @@ type_node_add_iface_entry_W (TypeNode   *node,
   IFaceEntry *entry;
   TypeNode *iface_node;
   guint i, j;
-  guint num_entries;
+  int num_entries;
 
   g_assert (node->is_instantiatable);
 
@@ -1421,7 +1415,7 @@ type_node_add_iface_entry_W (TypeNode   *node,
 
   if (parent_entry)
     {
-      if (node->data && g_atomic_int_get (&node->data->class.init_state) >= BASE_IFACE_INIT)
+      if (node->data && node->data->class.init_state >= BASE_IFACE_INIT)
         {
           entries->entry[i].init_state = INITIALIZED;
           entries->entry[i].vtable = parent_entry->vtable;
@@ -1487,7 +1481,7 @@ type_add_interface_Wm (TypeNode             *node,
    */
   if (node->data)
     {
-      InitState class_state = g_atomic_int_get (&node->data->class.init_state);
+      InitState class_state = node->data->class.init_state;
       
       if (class_state >= BASE_IFACE_INIT)
         type_iface_vtable_base_init_Wm (iface, node);
@@ -1610,7 +1604,7 @@ g_type_interface_add_prerequisite (GType interface_type,
 	    }
 	}
       
-      for (i = 0; i < prerequisite_node->n_supers + 1u; i++)
+      for (i = 0; i < prerequisite_node->n_supers + 1; i++)
 	type_iface_add_prerequisite_W (iface, lookup_type_node_I (prerequisite_node->supers[i]));
       G_WRITE_UNLOCK (&type_rw_lock);
     }
@@ -2181,7 +2175,7 @@ type_class_init_Wm (TypeNode   *node,
   g_assert (node->is_classed && node->data &&
 	    node->data->class.class_size &&
 	    !node->data->class.class &&
-	    g_atomic_int_get (&node->data->class.init_state) == UNINITIALIZED);
+	    node->data->class.init_state == UNINITIALIZED);
   if (node->data->class.class_private_size)
     class = g_malloc0 (ALIGN_STRUCT (node->data->class.class_size) + node->data->class.class_private_size);
   else
@@ -2296,7 +2290,7 @@ type_class_init_Wm (TypeNode   *node,
    * inherited interfaces are already init_state == INITIALIZED, because
    * they either got setup in the above base_init loop, or during
    * class_init from within type_add_interface_Wm() for this or
-   * an ancestor type.
+   * an anchestor type.
    */
   i = 0;
   while ((entries = CLASSED_NODE_IFACES_ENTRIES_LOCKED (node)) != NULL)
@@ -3468,7 +3462,7 @@ g_type_depth (GType type)
  * be used to determine the types and order in which the leaf type is
  * descended from the root type.
  *
- * Returns: immediate child of @root_type and ancestor of @leaf_type
+ * Returns: immediate child of @root_type and anchestor of @leaf_type
  */
 GType
 g_type_next_base (GType type,
@@ -3555,8 +3549,8 @@ type_node_conforms_to_U (TypeNode *node,
 
 /**
  * g_type_is_a:
- * @type: type to check ancestry for
- * @is_a_type: possible ancestor of @type or interface that @type
+ * @type: type to check anchestry for
+ * @is_a_type: possible anchestor of @type or interface that @type
  *     could conform to
  *
  * If @is_a_type is a derivable type, check whether @type is a

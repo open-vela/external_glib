@@ -1362,7 +1362,7 @@ struct _GHashTable
 
   GHashFunc        hash_func;
   GEqualFunc       key_equal_func;
-  gint             ref_count;  /* (atomic) */
+  volatile gint    ref_count;
 
 #ifndef G_DISABLE_ASSERT
   int              version;

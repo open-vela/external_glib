@@ -908,7 +908,6 @@ gio_tool_sources = [
   'gio-tool-cat.c',
   'gio-tool-copy.c',
   'gio-tool-info.c',
-  'gio-tool-launch.c',
   'gio-tool-list.c',
   'gio-tool-mime.c',
   'gio-tool-mkdir.c',

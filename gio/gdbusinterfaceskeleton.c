@@ -458,7 +458,7 @@ dbus_interface_interface_init (GDBusInterfaceIface *iface)
 
 typedef struct
 {
-  gint ref_count;  /* (atomic) */
+  volatile gint ref_count;
   GDBusInterfaceSkeleton       *interface;
   GDBusInterfaceMethodCallFunc  method_call_func;
   GDBusMethodInvocation        *invocation;

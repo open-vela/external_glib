@@ -108,14 +108,10 @@ GType                 g_binding_get_type            (void) G_GNUC_CONST;
 
 GLIB_AVAILABLE_IN_ALL
 GBindingFlags         g_binding_get_flags           (GBinding *binding);
-GLIB_DEPRECATED_IN_2_68_FOR(g_binding_dup_source)
+GLIB_AVAILABLE_IN_ALL
 GObject *             g_binding_get_source          (GBinding *binding);
-GLIB_AVAILABLE_IN_2_68
-GObject *             g_binding_dup_source          (GBinding *binding);
-GLIB_DEPRECATED_IN_2_68_FOR(g_binding_dup_target)
+GLIB_AVAILABLE_IN_ALL
 GObject *             g_binding_get_target          (GBinding *binding);
-GLIB_AVAILABLE_IN_2_68
-GObject *             g_binding_dup_target          (GBinding *binding);
 GLIB_AVAILABLE_IN_ALL
 const gchar *         g_binding_get_source_property (GBinding *binding);
 GLIB_AVAILABLE_IN_ALL

@@ -93,8 +93,7 @@ static GType test_module_get_type (void)
 	NULL,
 	sizeof (TestModule),
 	0,
-        (GInstanceInitFunc)NULL,
-        NULL,
+	(GInstanceInitFunc)NULL
       };
     object_type = g_type_register_static (G_TYPE_TYPE_MODULE, "TestModule", &object_info, 0);
   }

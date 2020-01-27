@@ -17,7 +17,7 @@ gboolean fail;
 #define ROUNDS 10000
 
 GObject *object;
-gint bucket[THREADS];  /* accessed from multiple threads, but should never be contested due to the sequence of thread operations */
+volatile gint bucket[THREADS];
 
 static gpointer
 thread_func (gpointer data)

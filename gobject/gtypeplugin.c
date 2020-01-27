@@ -85,16 +85,9 @@ g_type_plugin_get_type (void)
   if (!type_plugin_type)
     {
       const GTypeInfo type_plugin_info = {
-        sizeof (GTypePluginClass),
-        NULL,           /* base_init */
-        NULL,           /* base_finalize */
-        0,              /* class_init */
-        NULL,           /* class_destroy */
-        NULL,           /* class_data */
-        0,              /* instance_size */
-        0,              /* n_preallocs */
-        NULL,           /* instance_init */
-        NULL,           /* value_table */
+	sizeof (GTypePluginClass),
+	NULL,           /* base_init */
+	NULL,           /* base_finalize */
       };
       
       type_plugin_type = g_type_register_static (G_TYPE_INTERFACE, g_intern_static_string ("GTypePlugin"), &type_plugin_info, 0);

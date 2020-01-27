@@ -174,9 +174,9 @@ typedef struct
   GTypeInstance  g_type_instance;
 
   /*< private >*/
-  guint          ref_count;  /* (atomic) */
+  volatile guint ref_count;
 #ifdef HAVE_OPTIONAL_FLAGS
-  guint          optional_flags;  /* (atomic) */
+  volatile guint optional_flags;
 #endif
   GData         *qdata;
 } GObjectReal;
@@ -749,7 +749,7 @@ g_object_class_install_properties (GObjectClass  *oclass,
                                    GParamSpec   **pspecs)
 {
   GType oclass_type, parent_type;
-  guint i;
+  gint i;
 
   g_return_if_fail (G_IS_OBJECT_CLASS (oclass));
   g_return_if_fail (n_pspecs > 1);
@@ -1798,7 +1798,7 @@ g_object_new_with_custom_constructor (GObjectClass          *class,
   gint n_cparams;
   gint cvals_used;
   GSList *node;
-  guint i;
+  gint i;
 
   /* If we have ->constructed() then we have to do a lot more work.
    * It's possible that this is a singleton and it's also possible
@@ -1828,7 +1828,7 @@ g_object_new_with_custom_constructor (GObjectClass          *class,
     {
       GParamSpec *pspec;
       GValue *value;
-      guint j;
+      gint j;
 
       pspec = node->data;
       value = NULL; /* to silence gcc... */
@@ -1954,7 +1954,7 @@ g_object_new_internal (GObjectClass          *class,
         {
           const GValue *value;
           GParamSpec *pspec;
-          guint j;
+          gint j;
 
           pspec = node->data;
           value = NULL; /* to silence gcc... */
@@ -1980,7 +1980,7 @@ g_object_new_internal (GObjectClass          *class,
 
   if (nqueue)
     {
-      guint i;
+      gint i;
 
       /* Set remaining properties.  The construct properties will
        * already have been taken, so set only the non-construct
@@ -2005,10 +2005,9 @@ g_object_new_is_valid_property (GType                  object_type,
                                 GParamSpec            *pspec,
                                 const char            *name,
                                 GObjectConstructParam *params,
-                                guint                  n_params)
+                                int                    n_params)
 {
-  guint i;
-
+  gint i;
   if (G_UNLIKELY (pspec == NULL))
     {
       g_critical ("%s: object class '%s' has no property named '%s'",
@@ -2218,15 +2217,13 @@ g_object_new_valist (GType        object_type,
 
   if (first_property_name)
     {
-      GObjectConstructParam params_stack[16];
-      GValue values_stack[G_N_ELEMENTS (params_stack)];
+      GObjectConstructParam stack_params[16];
+      GObjectConstructParam *params;
       const gchar *name;
-      GObjectConstructParam *params = params_stack;
-      GValue *values = values_stack;
-      guint n_params = 0;
-      guint n_params_alloc = G_N_ELEMENTS (params_stack);
+      gint n_params = 0;
 
       name = first_property_name;
+      params = stack_params;
 
       do
         {
@@ -2238,39 +2235,24 @@ g_object_new_valist (GType        object_type,
           if (!g_object_new_is_valid_property (object_type, pspec, name, params, n_params))
             break;
 
-          if (G_UNLIKELY (n_params == n_params_alloc))
+          if (n_params == 16)
             {
-              guint i;
-
-              if (n_params_alloc == G_N_ELEMENTS (params_stack))
-                {
-                  n_params_alloc = G_N_ELEMENTS (params_stack) * 2u;
-                  params = g_new (GObjectConstructParam, n_params_alloc);
-                  values = g_new (GValue, n_params_alloc);
-                  memcpy (params, params_stack, sizeof (GObjectConstructParam) * n_params);
-                  memcpy (values, values_stack, sizeof (GValue) * n_params);
-                }
-              else
-                {
-                  n_params_alloc *= 2u;
-                  params = g_realloc (params, sizeof (GObjectConstructParam) * n_params_alloc);
-                  values = g_realloc (values, sizeof (GValue) * n_params_alloc);
-                }
-
-              for (i = 0; i < n_params; i++)
-                params[i].value = &values[i];
+              params = g_new (GObjectConstructParam, n_params + 1);
+              memcpy (params, stack_params, sizeof stack_params);
             }
+          else if (n_params > 16)
+            params = g_renew (GObjectConstructParam, params, n_params + 1);
 
           params[n_params].pspec = pspec;
-          params[n_params].value = &values[n_params];
-          memset (&values[n_params], 0, sizeof (GValue));
+          params[n_params].value = g_newa (GValue, 1);
+          memset (params[n_params].value, 0, sizeof (GValue));
 
-          G_VALUE_COLLECT_INIT (&values[n_params], pspec->value_type, var_args, 0, &error);
+          G_VALUE_COLLECT_INIT (params[n_params].value, pspec->value_type, var_args, 0, &error);
 
           if (error)
             {
               g_critical ("%s: %s", G_STRFUNC, error);
-              g_value_unset (&values[n_params]);
+              g_value_unset (params[n_params].value);
               g_free (error);
               break;
             }
@@ -2284,11 +2266,8 @@ g_object_new_valist (GType        object_type,
       while (n_params--)
         g_value_unset (params[n_params].value);
 
-      if (G_UNLIKELY (n_params_alloc != G_N_ELEMENTS (params_stack)))
-        {
-          g_free (params);
-          g_free (values);
-        }
+      if (params != stack_params)
+        g_free (params);
     }
   else
     /* Fast case: no properties passed in. */
@@ -2975,7 +2954,7 @@ weak_refs_notify (gpointer data)
  * @data: extra data to pass to notify
  *
  * Adds a weak reference callback to an object. Weak references are
- * used for notification when an object is disposed. They are called
+ * used for notification when an object is finalized. They are called
  * "weak references" because they allow you to safely hold a pointer
  * to an object without calling g_object_ref() (g_object_ref() adds a
  * strong reference, that is, forces the object to stay alive).
