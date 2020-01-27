@@ -1116,7 +1116,7 @@ write_all (gint fd, gconstpointer vbuf, gsize to_write)
 
 /* This function is called between fork() and exec() and hence must be
  * async-signal-safe (see signal-safety(7)). */
-G_NORETURN
+G_GNUC_NORETURN
 static void
 write_err_and_exit (gint fd, gint msg)
 {
@@ -1330,17 +1330,12 @@ safe_closefrom (int lowfd)
    * simple wrapper of the fcntl command.
    */
   (void) fcntl (lowfd, F_CLOSEM);
-#else
-
-#if defined(HAVE_CLOSE_RANGE)
+#elif defined(HAVE_CLOSE_RANGE)
   /* close_range() is available in Linux since kernel 5.9, and on FreeBSD at
    * around the same time. It was designed for use in async-signal-safe
-   * situations: https://bugs.python.org/issue38061
-   *
-   * Handle ENOSYS in case it’s supported in libc but not the kernel; if so,
-   * fall back to safe_fdwalk(). */
-  if (close_range (lowfd, G_MAXUINT) != 0 && errno == ENOSYS)
-#endif  /* HAVE_CLOSE_RANGE */
+   * situations: https://bugs.python.org/issue38061 */
+  (void) close_range (lowfd, G_MAXUINT);
+#else
   (void) safe_fdwalk (close_func, GINT_TO_POINTER (lowfd));
 #endif
 }

@@ -513,7 +513,7 @@ static GMutex    g_once_mutex;
 static GCond     g_once_cond;
 static GSList   *g_once_init_list = NULL;
 
-static guint g_thread_n_created_counter = 0;  /* (atomic) */
+static volatile guint g_thread_n_created_counter = 0;
 
 static void g_thread_cleanup (gpointer data);
 static GPrivate     g_thread_specific_private = G_PRIVATE_INIT (g_thread_cleanup);
@@ -686,9 +686,6 @@ g_once_impl (GOnce       *once,
  *   // use initialization_value here
  * ]|
  *
- * While @location has a `volatile` qualifier, this is a historical artifact and
- * the pointer passed to it should not be `volatile`.
- *
  * Returns: %TRUE if the initialization section should be entered,
  *     %FALSE and blocks otherwise
  *
@@ -697,7 +694,7 @@ g_once_impl (GOnce       *once,
 gboolean
 (g_once_init_enter) (volatile void *location)
 {
-  gsize *value_location = (gsize *) location;
+  volatile gsize *value_location = location;
   gboolean need_init = FALSE;
   g_mutex_lock (&g_once_mutex);
   if (g_atomic_pointer_get (value_location) == 0)
@@ -728,16 +725,13 @@ gboolean
  * releases concurrent threads blocking in g_once_init_enter() on this
  * initialization variable.
  *
- * While @location has a `volatile` qualifier, this is a historical artifact and
- * the pointer passed to it should not be `volatile`.
- *
  * Since: 2.14
  */
 void
 (g_once_init_leave) (volatile void *location,
                      gsize          result)
 {
-  gsize *value_location = (gsize *) location;
+  volatile gsize *value_location = location;
 
   g_return_if_fail (g_atomic_pointer_get (value_location) == 0);
   g_return_if_fail (result != 0);

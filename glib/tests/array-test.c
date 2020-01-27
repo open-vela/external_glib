@@ -590,10 +590,6 @@ array_sort (gconstpointer test_data)
   gint prev, cur;
 
   garray = g_array_new (config->zero_terminated, config->clear_, sizeof (gint));
-
-  /* Sort empty array */
-  g_array_sort (garray, int_compare);
-
   for (i = 0; i < 10000; i++)
     {
       cur = g_random_int_range (0, 10000);
@@ -626,10 +622,6 @@ array_sort_with_data (gconstpointer test_data)
   gint prev, cur;
 
   garray = g_array_new (config->zero_terminated, config->clear_, sizeof (gint));
-
-  /* Sort empty array */
-  g_array_sort_with_data (garray, int_compare_data, NULL);
-
   for (i = 0; i < 10000; i++)
     {
       cur = g_random_int_range (0, 10000);
@@ -1342,10 +1334,6 @@ pointer_array_sort (void)
   gint prev, cur;
 
   gparray = g_ptr_array_new ();
-
-  /* Sort empty array */
-  g_ptr_array_sort (gparray, ptr_compare);
-
   for (i = 0; i < 10000; i++)
     {
       val = g_random_int_range (0, 10000);
@@ -1517,10 +1505,6 @@ pointer_array_sort_with_data (void)
   gint prev, cur;
 
   gparray = g_ptr_array_new ();
-
-  /* Sort empty array */
-  g_ptr_array_sort_with_data (gparray, ptr_compare_data, NULL);
-
   for (i = 0; i < 10000; i++)
     g_ptr_array_add (gparray, GINT_TO_POINTER (g_random_int_range (0, 10000)));
 

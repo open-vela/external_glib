@@ -469,8 +469,6 @@ G_ALIGNOF
 
 <SUBSECTION>
 G_CONST_RETURN
-G_NORETURN
-G_NORETURN_FUNCPTR
 
 <SUBSECTION>
 G_N_ELEMENTS
@@ -1941,7 +1939,6 @@ g_time_zone_unref
 g_time_zone_ref
 <SUBSECTION>
 g_time_zone_new
-g_time_zone_new_identifier
 g_time_zone_new_local
 g_time_zone_new_utc
 g_time_zone_new_offset

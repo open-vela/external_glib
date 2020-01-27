@@ -604,21 +604,9 @@ parse_host (const gchar  *start,
     }
 
   if (g_hostname_is_non_ascii (decoded))
-    {
-      host = g_hostname_to_ascii (decoded);
-      if (host == NULL)
-        {
-          g_free (decoded);
-          g_set_error (error, G_URI_ERROR, G_URI_ERROR_BAD_HOST,
-                       _("Illegal internationalized hostname ‘%.*s’ in URI"),
-                       (gint) length, start);
-          return FALSE;
-        }
-    }
+    host = g_hostname_to_ascii (decoded);
   else
-    {
-      host = g_steal_pointer (&decoded);
-    }
+    host = g_steal_pointer (&decoded);
 
  ok:
   if (out)
@@ -804,21 +792,6 @@ normalize_port (const char *scheme,
     }
 
   return port;
-}
-
-static int
-default_scheme_port (const char *scheme)
-{
-  if (strcmp (scheme, "http") == 0 || strcmp (scheme, "ws") == 0)
-    return 80;
-
-  if (strcmp (scheme, "https") == 0 || strcmp (scheme, "wss") == 0)
-    return 443;
-
-  if (strcmp (scheme, "ftp") == 0)
-    return 21;
-
-  return -1;
 }
 
 static gboolean
@@ -1016,8 +989,8 @@ g_uri_split_internal (const gchar  *uri_string,
           *path = g_strdup ("/");
         }
 
-      if (port && *port == -1)
-        *port = default_scheme_port (scheme_str);
+      if (port && *port != -1)
+        *port = normalize_port (scheme_str, *port);
     }
 
   g_free (normalized_scheme);
@@ -1595,7 +1568,6 @@ g_uri_join_internal (GUriFlags    flags,
 {
   gboolean encoded = (flags & G_URI_FLAGS_ENCODED);
   GString *str;
-  char *normalized_scheme = NULL;
 
   /* Restrictions on path prefixes. See:
    * https://tools.ietf.org/html/rfc3986#section-3
@@ -1607,9 +1579,6 @@ g_uri_join_internal (GUriFlags    flags,
   str = g_string_new (scheme);
   if (scheme)
     g_string_append_c (str, ':');
-
-  if (flags & G_URI_FLAGS_SCHEME_NORMALIZE && scheme && ((host && port != -1) || path[0] == '\0'))
-    normalized_scheme = g_ascii_strdown (scheme, -1);
 
   if (host)
     {
@@ -1671,18 +1640,14 @@ g_uri_join_internal (GUriFlags    flags,
             g_string_append_uri_escaped (str, host, HOST_ALLOWED_CHARS, TRUE);
         }
 
-      if (port != -1 && (!normalized_scheme || normalize_port (normalized_scheme, port) != -1))
+      if (port != -1)
         g_string_append_printf (str, ":%d", port);
     }
 
-  if (path[0] == '\0' && normalized_scheme && should_normalize_empty_path (normalized_scheme))
-    g_string_append (str, "/");
-  else if (encoded || flags & G_URI_FLAGS_ENCODED_PATH)
+  if (encoded || flags & G_URI_FLAGS_ENCODED_PATH)
     g_string_append (str, path);
   else
     g_string_append_uri_escaped (str, path, PATH_ALLOWED_CHARS, TRUE);
-
-  g_free (normalized_scheme);
 
   if (query)
     {
@@ -2466,9 +2431,6 @@ gint
 g_uri_get_port (GUri *uri)
 {
   g_return_val_if_fail (uri != NULL, -1);
-
-  if (uri->port == -1 && uri->flags & G_URI_FLAGS_SCHEME_NORMALIZE)
-    return default_scheme_port (uri->scheme);
 
   return uri->port;
 }

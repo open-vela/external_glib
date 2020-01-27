@@ -76,16 +76,12 @@ G_DEFINE_BOXED_TYPE (GResource, g_resource, g_resource_ref, g_resource_unref)
  * the xmllint executable, or xmllint must be in the `PATH`; otherwise
  * the preprocessing step is skipped.
  *
- * `to-pixdata` (deprecated since gdk-pixbuf 2.32) which will use the
- * `gdk-pixbuf-pixdata` command to convert images to the #GdkPixdata format,
- * which allows you to create pixbufs directly using the data inside the
- * resource file, rather than an (uncompressed) copy of it. For this, the
- * `gdk-pixbuf-pixdata` program must be in the `PATH`, or the
- * `GDK_PIXBUF_PIXDATA` environment variable must be set to the full path to the
- * `gdk-pixbuf-pixdata` executable; otherwise the resource compiler will abort.
- * `to-pixdata` has been deprecated since gdk-pixbuf 2.32, as #GResource
- * supports embedding modern image formats just as well. Instead of using it,
- * embed a PNG or SVG file in your #GResource.
+ * `to-pixdata` which will use the gdk-pixbuf-pixdata command to convert
+ * images to the GdkPixdata format, which allows you to create pixbufs directly using the data inside
+ * the resource file, rather than an (uncompressed) copy of it. For this, the gdk-pixbuf-pixdata
+ * program must be in the PATH, or the `GDK_PIXBUF_PIXDATA` environment variable must be
+ * set to the full path to the gdk-pixbuf-pixdata executable; otherwise the resource compiler will
+ * abort.
  *
  * `json-stripblanks` which will use the `json-glib-format` command to strip
  * ignorable whitespace from the JSON file. For this to work, the
@@ -1402,7 +1398,7 @@ register_lazy_static_resources (void)
 void
 g_static_resource_init (GStaticResource *static_resource)
 {
-  GStaticResource *next;
+  gpointer next;
 
   do
     {

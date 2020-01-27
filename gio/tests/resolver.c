@@ -40,7 +40,7 @@ static gboolean synchronous = FALSE;
 static guint connectable_count = 0;
 static GResolverRecordType record_type = 0;
 
-static G_NORETURN void
+static void G_GNUC_NORETURN
 usage (void)
 {
 	fprintf (stderr, "Usage: resolver [-s] [hostname | IP | service/protocol/domain ] ...\n");

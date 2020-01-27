@@ -73,8 +73,7 @@ g_context_specific_source_new (const gchar *name,
     NULL,
     NULL,
     g_context_specific_source_dispatch,
-    g_context_specific_source_finalize,
-    NULL, NULL
+    g_context_specific_source_finalize
   };
   GContextSpecificSource *css;
   GSource *source;

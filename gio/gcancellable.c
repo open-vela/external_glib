@@ -770,7 +770,6 @@ static GSourceFuncs cancellable_source_funcs =
   cancellable_source_dispatch,
   NULL,
   (GSourceFunc)cancellable_source_closure_callback,
-  NULL,
 };
 
 /**

@@ -822,12 +822,11 @@ g_array_sort (GArray       *farray,
   g_return_if_fail (array != NULL);
 
   /* Don't use qsort as we want a guaranteed stable sort */
-  if (array->len > 0)
-    g_qsort_with_data (array->data,
-                       array->len,
-                       array->elt_size,
-                       (GCompareDataFunc)compare_func,
-                       NULL);
+  g_qsort_with_data (array->data,
+                     array->len,
+                     array->elt_size,
+                     (GCompareDataFunc)compare_func,
+                     NULL);
 }
 
 /**
@@ -854,12 +853,11 @@ g_array_sort_with_data (GArray           *farray,
 
   g_return_if_fail (array != NULL);
 
-  if (array->len > 0)
-    g_qsort_with_data (array->data,
-                       array->len,
-                       array->elt_size,
-                       compare_func,
-                       user_data);
+  g_qsort_with_data (array->data,
+                     array->len,
+                     array->elt_size,
+                     compare_func,
+                     user_data);
 }
 
 /**
@@ -1421,8 +1419,8 @@ g_ptr_array_unref (GPtrArray *array)
  * threads, use only the atomic g_ptr_array_ref() and g_ptr_array_unref()
  * functions.
  *
- * Returns: (transfer full) (nullable): the pointer array if @free_seg is
- *     %FALSE, otherwise %NULL. The pointer array should be freed using g_free().
+ * Returns: the pointer array if @free_seg is %FALSE, otherwise %NULL.
+ *     The pointer array should be freed using g_free().
  */
 gpointer*
 g_ptr_array_free (GPtrArray *array,
@@ -1986,12 +1984,11 @@ g_ptr_array_sort (GPtrArray    *array,
   g_return_if_fail (array != NULL);
 
   /* Don't use qsort as we want a guaranteed stable sort */
-  if (array->len > 0)
-    g_qsort_with_data (array->pdata,
-                       array->len,
-                       sizeof (gpointer),
-                       (GCompareDataFunc)compare_func,
-                       NULL);
+  g_qsort_with_data (array->pdata,
+                     array->len,
+                     sizeof (gpointer),
+                     (GCompareDataFunc)compare_func,
+                     NULL);
 }
 
 /* Please keep this doc-comment in sync with
@@ -2063,12 +2060,11 @@ g_ptr_array_sort_with_data (GPtrArray        *array,
 {
   g_return_if_fail (array != NULL);
 
-  if (array->len > 0)
-    g_qsort_with_data (array->pdata,
-                       array->len,
-                       sizeof (gpointer),
-                       compare_func,
-                       user_data);
+  g_qsort_with_data (array->pdata,
+                     array->len,
+                     sizeof (gpointer),
+                     compare_func,
+                     user_data);
 }
 
 /**
