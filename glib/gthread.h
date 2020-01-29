@@ -254,7 +254,7 @@ void            g_once_init_leave               (volatile void  *location,
 # define g_once_init_leave(location, result) \
   (G_GNUC_EXTENSION ({                                               \
     G_STATIC_ASSERT (sizeof *(location) == sizeof (gpointer));       \
-    0 ? (void) (*(location) = (result)) : (void) 0;                  \
+    (void) (0 ? *(location) = (result) : 0);                         \
     g_once_init_leave ((location), (gsize) (result));                \
   }))
 #else
