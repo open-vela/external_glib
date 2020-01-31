@@ -496,8 +496,10 @@ void
 g_network_monitor_base_add_network (GNetworkMonitorBase *monitor,
                                     GInetAddressMask    *network)
 {
-  if (!g_hash_table_add (monitor->priv->networks, g_object_ref (network)))
+  if (!g_hash_table_add (monitor->priv->networks, network))
     return;
+
+  g_object_ref (network);  /* for the element now stored in the hash table */
 
   if (g_inet_address_mask_get_length (network) == 0)
     {
