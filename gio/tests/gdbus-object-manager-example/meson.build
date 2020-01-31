@@ -1,7 +1,6 @@
 # FIXME: set UNINSTALLED_GLIB_{SRC|BUILD}DIR=top_{src|build}dir ?
-gdbus_example_objectmanager_xml = files('gdbus-example-objectmanager.xml')
 gdbus_example_objectmanager_generated = custom_target('objectmanager-gen',
-  input  : gdbus_example_objectmanager_xml,
+  input  : ['gdbus-example-objectmanager.xml'],
   output : ['objectmanager-gen.h',
             'objectmanager-gen.c',
             'objectmanager-gen-org.gtk.GDBus.Example.ObjectManager.Animal.xml',
@@ -24,5 +23,4 @@ libgdbus_example_objectmanager = library('gdbus-example-objectmanager',
 
 libgdbus_example_objectmanager_dep = declare_dependency(
   sources : gdbus_example_objectmanager_generated[0],
-  link_with : libgdbus_example_objectmanager,
-  dependencies : [libgio_dep])
+  link_with : libgdbus_example_objectmanager)

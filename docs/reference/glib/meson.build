@@ -88,8 +88,7 @@ if get_option('gtk_doc')
                fixxref_args: [
                  '--html-dir=' + docpath,
                ],
-               install: true,
-               check: true)
+               install: true)
 endif
 
 if get_option('man')

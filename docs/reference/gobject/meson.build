@@ -50,8 +50,7 @@ if get_option('gtk_doc')
       '--html-dir=' + docpath,
       '--extra-dir=' + join_paths('gobject', '..', 'glib', 'html'),
     ],
-    install: true,
-    check: true,
+    install: true
   )
 endif
 
