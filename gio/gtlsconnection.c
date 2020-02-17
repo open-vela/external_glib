@@ -142,7 +142,7 @@ g_tls_connection_class_init (GTlsConnectionClass *klass)
 							 G_PARAM_STATIC_STRINGS |
 							 G_PARAM_DEPRECATED));
   /**
-   * GTlsConnection:database: (nullable)
+   * GTlsConnection:database:
    *
    * The certificate database to use when verifying this TLS connection.
    * If no certificate database is set, then the default database will be
@@ -158,7 +158,7 @@ g_tls_connection_class_init (GTlsConnectionClass *klass)
 							 G_PARAM_READWRITE |
 							 G_PARAM_STATIC_STRINGS));
   /**
-   * GTlsConnection:interaction: (nullable)
+   * GTlsConnection:interaction:
    *
    * A #GTlsInteraction object to be used when the connection or certificate
    * database need to interact with the user. This will be used to prompt the
@@ -225,7 +225,7 @@ g_tls_connection_class_init (GTlsConnectionClass *klass)
 							G_PARAM_READWRITE |
 							G_PARAM_STATIC_STRINGS));
   /**
-   * GTlsConnection:peer-certificate: (nullable)
+   * GTlsConnection:peer-certificate:
    *
    * The connection's peer's certificate, after the TLS handshake has
    * completed and the certificate has been accepted. Note in
@@ -265,7 +265,7 @@ g_tls_connection_class_init (GTlsConnectionClass *klass)
 						       G_PARAM_READABLE |
 						       G_PARAM_STATIC_STRINGS));
   /**
-   * GTlsConnection:advertised-protocols: (nullable)
+   * GTlsConnection:advertised-protocols:
    *
    * The list of application-layer protocols that the connection
    * advertises that it is willing to speak. See
@@ -445,7 +445,7 @@ g_tls_connection_get_use_system_certdb (GTlsConnection *conn)
 /**
  * g_tls_connection_set_database:
  * @conn: a #GTlsConnection
- * @database: (nullable): a #GTlsDatabase
+ * @database: a #GTlsDatabase
  *
  * Sets the certificate database that is used to verify peer certificates.
  * This is set to the default database by default. See
@@ -477,7 +477,7 @@ g_tls_connection_set_database (GTlsConnection *conn,
  * Gets the certificate database that @conn uses to verify
  * peer certificates. See g_tls_connection_set_database().
  *
- * Returns: (transfer none) (nullable): the certificate database that @conn uses or %NULL
+ * Returns: (transfer none): the certificate database that @conn uses or %NULL
  *
  * Since: 2.30
  */
@@ -539,7 +539,7 @@ g_tls_connection_set_certificate (GTlsConnection  *conn,
  * Gets @conn's certificate, as set by
  * g_tls_connection_set_certificate().
  *
- * Returns: (transfer none) (nullable): @conn's certificate, or %NULL
+ * Returns: (transfer none): @conn's certificate, or %NULL
  *
  * Since: 2.28
  */
@@ -589,7 +589,7 @@ g_tls_connection_set_interaction (GTlsConnection       *conn,
  * for things like prompting the user for passwords. If %NULL is returned, then
  * no user interaction will occur for this connection.
  *
- * Returns: (transfer none) (nullable): The interaction object.
+ * Returns: (transfer none): The interaction object.
  *
  * Since: 2.30
  */
@@ -615,7 +615,7 @@ g_tls_connection_get_interaction (GTlsConnection       *conn)
  * (It is not set during the emission of
  * #GTlsConnection::accept-certificate.)
  *
- * Returns: (transfer none) (nullable): @conn's peer's certificate, or %NULL
+ * Returns: (transfer none): @conn's peer's certificate, or %NULL
  *
  * Since: 2.28
  */
