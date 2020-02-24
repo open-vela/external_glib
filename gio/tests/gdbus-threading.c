@@ -406,7 +406,7 @@ test_sleep_in_thread_func (gpointer _data)
 static void
 test_method_calls_on_proxy (GDBusProxy *proxy)
 {
-  guint n, divisor;
+  guint n;
 
   /*
    * Check that multiple threads can do calls without interferring with
@@ -424,11 +424,6 @@ test_method_calls_on_proxy (GDBusProxy *proxy)
    * We run this test twice - first with async calls in each thread, then
    * again with sync calls
    */
-
-  if (g_test_thorough ())
-    divisor = 1;
-  else
-    divisor = 10;
 
   for (n = 0; n < 2; n++)
     {
@@ -448,7 +443,7 @@ test_method_calls_on_proxy (GDBusProxy *proxy)
 
       data1.proxy = proxy;
       data1.msec = 40;
-      data1.num = 100 / divisor;
+      data1.num = 100;
       data1.async = do_async;
       thread1 = g_thread_new ("sleep",
                               test_sleep_in_thread_func,
@@ -456,7 +451,7 @@ test_method_calls_on_proxy (GDBusProxy *proxy)
 
       data2.proxy = proxy;
       data2.msec = 20;
-      data2.num = 200 / divisor;
+      data2.num = 200;
       data2.async = do_async;
       thread2 = g_thread_new ("sleep2",
                               test_sleep_in_thread_func,
@@ -464,7 +459,7 @@ test_method_calls_on_proxy (GDBusProxy *proxy)
 
       data3.proxy = proxy;
       data3.msec = 100;
-      data3.num = 40 / divisor;
+      data3.num = 40;
       data3.async = do_async;
       thread3 = g_thread_new ("sleep3",
                               test_sleep_in_thread_func,
@@ -481,8 +476,8 @@ test_method_calls_on_proxy (GDBusProxy *proxy)
       //g_debug ("Elapsed time for %s = %d msec", n == 0 ? "async" : "sync", elapsed_msec);
 
       /* elapsed_msec should be 4000 msec +/- change for overhead/inaccuracy */
-      g_assert_cmpint (elapsed_msec, >=, 3950 / divisor);
-      g_assert_cmpint (elapsed_msec,  <, 30000 / divisor);
+      g_assert_cmpint (elapsed_msec, >=, 3950);
+      g_assert_cmpint (elapsed_msec,  <, 30000);
 
       if (g_test_verbose ())
         g_printerr (" ");
@@ -580,7 +575,7 @@ test_threaded_singleton (void)
   if (g_test_thorough ())
     n = 100000;
   else
-    n = 1000;
+    n = 5000;
 
   for (i = 0; i < n; i++)
     {
