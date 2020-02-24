@@ -414,8 +414,7 @@ connection_get_group (void)
 }
 
 static GDBusConnection *
-connection_get_dbus_connection (gboolean   require_message_bus,
-                                GError   **error)
+connection_get_dbus_connection (GError **error)
 {
   GDBusConnection *c;
 
@@ -451,11 +450,8 @@ connection_get_dbus_connection (gboolean   require_message_bus,
     }
   else if (opt_connection_address != NULL)
     {
-      GDBusConnectionFlags flags = G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT;
-      if (require_message_bus)
-        flags |= G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION;
       c = g_dbus_connection_new_for_address_sync (opt_connection_address,
-                                                  flags,
+                                                  G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT,
                                                   NULL, /* GDBusAuthObserver */
                                                   NULL, /* GCancellable */
                                                   error);
@@ -653,7 +649,7 @@ handle_emit (gint        *argc,
     }
 
   error = NULL;
-  c = connection_get_dbus_connection ((opt_emit_dest != NULL), &error);
+  c = connection_get_dbus_connection (&error);
   if (c == NULL)
     {
       if (request_completion)
@@ -960,7 +956,7 @@ handle_call (gint        *argc,
     }
 
   error = NULL;
-  c = connection_get_dbus_connection (TRUE, &error);
+  c = connection_get_dbus_connection (&error);
   if (c == NULL)
     {
       if (request_completion)
@@ -1754,7 +1750,7 @@ handle_introspect (gint        *argc,
     }
 
   error = NULL;
-  c = connection_get_dbus_connection (TRUE, &error);
+  c = connection_get_dbus_connection (&error);
   if (c == NULL)
     {
       if (request_completion)
@@ -1986,7 +1982,7 @@ handle_monitor (gint        *argc,
     }
 
   error = NULL;
-  c = connection_get_dbus_connection (TRUE, &error);
+  c = connection_get_dbus_connection (&error);
   if (c == NULL)
     {
       if (request_completion)
@@ -2206,7 +2202,7 @@ handle_wait (gint        *argc,
     }
 
   error = NULL;
-  c = connection_get_dbus_connection (TRUE, &error);
+  c = connection_get_dbus_connection (&error);
   if (c == NULL)
     {
       if (request_completion)
