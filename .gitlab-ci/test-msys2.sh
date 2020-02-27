@@ -27,21 +27,16 @@ pacman --noconfirm -S --needed \
 curl -O -J -L "https://github.com/linux-test-project/lcov/releases/download/v1.14/lcov-1.14.tar.gz"
 echo "14995699187440e0ae4da57fe3a64adc0a3c5cf14feab971f8db38fb7d8f071a  lcov-1.14.tar.gz" | sha256sum -c
 tar -xzf lcov-1.14.tar.gz
-# FIXME: not currently using lcov, see below
-#LCOV="$(pwd)/lcov-1.14/bin/lcov"
+LCOV="$(pwd)/lcov-1.14/bin/lcov"
 
 mkdir -p _coverage
 mkdir -p _ccache
-CCACHE_BASEDIR="$(pwd)"
-CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
-export CCACHE_BASEDIR CCACHE_DIR
-
+export CCACHE_BASEDIR="$(pwd)"
+export CCACHE_DIR="${CCACHE_BASEDIR}/_ccache"
 pip3 install --upgrade --user meson==0.49.2
-
-PATH="$HOME/.local/bin:$PATH"
-CFLAGS="-coverage -ftest-coverage -fprofile-arcs"
+export PATH="$HOME/.local/bin:$PATH"
+export CFLAGS="-coverage -ftest-coverage -fprofile-arcs"
 DIR="$(pwd)"
-export PATH CFLAGS
 
 meson --werror --buildtype debug _build
 cd _build
@@ -58,7 +53,7 @@ ninja
 #    --output-file "${DIR}/_coverage/${CI_JOB_NAME}-baseline.lcov"
 
 # FIXME: fix the test suite
-meson test --timeout-multiplier "${MESON_TEST_TIMEOUT_MULTIPLIER}" --no-suite flaky || true
+meson test --timeout-multiplier ${MESON_TEST_TIMEOUT_MULTIPLIER} --no-suite flaky || true
 
 python3 "${DIR}"/.gitlab-ci/meson-junit-report.py \
         --project-name glib \
