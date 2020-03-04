@@ -523,7 +523,7 @@ tokenize_command_line (const gchar *command_line,
               ensure_token (&current_token);
               g_string_append_c (current_token, *p);
 
-              G_GNUC_FALLTHROUGH;
+              /* FALL THRU */
             case '\\':
               current_quote = *p;
               break;
