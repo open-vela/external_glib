@@ -1,7 +1,5 @@
 if get_option('gtk_doc')
-  if installed_tests_enabled
-    subdir('gdbus-object-manager-example')
-  endif
+  subdir('gdbus-object-manager-example')
   subdir('xml')
 
   ignore_headers = [
@@ -162,30 +160,6 @@ if get_option('gtk_doc')
     copy : true,
   )
 
-  content_files = [
-    'overview.xml',
-    'migrating-posix.xml',
-    'migrating-gnome-vfs.xml',
-    'migrating-gconf.xml',
-    'migrating-gdbus.xml',
-    'gio-querymodules.xml',
-    'glib-compile-schemas.xml',
-    'glib-compile-resources.xml',
-    'gapplication.xml',
-    'gsettings.xml',
-    'gresource.xml',
-    'gdbus.xml',
-    'gdbus-codegen.xml',
-  ]
-
-  if installed_tests_enabled
-    content_files += [
-      gdbus_example_objectmanager_xml,
-      gdbus_example_objectmanager_sources,
-      gdbus_object_manager_example_doc
-    ]
-  endif
-
   gnome.gtkdoc('gio',
     main_xml : 'gio-docs.xml',
     namespace : 'g',
@@ -199,7 +173,24 @@ if get_option('gtk_doc')
     mkdb_args : [
       '--ignore-files=' + ' '.join(ignore_sources),
     ],
-    content_files : content_files,
+    content_files : [
+      'overview.xml',
+      'migrating-posix.xml',
+      'migrating-gnome-vfs.xml',
+      'migrating-gconf.xml',
+      'migrating-gdbus.xml',
+      'gio-querymodules.xml',
+      'glib-compile-schemas.xml',
+      'glib-compile-resources.xml',
+      'gapplication.xml',
+      'gsettings.xml',
+      'gresource.xml',
+      'gdbus.xml',
+      'gdbus-codegen.xml',
+      gdbus_example_objectmanager_xml,
+      gdbus_example_objectmanager_sources,
+      gdbus_object_manager_example_doc,
+    ],
     expand_content_files : [
       'overview.xml',
       'migrating-posix.xml',
