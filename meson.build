@@ -210,27 +210,15 @@ else
 endif
 glibconfig_conf.set('glib_os', glib_os)
 
-# We need to know the CRT being used to determine what .lib files we need on
-# Visual Studio for dependencies that don't normally come with pkg-config files
-vs_crt = 'release'
-vs_crt_opt = get_option('b_vscrt')
-if vs_crt_opt in ['mdd', 'mtd']
-  vs_crt = 'debug'
-elif vs_crt_opt == 'from_buildtype'
-  if get_option('buildtype') == 'debug'
-    vs_crt = 'debug'
-  endif
-endif
+# We need to know the build type to determine what .lib files we need on Visual Studio
+# for dependencies that don't normally come with pkg-config files for Visual Studio builds
+buildtype = get_option('buildtype')
 
-# Use debug/optimization flags to determine whether to enable debug or disable
-# cast checks
 glib_debug_cflags = []
-if get_option('debug')
+if buildtype.startswith('debug')
   glib_debug_cflags += ['-DG_ENABLE_DEBUG']
-  message('Enabling various debug infrastructure')
-elif get_option('optimization') in ['2', '3', 's']
+elif buildtype == 'release'
   glib_debug_cflags += ['-DG_DISABLE_CAST_CHECKS']
-  message('Disabling cast checks')
 endif
 
 add_project_arguments(glib_debug_cflags, language: 'c')
@@ -1860,7 +1848,7 @@ else
     # MSVC: Search for the PCRE library by the configuration, which corresponds
     # to the output of CMake builds of PCRE.  Note that debugoptimized
     # is really a Release build with .PDB files.
-      if vs_crt == 'debug'
+      if buildtype == 'debug'
         pcre = cc.find_library('pcred', required : false)
       else
         pcre = cc.find_library('pcre', required : false)
