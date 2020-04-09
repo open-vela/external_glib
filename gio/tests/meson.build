@@ -531,9 +531,8 @@ if installed_tests_enabled
     cdata = configuration_data()
     cdata.set('installed_tests_dir', installed_tests_execdir)
     cdata.set('program', memory_monitor_test + '.py')
-    cdata.set('env', '')
     configure_file(
-      input: installed_tests_template_tap,
+      input: installed_tests_template,
       output: memory_monitor_test + '.test',
       install_dir: installed_tests_metadir,
       configuration: cdata
