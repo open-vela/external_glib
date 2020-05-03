@@ -390,14 +390,12 @@ typedef void GRecMutexLocker;
  * Returns: a #GRecMutexLocker
  * Since: 2.60
  */
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 static inline GRecMutexLocker *
 g_rec_mutex_locker_new (GRecMutex *rec_mutex)
 {
   g_rec_mutex_lock (rec_mutex);
   return (GRecMutexLocker *) rec_mutex;
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * g_rec_mutex_locker_free:
@@ -409,13 +407,11 @@ G_GNUC_END_IGNORE_DEPRECATIONS
  *
  * Since: 2.60
  */
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 static inline void
 g_rec_mutex_locker_free (GRecMutexLocker *locker)
 {
   g_rec_mutex_unlock ((GRecMutex *) locker);
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * GRWLockWriterLocker:
@@ -498,14 +494,12 @@ typedef void GRWLockWriterLocker;
  * Returns: a #GRWLockWriterLocker
  * Since: 2.62
  */
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 static inline GRWLockWriterLocker *
 g_rw_lock_writer_locker_new (GRWLock *rw_lock)
 {
   g_rw_lock_writer_lock (rw_lock);
   return (GRWLockWriterLocker *) rw_lock;
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * g_rw_lock_writer_locker_free:
@@ -518,13 +512,11 @@ G_GNUC_END_IGNORE_DEPRECATIONS
  *
  * Since: 2.62
  */
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 static inline void
 g_rw_lock_writer_locker_free (GRWLockWriterLocker *locker)
 {
   g_rw_lock_writer_unlock ((GRWLock *) locker);
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * GRWLockReaderLocker:
@@ -551,14 +543,12 @@ typedef void GRWLockReaderLocker;
  * Returns: a #GRWLockReaderLocker
  * Since: 2.62
  */
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 static inline GRWLockReaderLocker *
 g_rw_lock_reader_locker_new (GRWLock *rw_lock)
 {
   g_rw_lock_reader_lock (rw_lock);
   return (GRWLockReaderLocker *) rw_lock;
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 /**
  * g_rw_lock_reader_locker_free:
@@ -571,13 +561,11 @@ G_GNUC_END_IGNORE_DEPRECATIONS
  *
  * Since: 2.62
  */
-G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 static inline void
 g_rw_lock_reader_locker_free (GRWLockReaderLocker *locker)
 {
   g_rw_lock_reader_unlock ((GRWLock *) locker);
 }
-G_GNUC_END_IGNORE_DEPRECATIONS
 
 G_END_DECLS
 
