@@ -38,7 +38,7 @@ export CCACHE_BASEDIR CCACHE_DIR
 
 pip3 install --upgrade --user meson==0.49.2
 
-PATH="$(cygpath "$USERPROFILE")/.local/bin:$HOME/.local/bin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
 CFLAGS="-coverage -ftest-coverage -fprofile-arcs"
 DIR="$(pwd)"
 export PATH CFLAGS
