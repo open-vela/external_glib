@@ -153,7 +153,6 @@ enum_name: @enum_name@
 ENUMNAME: @ENUMNAME@
 ENUMSHORT: @ENUMSHORT@
 ENUMPREFIX: @ENUMPREFIX@
-enumsince: @enumsince@
 type: @type@
 Type: @Type@
 TYPE: @TYPE@
@@ -166,7 +165,6 @@ enum_name: @enum_name@
 ENUMNAME: @ENUMNAME@
 ENUMSHORT: @ENUMSHORT@
 ENUMPREFIX: @ENUMPREFIX@
-enumsince: @enumsince@
 type: @type@
 Type: @Type@
 TYPE: @TYPE@
@@ -189,7 +187,6 @@ enum_name: @enum_name@
 ENUMNAME: @ENUMNAME@
 ENUMSHORT: @ENUMSHORT@
 ENUMPREFIX: @ENUMPREFIX@
-enumsince: @enumsince@
 type: @type@
 Type: @Type@
 TYPE: @TYPE@
@@ -228,7 +225,7 @@ file-tail
 
     def assertSingleEnum(self, result, enum_name_camel, enum_name_lower,
                          enum_name_upper, enum_name_short, enum_prefix,
-                         enum_since, type_lower, type_camel, type_upper,
+                         type_lower, type_camel, type_upper,
                          value_name, value_nick, value_num):
         """Assert that out (from runMkenumsWithHeader()) contains a single
            enum and value matching the given arguments."""
@@ -238,7 +235,6 @@ file-tail
             'enum_name_upper': enum_name_upper,
             'enum_name_short': enum_name_short,
             'enum_prefix': enum_prefix,
-            'enum_since': enum_since,
             'type_lower': type_lower,
             'type_camel': type_camel,
             'type_upper': type_upper,
@@ -262,7 +258,6 @@ enum_name: {enum_name_lower}
 ENUMNAME: {enum_name_upper}
 ENUMSHORT: {enum_name_short}
 ENUMPREFIX: {enum_prefix}
-enumsince: {enum_since}
 type: {type_lower}
 Type: {type_camel}
 TYPE: {type_upper}
@@ -272,7 +267,6 @@ enum_name: {enum_name_lower}
 ENUMNAME: {enum_name_upper}
 ENUMSHORT: {enum_name_short}
 ENUMPREFIX: {enum_prefix}
-enumsince: {enum_since}
 type: {type_lower}
 Type: {type_camel}
 TYPE: {type_upper}
@@ -289,7 +283,6 @@ enum_name: {enum_name_lower}
 ENUMNAME: {enum_name_upper}
 ENUMSHORT: {enum_name_short}
 ENUMPREFIX: {enum_prefix}
-enumsince: {enum_since}
 type: {type_lower}
 Type: {type_camel}
 TYPE: {type_upper}
@@ -367,7 +360,7 @@ comment: {standard_bottom_comment}
         self.assertEqual('', result.err)
         self.assertSingleEnum(result, 'SomeEnumIdentifier',
                               'some_enum_identifier', 'SOME_ENUM_IDENTIFIER',
-                              'ENUM_IDENTIFIER', 'SOME', '', 'enum', 'Enum',
+                              'ENUM_IDENTIFIER', 'SOME', 'enum', 'Enum',
                               'ENUM', 'ENUM_VALUE', 'value', '0')
 
     def test_non_utf8_encoding(self):
@@ -382,7 +375,7 @@ comment: {standard_bottom_comment}
         self.assertIn('WARNING: UnicodeWarning: ', result.err)
         self.assertSingleEnum(result, 'SomeEnumIdentifier',
                               'some_enum_identifier', 'SOME_ENUM_IDENTIFIER',
-                              'ENUM_IDENTIFIER', 'SOME', '', 'enum', 'Enum',
+                              'ENUM_IDENTIFIER', 'SOME', 'enum', 'Enum',
                               'ENUM', 'ENUM_VALUE', 'value', '0')
 
     def test_reproducible(self):
@@ -437,7 +430,7 @@ comment: {standard_bottom_comment}
         self.assertEqual('', result.err)
         self.assertSingleEnum(result, 'GeglSamplerType',
                               'gegl_sampler_type', 'GEGL_SAMPLER_TYPE',
-                              'SAMPLER_TYPE', 'GEGL', '', 'enum', 'Enum',
+                              'SAMPLER_TYPE', 'GEGL', 'enum', 'Enum',
                               'ENUM', 'GEGL_SAMPLER_NEAREST', 'nearest', '0')
 
     def test_filename_basename_in_fhead_ftail(self):
@@ -484,20 +477,6 @@ comment
 comment: {standard_bottom_comment}
 '''.format(**result.subs).strip(), result.out)
 
-    def test_since(self):
-        """Test user-provided 'since' version handling
-        https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1492"""
-        h_contents = '''
-        typedef enum { /*< since=1.0 >*/
-            QMI_WMS_MESSAGE_PROTOCOL_CDMA = 0,
-        } QmiWmsMessageProtocol;
-        '''
-        result = self.runMkenumsWithHeader(h_contents)
-        self.assertEqual('', result.err)
-        self.assertSingleEnum(result, 'QmiWmsMessageProtocol',
-                              'qmi_wms_message_protocol', 'QMI_WMS_MESSAGE_PROTOCOL',
-                              'WMS_MESSAGE_PROTOCOL', 'QMI', '1.0', 'enum', 'Enum',
-                              'ENUM', 'QMI_WMS_MESSAGE_PROTOCOL_CDMA', 'cdma', '0')
 
 class TestRspMkenums(TestMkenums):
     '''Run all tests again in @rspfile mode'''
