@@ -51,6 +51,7 @@
 
 #include "gfileattribute.h"
 #include "glocalfile.h"
+#include "glocalfileprivate.h"
 #include "glocalfileinfo.h"
 #include "glocalfileenumerator.h"
 #include "glocalfileinputstream.h"
@@ -111,10 +112,6 @@ G_DEFINE_TYPE_WITH_CODE (GLocalFile, g_local_file, G_TYPE_OBJECT,
 						g_local_file_file_iface_init))
 
 static char *find_mountpoint_for (const char *file, dev_t dev, gboolean resolve_basename_symlink);
-
-#ifndef G_OS_WIN32
-static gboolean is_remote_fs (const gchar *filename);
-#endif
 
 static void
 g_local_file_finalize (GObject *object)
@@ -693,8 +690,6 @@ get_fs_type (long f_type)
       return "smackfs";
     case 0x517B:
       return "smb";
-    case 0xfe534d42:
-      return "smb2";
     case 0x534F434B:
       return "sockfs";
     case 0x73717368:
@@ -1115,13 +1110,11 @@ g_local_file_query_filesystem_info (GFile         *file,
       get_mount_info (info, local->filename, attribute_matcher);
 #endif /* G_OS_WIN32 */
     }
-
-#ifndef G_OS_WIN32
+  
   if (g_file_attribute_matcher_matches (attribute_matcher,
-                                        G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE))
-    g_file_info_set_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE,
-                                       is_remote_fs (local->filename));
-#endif
+					G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE))
+      g_file_info_set_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_REMOTE,
+					 g_local_file_is_remote (local->filename));
 
   g_file_attribute_matcher_unref (attribute_matcher);
   
