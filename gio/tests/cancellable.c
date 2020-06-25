@@ -29,8 +29,8 @@ static gint num_async_operations = 0;
 
 typedef struct
 {
-  guint iterations_requested;  /* construct-only */
-  guint iterations_done;  /* (atomic) */
+  guint iterations_requested;
+  guint iterations_done;
 } MockOperationData;
 
 static void
@@ -54,13 +54,13 @@ mock_operation_thread (GTask        *task,
       if (g_cancellable_is_cancelled (cancellable))
         break;
       if (g_test_verbose ())
-        g_test_message ("THRD: %u iteration %u", data->iterations_requested, i);
+        g_printerr ("THRD: %u iteration %u\n", data->iterations_requested, i);
       g_usleep (WAIT_ITERATION * 1000);
     }
 
   if (g_test_verbose ())
-    g_test_message ("THRD: %u stopped at %u", data->iterations_requested, i);
-  g_atomic_int_add (&data->iterations_done, i);
+    g_printerr ("THRD: %u stopped at %u\n", data->iterations_requested, i);
+  data->iterations_done = i;
 
   g_task_return_boolean (task, TRUE);
 }
@@ -71,13 +71,11 @@ mock_operation_timeout (gpointer user_data)
   GTask *task;
   MockOperationData *data;
   gboolean done = FALSE;
-  guint iterations_done;
 
   task = G_TASK (user_data);
   data = g_task_get_task_data (task);
-  iterations_done = g_atomic_int_get (&data->iterations_done);
 
-  if (iterations_done >= data->iterations_requested)
+  if (data->iterations_done >= data->iterations_requested)
       done = TRUE;
 
   if (g_cancellable_is_cancelled (g_task_get_cancellable (task)))
@@ -86,18 +84,18 @@ mock_operation_timeout (gpointer user_data)
   if (done)
     {
       if (g_test_verbose ())
-        g_test_message ("LOOP: %u stopped at %u",
-                        data->iterations_requested, iterations_done);
+        g_printerr ("LOOP: %u stopped at %u\n", data->iterations_requested,\
+                    data->iterations_done);
       g_task_return_boolean (task, TRUE);
-      return G_SOURCE_REMOVE;
+      return FALSE; /* don't call timeout again */
     }
   else
     {
-      g_atomic_int_inc (&data->iterations_done);
+      data->iterations_done++;
       if (g_test_verbose ())
-        g_test_message ("LOOP: %u iteration %u",
-                        data->iterations_requested, iterations_done + 1);
-      return G_SOURCE_CONTINUE;
+        g_printerr ("LOOP: %u iteration %u\n", data->iterations_requested,
+                    data->iterations_done);
+      return TRUE; /* call timeout */
     }
 }
 
@@ -120,14 +118,14 @@ mock_operation_async (guint                wait_iterations,
     {
       g_task_run_in_thread (task, mock_operation_thread);
       if (g_test_verbose ())
-        g_test_message ("THRD: %d started", wait_iterations);
+        g_printerr ("THRD: %d started\n", wait_iterations);
     }
   else
     {
       g_timeout_add_full (G_PRIORITY_DEFAULT, WAIT_ITERATION, mock_operation_timeout,
                           g_object_ref (task), g_object_unref);
       if (g_test_verbose ())
-        g_test_message ("LOOP: %d started", wait_iterations);
+        g_printerr ("LOOP: %d started\n", wait_iterations);
     }
 
   g_object_unref (task);
@@ -149,8 +147,10 @@ mock_operation_finish (GAsyncResult  *result,
   data = g_task_get_task_data (task);
 
   g_task_propagate_boolean (task, error);
-  return g_atomic_int_get (&data->iterations_done);
+  return data->iterations_done;
 }
+
+GMainLoop *loop;
 
 static void
 on_mock_operation_ready (GObject      *source,
@@ -169,7 +169,17 @@ on_mock_operation_ready (GObject      *source,
 
   g_assert_cmpint (iterations_requested, >, iterations_done);
   num_async_operations--;
-  g_main_context_wakeup (NULL);
+
+  if (!num_async_operations)
+    g_main_loop_quit (loop);
+}
+
+static gboolean
+on_main_loop_timeout_quit (gpointer user_data)
+{
+  GMainLoop *loop = user_data;
+  g_main_loop_quit (loop);
+  return FALSE;
 }
 
 static void
@@ -185,6 +195,7 @@ test_cancel_multiple_concurrent (void)
     }
 
   cancellable = g_cancellable_new ();
+  loop = g_main_loop_new (NULL, FALSE);
 
   for (i = 0; i < 45; i++)
     {
@@ -194,22 +205,21 @@ test_cancel_multiple_concurrent (void)
       num_async_operations++;
     }
 
-  /* Wait for the threads to start up */
-  while (num_async_operations != 45)
-    g_main_context_iteration (NULL, TRUE);
-  g_assert_cmpint (num_async_operations, ==, 45);\
-
+  /* Wait for two iterations, to give threads a chance to start up */
+  g_timeout_add (WAIT_ITERATION * 2, on_main_loop_timeout_quit, loop);
+  g_main_loop_run (loop);
+  g_assert_cmpint (num_async_operations, ==, 45);
   if (g_test_verbose ())
-    g_test_message ("CANCEL: %d operations", num_async_operations);
+    g_printerr ("CANCEL: %d operations\n", num_async_operations);
   g_cancellable_cancel (cancellable);
   g_assert_true (g_cancellable_is_cancelled (cancellable));
 
   /* Wait for all operations to be cancelled */
-  while (num_async_operations != 0)
-    g_main_context_iteration (NULL, TRUE);
+  g_main_loop_run (loop);
   g_assert_cmpint (num_async_operations, ==, 0);
 
   g_object_unref (cancellable);
+  g_main_loop_unref (loop);
 }
 
 static void
@@ -260,7 +270,6 @@ test_cancellable_source_threaded_dispose (void)
   ThreadedDisposeData data;
   GThread *thread = NULL;
   guint i;
-  GPtrArray *cancellables_pending_unref = g_ptr_array_new_with_free_func (g_object_unref);
 
   g_test_summary ("Test a thread race between disposing of a GCancellableSource "
                   "(in one thread) and cancelling the GCancellable it refers "
@@ -300,18 +309,7 @@ test_cancellable_source_threaded_dispose (void)
       /* Race with disposal of the cancellable source. */
       g_cancellable_cancel (cancellable);
 
-      /* This thread can’t drop its reference to the #GCancellable here, as it
-       * might not be the final reference (depending on how the race is
-       * resolved: #GCancellableSource holds a strong ref on the #GCancellable),
-       * and at this point we can’t guarantee to support disposing of a
-       * #GCancellable in a different thread from where it’s created, especially
-       * when signal handlers are connected to it.
-       *
-       * So this is a workaround for a disposal-in-another-thread bug for
-       * #GCancellable, but there’s no hope of debugging and resolving it with
-       * this test setup, and the bug is orthogonal to what’s being tested here
-       * (a race between #GCancellable and #GCancellableSource). */
-      g_ptr_array_add (cancellables_pending_unref, g_steal_pointer (&cancellable));
+      g_object_unref (cancellable);
     }
 
   /* Indicate that the test has finished. Can’t use %NULL as #GAsyncQueue
@@ -324,8 +322,6 @@ test_cancellable_source_threaded_dispose (void)
   g_async_queue_unref (data.cancellable_source_queue);
   g_mutex_clear (&data.mutex);
   g_cond_clear (&data.cond);
-
-  g_ptr_array_unref (cancellables_pending_unref);
 }
 
 int
