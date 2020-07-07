@@ -2393,8 +2393,7 @@ g_strsplit (const gchar *string,
  * g_strsplit_set:
  * @string: The string to be tokenized
  * @delimiters: A nul-terminated string containing bytes that are used
- *     to split the string (it can accept an empty string, which will result
- *     in no string splitting).
+ *     to split the string.
  * @max_tokens: The maximum number of tokens to split @string into.
  *     If this is less than 1, the string is split completely
  *
@@ -2430,7 +2429,7 @@ g_strsplit_set (const gchar *string,
                 const gchar *delimiters,
                 gint         max_tokens)
 {
-  guint8 delim_table[256]; /* 1 = index is a separator; 0 otherwise */
+  gboolean delim_table[256];
   GSList *tokens, *list;
   gint n_tokens;
   const gchar *s;
@@ -2451,9 +2450,6 @@ g_strsplit_set (const gchar *string,
       return result;
     }
 
-  /* Check if each character in @string is a separator, by indexing by the
-   * character value into the @delim_table, which has value 1 stored at an index
-   * if that index is a separator. */
   memset (delim_table, FALSE, sizeof (delim_table));
   for (s = delimiters; *s != '\0'; ++s)
     delim_table[*(guchar *)s] = TRUE;
