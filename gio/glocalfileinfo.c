@@ -305,15 +305,17 @@ name_is_valid (const char *str)
 }
 
 static char *
-hex_escape_buffer (const char *str,
-                   size_t      len,
+hex_escape_string (const char *str, 
                    gboolean   *free_return)
 {
-  size_t num_invalid, i;
+  int num_invalid, i;
   char *escaped_str, *p;
   unsigned char c;
   static char *hex_digits = "0123456789abcdef";
+  int len;
 
+  len = strlen (str);
+  
   num_invalid = 0;
   for (i = 0; i < len; i++)
     {
@@ -347,13 +349,6 @@ hex_escape_buffer (const char *str,
 
   *free_return = TRUE;
   return escaped_str;
-}
-
-static char *
-hex_escape_string (const char *str,
-                   gboolean   *free_return)
-{
-  return hex_escape_buffer (str, strlen (str), free_return);
 }
 
 static char *
@@ -394,10 +389,10 @@ hex_unescape_string (const char *str,
       else
 	*p++ = str[i];
     }
-  if (out_len)
-    *out_len = p - unescaped_str;
   *p++ = 0;
 
+  if (out_len)
+    *out_len = p - unescaped_str;
   *free_return = TRUE;
   return unescaped_str;
 }
@@ -411,7 +406,7 @@ escape_xattr (GFileInfo  *info,
   char *escaped_val;
   gboolean free_escaped_val;
   
-  escaped_val = hex_escape_buffer (value, len, &free_escaped_val);
+  escaped_val = hex_escape_string (value, &free_escaped_val);
   
   g_file_info_set_attribute_string (info, gio_attr, escaped_val);
   
