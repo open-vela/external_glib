@@ -357,8 +357,7 @@ char *      g_uri_escape_string    (const char *unescaped,
 
 GLIB_AVAILABLE_IN_2_66
 GBytes *    g_uri_unescape_bytes   (const char *escaped_string,
-                                    gssize      length,
-                                    const char *illegal_characters);
+                                    gssize      length);
 GLIB_AVAILABLE_IN_2_66
 char *      g_uri_escape_bytes     (const guchar *unescaped,
                                     gsize         length,

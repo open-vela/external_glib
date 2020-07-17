@@ -10,7 +10,7 @@ test_bytes (const guint8 *data,
   if (size > G_MAXSSIZE)
     return;
 
-  unescaped_bytes = g_uri_unescape_bytes ((const gchar *) data, (gssize) size, NULL);
+  unescaped_bytes = g_uri_unescape_bytes ((const gchar *) data, (gssize) size);
   if (unescaped_bytes == NULL)
     return;
 
