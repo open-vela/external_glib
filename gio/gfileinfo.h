@@ -108,8 +108,7 @@ typedef struct _GFileInfoClass   GFileInfoClass;
  *
  * A key in the "standard" namespace for getting the name of the file.
  * The name is the on-disk filename which may not be in any known encoding,
- * and can thus not be generally displayed as is. It is guaranteed to be set on
- * every file.
+ * and can thus not be generally displayed as is.
  * Use #G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME if you need to display the
  * name in a user interface.
  * Corresponding #GFileAttributeType is %G_FILE_ATTRIBUTE_TYPE_BYTE_STRING.
@@ -120,8 +119,8 @@ typedef struct _GFileInfoClass   GFileInfoClass;
  * G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME:
  *
  * A key in the "standard" namespace for getting the display name of the file.
- * A display name is guaranteed to be in UTF-8 and can thus be displayed in
- * the UI. It is guaranteed to be set on every file.
+ * A display name is guaranteed to be in UTF8 and can thus be displayed in
+ * the UI.
  * Corresponding #GFileAttributeType is %G_FILE_ATTRIBUTE_TYPE_STRING.
  **/
 #define G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME "standard::display-name"     /* string */
