@@ -17,7 +17,11 @@
 
 #include "config.h"
 
-#include <Foundation/Foundation.h>
+#ifndef HAVE_COCOA
+#error "Can only build gutils-macos.m on MacOS"
+#endif
+
+#include <Cocoa/Cocoa.h>
 #include "gutils.h"
 #include "gstrfuncs.h"
 
