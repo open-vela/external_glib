@@ -10,9 +10,7 @@
  * See the included COPYING file for more information.
  */
 
-#ifndef GLIB_DISABLE_DEPRECATION_WARNINGS
 #define GLIB_DISABLE_DEPRECATION_WARNINGS
-#endif
 
 #include <glib.h>
 
