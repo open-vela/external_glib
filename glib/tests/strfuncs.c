@@ -19,9 +19,7 @@
  * if advised of the possibility of such damage.
  */
 
-#ifndef GLIB_DISABLE_DEPRECATION_WARNINGS
 #define GLIB_DISABLE_DEPRECATION_WARNINGS
-#endif
 
 #define _XOPEN_SOURCE 600
 #include <ctype.h>

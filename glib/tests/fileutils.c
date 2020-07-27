@@ -24,9 +24,7 @@
 #include <errno.h>
 
 /* We are testing some deprecated APIs here */
-#ifndef GLIB_DISABLE_DEPRECATION_WARNINGS
 #define GLIB_DISABLE_DEPRECATION_WARNINGS
-#endif
 
 #include <glib.h>
 

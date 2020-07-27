@@ -2,9 +2,7 @@
 #undef G_LOG_DOMAIN
 
 /* We are testing some deprecated APIs here */
-#ifndef GLIB_DISABLE_DEPRECATION_WARNINGS
 #define GLIB_DISABLE_DEPRECATION_WARNINGS
-#endif
 
 #include "config.h"
 
