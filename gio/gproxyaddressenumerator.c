@@ -93,14 +93,39 @@ G_DEFINE_TYPE_WITH_PRIVATE (GProxyAddressEnumerator, g_proxy_address_enumerator,
 
 static void
 save_userinfo (GProxyAddressEnumeratorPrivate *priv,
-               const gchar *proxy)
+	       const gchar *proxy)
 {
-  g_clear_pointer (&priv->proxy_username, g_free);
-  g_clear_pointer (&priv->proxy_password, g_free);
+  gchar *userinfo;
 
-  g_uri_split_with_user (proxy, G_URI_FLAGS_HAS_PASSWORD, NULL,
-                         &priv->proxy_username, &priv->proxy_password,
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+  if (priv->proxy_username)
+    {
+      g_free (priv->proxy_username);
+      priv->proxy_username = NULL;
+    }
+
+  if (priv->proxy_password)
+    {
+      g_free (priv->proxy_password);
+      priv->proxy_password = NULL;
+    }
+  
+  if (_g_uri_parse_authority (proxy, NULL, NULL, &userinfo, NULL))
+    {
+      if (userinfo)
+	{
+	  gchar **split = g_strsplit (userinfo, ":", 2);
+
+	  if (split[0] != NULL)
+	    {
+	      priv->proxy_username = g_uri_unescape_string (split[0], NULL);
+	      if (split[1] != NULL)
+		priv->proxy_password = g_uri_unescape_string (split[1], NULL);
+	    }
+
+	  g_strfreev (split);
+	  g_free (userinfo);
+	}
+    }
 }
 
 static void

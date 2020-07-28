@@ -772,6 +772,17 @@ if cc.links('''#include <sys/eventfd.h>
   glib_conf.set('HAVE_EVENTFD', 1)
 endif
 
+# Check for __uint128_t (gcc) by checking for 128-bit division
+uint128_t_src = '''int main() {
+static __uint128_t v1 = 100;
+static __uint128_t v2 = 10;
+static __uint128_t u;
+u = v1 / v2;
+}'''
+if cc.compiles(uint128_t_src, name : '__uint128_t available')
+  glib_conf.set('HAVE_UINT128_T', 1)
+endif
+
 clock_gettime_test_code = '''
   #include <time.h>
   struct timespec t;
@@ -862,6 +873,17 @@ if cc.compiles('''#include <fcntl.h>
                     open(0, O_DIRECTORY, 0);
                   }''', name : 'open() option O_DIRECTORY')
   glib_conf.set('HAVE_OPEN_O_DIRECTORY', 1)
+endif
+
+# fcntl takes F_FULLFSYNC as an option
+# See https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fsync.2.html
+if cc.compiles('''#include <fcntl.h>
+                  #include <sys/types.h>
+                  #include <sys/stat.h>
+                  void some_func (void) {
+                    fcntl(0, F_FULLFSYNC, 0);
+                  }''', name : 'fcntl() option F_FULLFSYNC')
+  glib_conf.set('HAVE_FCNTL_F_FULLFSYNC', 1)
 endif
 
 # Check whether there is a vsnprintf() function with C99 semantics installed.
