@@ -830,36 +830,6 @@ get_mount_info (GFileInfo             *fs_info,
 
 #ifdef G_OS_WIN32
 
-static gboolean
-is_xp_or_later (void)
-{
-  static int result = -1;
-
-  if (result == -1)
-    {
-#ifndef _MSC_VER    
-      OSVERSIONINFOEX ver_info = {0};
-      DWORDLONG cond_mask = 0;
-      int op = VER_GREATER_EQUAL;
-
-      ver_info.dwOSVersionInfoSize = sizeof ver_info;
-      ver_info.dwMajorVersion = 5;
-      ver_info.dwMinorVersion = 1;
-
-      VER_SET_CONDITION (cond_mask, VER_MAJORVERSION, op);
-      VER_SET_CONDITION (cond_mask, VER_MINORVERSION, op);
-
-      result = VerifyVersionInfo (&ver_info,
-				  VER_MAJORVERSION | VER_MINORVERSION, 
-				  cond_mask) != 0;
-#else
-      result = ((DWORD)(LOBYTE (LOWORD (GetVersion ())))) >= 5;  
-#endif
-    }
-
-  return result;
-}
-
 static wchar_t *
 get_volume_for_path (const char *path)
 {
@@ -918,18 +888,10 @@ get_filesystem_readonly (GFileInfo  *info,
 
   if (rootdir)
     {
-      if (is_xp_or_later ())
-        {
-          DWORD flags;
-          if (GetVolumeInformationW (rootdir, NULL, 0, NULL, NULL, &flags, NULL, 0))
-	    g_file_info_set_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY,
-					       (flags & FILE_READ_ONLY_VOLUME) != 0);
-        }
-      else
-        {
-          if (GetDriveTypeW (rootdir) == DRIVE_CDROM)
-	    g_file_info_set_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY, TRUE);
-        }
+      DWORD flags;
+      if (GetVolumeInformationW (rootdir, NULL, 0, NULL, NULL, &flags, NULL, 0))
+        g_file_info_set_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY,
+                                           (flags & FILE_READ_ONLY_VOLUME) != 0);
     }
 
   g_free (rootdir);
@@ -2211,7 +2173,9 @@ g_local_file_trash (GFile         *file,
 			  original_name_escaped, delete_time);
   g_free (delete_time);
 
-  g_file_set_contents (infofile, data, -1, NULL);
+  g_file_set_contents_full (infofile, data, -1,
+                            G_FILE_SET_CONTENTS_CONSISTENT | G_FILE_SET_CONTENTS_ONLY_EXISTING,
+                            0600, NULL);
 
   /* TODO: Maybe we should verify that you can delete the file from the trash
    * before moving it? OTOH, that is hard, as it needs a recursive scan

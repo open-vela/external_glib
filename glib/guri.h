@@ -78,7 +78,7 @@ typedef enum {
 } GUriFlags;
 
 GLIB_AVAILABLE_IN_2_66
-gboolean     g_uri_split            (const gchar  *uri_ref,
+gboolean     g_uri_split            (const gchar  *uri_string,
                                      GUriFlags     flags,
                                      gchar       **scheme,
                                      gchar       **userinfo,
@@ -89,7 +89,7 @@ gboolean     g_uri_split            (const gchar  *uri_ref,
                                      gchar       **fragment,
                                      GError      **error);
 GLIB_AVAILABLE_IN_2_66
-gboolean     g_uri_split_with_user  (const gchar  *uri_ref,
+gboolean     g_uri_split_with_user  (const gchar  *uri_string,
                                      GUriFlags     flags,
                                      gchar       **scheme,
                                      gchar       **user,
@@ -141,13 +141,13 @@ GUri *       g_uri_parse            (const gchar  *uri_string,
                                      GError      **error);
 GLIB_AVAILABLE_IN_2_66
 GUri *       g_uri_parse_relative   (GUri         *base_uri,
-                                     const gchar  *uri_ref,
+                                     const gchar  *uri_string,
                                      GUriFlags     flags,
                                      GError      **error);
 
 GLIB_AVAILABLE_IN_2_66
 gchar *      g_uri_resolve_relative (const gchar  *base_uri_string,
-                                     const gchar  *uri_ref,
+                                     const gchar  *uri_string,
                                      GUriFlags     flags,
                                      GError      **error);
 
@@ -358,7 +358,9 @@ char *      g_uri_escape_string    (const char *unescaped,
 GLIB_AVAILABLE_IN_2_66
 GBytes *    g_uri_unescape_bytes   (const char *escaped_string,
                                     gssize      length,
-                                    const char *illegal_characters);
+                                    const char *illegal_characters,
+                                    GError    **error);
+
 GLIB_AVAILABLE_IN_2_66
 char *      g_uri_escape_bytes     (const guchar *unescaped,
                                     gsize         length,

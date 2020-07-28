@@ -31,6 +31,14 @@ variables:
     - bash .gitlab-ci/show-execution-environment.sh
     - cp -r $HOME/subprojects/* subprojects/
 
+# Some jobs take a long time and are unlikely to find failures (or will find
+# failures which are not merge-blockers to fix), so they’re executed on a weekly
+# schedule in order to save CI resources and speed up branch pipelines.
+.build-only-schedules:
+  extends: .build
+  only:
+    - schedules
+
 style-check-diff:
   extends: .only-default
   image: $DEBIAN_IMAGE
@@ -51,6 +59,7 @@ fedora-x86_64:
   extends: .build
   image: $FEDORA_IMAGE
   stage: build
+  needs: []
   variables:
     CFLAGS: "-coverage -ftest-coverage -fprofile-arcs"
   script:
@@ -98,6 +107,7 @@ debian-stable-x86_64:
   extends: .build
   image: $DEBIAN_IMAGE
   stage: build
+  needs: []
   script:
     - meson ${MESON_COMMON_OPTIONS}
             --werror
@@ -123,9 +133,10 @@ debian-stable-x86_64:
       - "_build/${CI_JOB_NAME}-report.xml"
 
 installed-tests:
-  extends: .build
+  extends: .build-only-schedules
   image: $FEDORA_IMAGE
   stage: build
+  needs: []
   script:
     # dtrace is disabled because it breaks the static-link.py test
     - meson ${MESON_COMMON_OPTIONS}
@@ -144,9 +155,8 @@ installed-tests:
     # FIXME Install newer xdg-desktop-portal with
     # GMemoryMonitor support, see:
     # https://github.com/flatpak/xdg-desktop-portal/pull/365
-    - git clone --single-branch https://github.com/flatpak/xdg-desktop-portal.git
+    - git clone --branch 1.6.0 --depth 1 --no-tags https://github.com/flatpak/xdg-desktop-portal.git
     - cd xdg-desktop-portal
-    - git reset --hard 1.6.0
     - ./autogen.sh --prefix=/usr --libdir=/usr/lib64 --disable-libportal --disable-dependency-tracking
     - make
     - sudo make install
@@ -154,7 +164,7 @@ installed-tests:
     # FIXME install newer gobject-introspection
     # with GMemoryMonitor support, see:
     # https://gitlab.gnome.org/GNOME/gobject-introspection/merge_requests/193
-    - git clone --single-branch https://gitlab.gnome.org/GNOME/gobject-introspection.git
+    - git clone --branch master --depth 1 --no-tags https://gitlab.gnome.org/GNOME/gobject-introspection.git
     - cd gobject-introspection
     - /usr/bin/meson _build --prefix=/usr --libdir=/usr/lib64
     - ninja -C _build
@@ -177,9 +187,10 @@ installed-tests:
       - "_build/installed-tests-report/"
 
 G_DISABLE_ASSERT:
-  extends: .build
+  extends: .build-only-schedules
   image: $FEDORA_IMAGE
   stage: build
+  needs: []
   script:
     - meson ${MESON_COMMON_OPTIONS}
             --werror
@@ -203,9 +214,10 @@ G_DISABLE_ASSERT:
       - "_build/${CI_JOB_NAME}-report.xml"
 
 valgrind:
-  extends: .build
+  extends: .build-only-schedules
   image: $FEDORA_IMAGE
   stage: analysis
+  needs: []
   variables:
     MESON_TEST_TIMEOUT_MULTIPLIER: 10
   script:
@@ -238,6 +250,7 @@ valgrind:
 .cross-template: &cross-template
   extends: .build
   stage: build
+  needs: []
   artifacts:
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
@@ -275,6 +288,7 @@ msys2-mingw32:
   stage: build
   tags:
     - win32-ps
+  needs: []
   variables:
     MSYSTEM: "MINGW32"
     CHERE_INVOKING: "yes"
@@ -297,6 +311,7 @@ vs2017-x64:
   stage: build
   tags:
     - win32-ps
+  needs: []
   script:
     - .gitlab-ci/test-msvc.bat
   artifacts:
@@ -318,6 +333,7 @@ freebsd-11-x86_64:
     # To compile GLib, you still have to install the following packages:
     # desktop-file-utils gettext libiconv meson pkgconf python3 shared-mime-info
     - freebsd-11
+  needs: []
   variables:
     # CPPFLAGS is required because libintl doesn't use pkg-config.
     CPPFLAGS: -I/usr/local/include
@@ -355,6 +371,7 @@ freebsd-12-x86_64:
     - branches@GNOME/glib
   tags:
     - freebsd-12
+  needs: []
   variables:
     CPPFLAGS: -I/usr/local/include
     LDFLAGS: -L/usr/local/lib -Wl,--disable-new-dtags
@@ -385,6 +402,7 @@ macos:
     - branches@GNOME/glib
   tags:
     - macos
+  needs: []
   before_script:
     - bash .gitlab-ci/show-execution-environment.sh
     - pip3 install --user meson==0.49.2
@@ -418,6 +436,7 @@ coverage:
   extends: .only-default
   image: $FEDORA_IMAGE
   stage: coverage
+  needs: ['fedora-x86_64', 'msys2-mingw32']
   artifacts:
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     paths:
@@ -429,9 +448,10 @@ coverage:
   coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
 
 scan-build:
-  extends: .build
+  extends: .build-only-schedules
   image: $FEDORA_IMAGE
   stage: analysis
+  needs: []
   script:
     - meson ${MESON_COMMON_OPTIONS}
             --werror
@@ -454,6 +474,7 @@ pages:
   stage: deploy
   only:
     - master
+  needs: ['coverage', 'style-check-diff']
   script:
     - mv _coverage/ public/
   artifacts:
