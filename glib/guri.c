@@ -1330,7 +1330,6 @@ g_uri_resolve_relative (const gchar  *base_uri_string,
 static gchar *
 g_uri_join_internal (GUriFlags    flags,
                      const gchar *scheme,
-                     gboolean     userinfo,
                      const gchar *user,
                      const gchar *password,
                      const gchar *auth_params,
@@ -1356,14 +1355,11 @@ g_uri_join_internal (GUriFlags    flags,
             g_string_append (str, user);
           else
             {
-              if (userinfo)
-                g_string_append_uri_escaped (str, user, USERINFO_ALLOWED_CHARS, TRUE);
-              else
-                /* Encode ':' and ';' regardless of whether we have a
-                 * password or auth params, since it may be parsed later
-                 * under the assumption that it does.
-                 */
-                g_string_append_uri_escaped (str, user, USER_ALLOWED_CHARS, TRUE);
+              /* Encode ':' and ';' regardless of whether we have a
+               * password or auth params, since it may be parsed later
+               * under the assumption that it does.
+               */
+              g_string_append_uri_escaped (str, user, USER_ALLOWED_CHARS, TRUE);
             }
 
           if (password)
@@ -1473,7 +1469,7 @@ g_uri_join (GUriFlags    flags,
 
   return g_uri_join_internal (flags,
                               scheme,
-                              TRUE, userinfo, NULL, NULL,
+                              userinfo, NULL, NULL,
                               host,
                               port,
                               path,
@@ -1525,7 +1521,7 @@ g_uri_join_with_user (GUriFlags    flags,
 
   return g_uri_join_internal (flags,
                               scheme,
-                              FALSE, user, password, auth_params,
+                              user, password, auth_params,
                               host,
                               port,
                               path,
@@ -1595,10 +1591,7 @@ g_uri_build (GUriFlags    flags,
  * @query: (nullable): the query component, or %NULL
  * @fragment: (nullable): the fragment, or %NULL
  *
- * Creates a new #GUri from the given components according to @flags
- * (%G_URI_FLAGS_HAS_PASSWORD is added unconditionally). The @flags must be
- * coherent with the passed values, in particular use `%`-encoded values with
- * %G_URI_FLAGS_ENCODED.
+ * Creates a new #GUri from the given components according to @flags.
 
  * In constrast to g_uri_build(), this allows specifying the components
  * of the "userinfo" field separately. Note that @user must be non-%NULL
@@ -1630,7 +1623,7 @@ g_uri_build_with_user (GUriFlags    flags,
   g_return_val_if_fail (path != NULL, NULL);
 
   uri = g_atomic_rc_box_new0 (GUri);
-  uri->flags = flags | G_URI_FLAGS_HAS_PASSWORD;
+  uri->flags = flags;
   uri->scheme = g_ascii_strdown (scheme, -1);
   uri->user = g_strdup (user);
   uri->password = g_strdup (password);
@@ -1643,19 +1636,33 @@ g_uri_build_with_user (GUriFlags    flags,
 
   if (user)
     {
-      userinfo = g_string_new (user);
+      userinfo = g_string_new (NULL);
+      if (flags & G_URI_FLAGS_ENCODED)
+        g_string_append (userinfo, uri->user);
+      else
+        g_string_append_uri_escaped (userinfo, uri->user, USER_ALLOWED_CHARS, TRUE);
       if (password)
         {
           g_string_append_c (userinfo, ':');
-          g_string_append (userinfo, uri->password);
+          if (flags & G_URI_FLAGS_ENCODED)
+            g_string_append (userinfo, uri->password);
+          else
+            g_string_append_uri_escaped (userinfo, uri->password,
+                                         PASSWORD_ALLOWED_CHARS, TRUE);
         }
       if (auth_params)
         {
           g_string_append_c (userinfo, ';');
-          g_string_append (userinfo, uri->auth_params);
+          if (flags & G_URI_FLAGS_ENCODED)
+            g_string_append (userinfo, uri->auth_params);
+          else
+            g_string_append_uri_escaped (userinfo,
+                                         uri->auth_params, AUTH_PARAMS_ALLOWED_CHARS, TRUE);
         }
       uri->userinfo = g_string_free (userinfo, FALSE);
     }
+  else
+    uri->userinfo = NULL;
 
   return uri;
 }
