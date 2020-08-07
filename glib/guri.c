@@ -1347,13 +1347,6 @@ g_uri_join_internal (GUriFlags    flags,
   gboolean encoded = (flags & G_URI_FLAGS_ENCODED);
   GString *str;
 
-  /* Restrictions on path prefixes. See:
-   * https://tools.ietf.org/html/rfc3986#section-3
-   */
-  g_return_val_if_fail (path != NULL, NULL);
-  g_return_val_if_fail (host == NULL || (path[0] == '\0' || path[0] == '/'), NULL);
-  g_return_val_if_fail (host != NULL || (path[0] != '/' || path[1] != '/'), NULL);
-
   str = g_string_new (scheme);
   if (scheme)
     g_string_append_c (str, ':');
@@ -1461,11 +1454,6 @@ g_uri_join_internal (GUriFlags    flags,
  * Joins the given components together according to @flags to create
  * an absolute URI string. @path may not be %NULL (though it may be "").
  *
- * When @host is present, @path must either be empty or begin with a slash (`/`)
- * character. When @host is not present, @path cannot begin with two slash
-   characters (`//`). See
- * [RFC 3986, section 3](https://tools.ietf.org/html/rfc3986#section-3).
- *
  * See also g_uri_join_with_user(), which allows specifying the
  * components of the "userinfo" separately.
  *
@@ -1515,7 +1503,7 @@ g_uri_join (GUriFlags    flags,
  * an absolute URI string. @path may not be %NULL (though it may be "").
  *
  * In contrast to g_uri_join(), this allows specifying the components
- * of the "userinfo" separately. It otherwise behaves the same.
+ * of the "userinfo" separately.
  *
  * Return value: an absolute URI string
  *
