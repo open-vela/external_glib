@@ -491,7 +491,7 @@ g_io_channel_new_file (const gchar *filename,
             mode_num |= MODE_PLUS;
             break;
           }
-        G_GNUC_FALLTHROUGH;
+        /* Fall through */
       default:
         g_warning ("Invalid GIOFileMode %s.", mode);
         return NULL;
