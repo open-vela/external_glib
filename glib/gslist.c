@@ -127,7 +127,7 @@ g_slist_alloc (void)
 
 /**
  * g_slist_free:
- * @list: the first link of a #GSList
+ * @list: a #GSList
  *
  * Frees all of the memory used by a #GSList.
  * The freed elements are returned to the slice allocator.
@@ -171,7 +171,7 @@ g_slist_free_1 (GSList *list)
 
 /**
  * g_slist_free_full:
- * @list: the first link of a #GSList
+ * @list: a pointer to a #GSList
  * @free_func: the function to be called to free each element's data
  *
  * Convenience method, which frees all the memory used by a #GSList, and
