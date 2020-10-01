@@ -191,12 +191,12 @@ gboolean         g_win32_registry_subkey_iter_next           (GWin32RegistrySubk
                                                               GError                        **error);
 GLIB_AVAILABLE_IN_2_46
 gboolean         g_win32_registry_subkey_iter_get_name       (GWin32RegistrySubkeyIter        *iter,
-                                                              const gchar                    **subkey_name,
+                                                              gchar                          **subkey_name,
                                                               gsize                           *subkey_name_len,
                                                               GError                         **error);
 GLIB_AVAILABLE_IN_2_46
 gboolean         g_win32_registry_subkey_iter_get_name_w     (GWin32RegistrySubkeyIter        *iter,
-                                                              const gunichar2                **subkey_name,
+                                                              gunichar2                      **subkey_name,
                                                               gsize                           *subkey_name_len,
                                                               GError                         **error);
 
