@@ -315,7 +315,7 @@ on_timeout_cb (gpointer user_data)
   g_assert_no_error (error);
 
 
-  return G_SOURCE_CONTINUE;
+  return TRUE;
 }
 
 /* ---------------------------------------------------------------------------------------------------- */

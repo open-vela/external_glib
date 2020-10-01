@@ -14,9 +14,6 @@ glib_tests = {
   'collate' : {},
   'cond' : {},
   'convert' : {},
-  'cxx' : {
-    'source' : ['cxx.cpp'],
-  },
   'dataset' : {},
   'date' : {},
   'dir' : {},
@@ -95,7 +92,6 @@ glib_tests = {
   'spawn-singlethread' : {},
   'strfuncs' : {},
   'string' : {},
-  'strvbuilder' : {},
   'testing' : {},
   'test-printf' : {},
   'thread' : {},

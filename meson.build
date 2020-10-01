@@ -1,5 +1,5 @@
 project('glib', 'c', 'cpp',
-  version : '2.67.0',
+  version : '2.66.0',
   # NOTE: We keep this pinned at 0.49 because that's what Debian 10 ships
   meson_version : '>= 0.49.2',
   default_options : [
@@ -473,7 +473,6 @@ if host_system == 'windows'
 endif
 
 functions = [
-  'close_range',
   'endmntent',
   'endservent',
   'fallocate',

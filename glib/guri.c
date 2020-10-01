@@ -420,13 +420,8 @@ _uri_encoder (GString      *out,
 
   while (p < end)
     {
-      gunichar multibyte_utf8_char = 0;
-
-      if (allow_utf8 && *p >= 0x80)
-        multibyte_utf8_char = g_utf8_get_char_validated ((gchar *)p, end - p);
-
-      if (multibyte_utf8_char > 0 &&
-          multibyte_utf8_char != (gunichar) -1 && multibyte_utf8_char != (gunichar) -2)
+      if (allow_utf8 && *p >= 0x80 &&
+          g_utf8_get_char_validated ((gchar *)p, end - p) > 0)
         {
           gint len = g_utf8_skip [*p];
           g_string_append_len (out, (gchar *)p, len);
@@ -447,100 +442,6 @@ _uri_encoder (GString      *out,
     }
 }
 
-/* Parse the IP-literal construction from RFC 6874 (which extends RFC 3986 to
- * support IPv6 zone identifiers.
- *
- * Currently, IP versions beyond 6 (i.e. the IPvFuture rule) are unsupported.
- * There’s no point supporting them until (a) they exist and (b) the rest of the
- * stack (notably, sockets) supports them.
- *
- * Rules:
- *
- * IP-literal = "[" ( IPv6address / IPv6addrz / IPvFuture  ) "]"
- *
- * ZoneID = 1*( unreserved / pct-encoded )
- *
- * IPv6addrz = IPv6address "%25" ZoneID
- *
- * If %G_URI_FLAGS_PARSE_RELAXED is specified, this function also accepts:
- *
- * IPv6addrz = IPv6address "%" ZoneID
- */
-static gboolean
-parse_ip_literal (const gchar  *start,
-                  gsize         length,
-                  GUriFlags     flags,
-                  gchar       **out,
-                  GError      **error)
-{
-  gchar *pct, *zone_id = NULL;
-  gchar *addr = NULL;
-  gsize addr_length = 0;
-  gsize zone_id_length = 0;
-  gchar *decoded_zone_id = NULL;
-
-  if (start[length - 1] != ']')
-    goto bad_ipv6_literal;
-
-  /* Drop the square brackets */
-  addr = g_strndup (start + 1, length - 2);
-  addr_length = length - 2;
-
-  /* If there's an IPv6 scope ID, split out the zone. */
-  pct = strchr (addr, '%');
-  if (pct != NULL)
-    {
-      *pct = '\0';
-
-      if (addr_length - (pct - addr) >= 4 &&
-          *(pct + 1) == '2' && *(pct + 2) == '5')
-        {
-          zone_id = pct + 3;
-          zone_id_length = addr_length - (zone_id - addr);
-        }
-      else if (flags & G_URI_FLAGS_PARSE_RELAXED &&
-               addr_length - (pct - addr) >= 2)
-        {
-          zone_id = pct + 1;
-          zone_id_length = addr_length - (zone_id - addr);
-        }
-      else
-        goto bad_ipv6_literal;
-
-      g_assert (zone_id_length >= 1);
-    }
-
-  /* addr must be an IPv6 address */
-  if (!g_hostname_is_ip_address (addr) || !strchr (addr, ':'))
-    goto bad_ipv6_literal;
-
-  /* Zone ID must be valid. It can contain %-encoded characters. */
-  if (zone_id != NULL &&
-      !uri_decode (&decoded_zone_id, NULL, zone_id, zone_id_length, FALSE,
-                   flags, G_URI_ERROR_BAD_HOST, NULL))
-    goto bad_ipv6_literal;
-
-  /* Success */
-  if (out != NULL && decoded_zone_id != NULL)
-    *out = g_strconcat (addr, "%", decoded_zone_id, NULL);
-  else if (out != NULL)
-    *out = g_steal_pointer (&addr);
-
-  g_free (addr);
-  g_free (decoded_zone_id);
-
-  return TRUE;
-
-bad_ipv6_literal:
-  g_free (addr);
-  g_free (decoded_zone_id);
-  g_set_error (error, G_URI_ERROR, G_URI_ERROR_BAD_HOST,
-               _("Invalid IPv6 address ‘%.*s’ in URI"),
-               (gint)length, start);
-
-  return FALSE;
-}
-
 static gboolean
 parse_host (const gchar  *start,
             gsize         length,
@@ -548,13 +449,43 @@ parse_host (const gchar  *start,
             gchar       **out,
             GError      **error)
 {
-  gchar *decoded = NULL, *host;
+  gchar *decoded, *host, *pct;
   gchar *addr = NULL;
 
   if (*start == '[')
     {
-      if (!parse_ip_literal (start, length, flags, &host, error))
-        return FALSE;
+      if (start[length - 1] != ']')
+        {
+        bad_ipv6_literal:
+          g_free (addr);
+          g_set_error (error, G_URI_ERROR, G_URI_ERROR_BAD_HOST,
+                       _("Invalid IPv6 address ‘%.*s’ in URI"),
+                       (gint)length, start);
+          return FALSE;
+        }
+
+      addr = g_strndup (start + 1, length - 2);
+
+      /* If there's an IPv6 scope id, ignore it for the moment. */
+      pct = strchr (addr, '%');
+      if (pct)
+        *pct = '\0';
+
+      /* addr must be an IPv6 address */
+      if (!g_hostname_is_ip_address (addr) || !strchr (addr, ':'))
+        goto bad_ipv6_literal;
+
+      if (pct)
+        {
+          *pct = '%';
+          if (strchr (pct + 1, '%'))
+            goto bad_ipv6_literal;
+          /* If the '%' is encoded as '%25' (which it should be), decode it */
+          if (pct[1] == '2' && pct[2] == '5' && pct[3])
+            memmove (pct + 1, pct + 3, strlen (pct + 3) + 1);
+        }
+
+      host = addr;
       goto ok;
     }
 
@@ -574,7 +505,7 @@ parse_host (const gchar  *start,
       if (!uri_normalize (&decoded, start, length, flags,
                           G_URI_ERROR_BAD_HOST, error))
         return FALSE;
-      host = g_steal_pointer (&decoded);
+      host = decoded;
       goto ok;
     }
 
@@ -596,16 +527,18 @@ parse_host (const gchar  *start,
     }
 
   if (g_hostname_is_non_ascii (decoded))
-    host = g_hostname_to_ascii (decoded);
+    {
+      host = g_hostname_to_ascii (decoded);
+      g_free (decoded);
+    }
   else
-    host = g_steal_pointer (&decoded);
+    host = decoded;
 
  ok:
   if (out)
-    *out = g_steal_pointer (&host);
-  g_free (host);
-  g_free (decoded);
-
+    *out = host;
+  else
+    g_free (host);
   return TRUE;
 }
 
@@ -1270,7 +1203,7 @@ remove_dot_segments (gchar *path)
  * valid [absolute URI][relative-absolute-uris], it will be discarded, and an
  * error returned.
  *
- * Return value: (transfer full): a new #GUri, or NULL on error.
+ * Return value: (transfer full): a new #GUri.
  *
  * Since: 2.66
  */
@@ -1297,7 +1230,7 @@ g_uri_parse (const gchar  *uri_string,
  * If the result is not a valid absolute URI, it will be discarded, and an error
  * returned.
  *
- * Return value: (transfer full): a new #GUri, or NULL on error.
+ * Return value: (transfer full): a new #GUri.
  *
  * Since: 2.66
  */
@@ -1414,8 +1347,7 @@ g_uri_parse_relative (GUri         *base_uri,
  * (If @base_uri_string is %NULL, this just returns @uri_ref, or
  * %NULL if @uri_ref is invalid or not absolute.)
  *
- * Return value: (transfer full): the resolved URI string,
- * or NULL on error.
+ * Return value: (transfer full): the resolved URI string.
  *
  * Since: 2.66
  */
@@ -1609,7 +1541,7 @@ g_uri_join_internal (GUriFlags    flags,
  * %G_URI_FLAGS_HAS_PASSWORD and %G_URI_FLAGS_HAS_AUTH_PARAMS are ignored if set
  * in @flags.
  *
- * Return value: (not nullable) (transfer full): an absolute URI string
+ * Return value: (transfer full): an absolute URI string
  *
  * Since: 2.66
  */
@@ -1661,7 +1593,7 @@ g_uri_join (GUriFlags    flags,
  * %G_URI_FLAGS_HAS_PASSWORD and %G_URI_FLAGS_HAS_AUTH_PARAMS are ignored if set
  * in @flags.
  *
- * Return value: (not nullable) (transfer full): an absolute URI string
+ * Return value: (transfer full): an absolute URI string
  *
  * Since: 2.66
  */
@@ -1706,7 +1638,7 @@ g_uri_join_with_user (GUriFlags    flags,
  * See also g_uri_build_with_user(), which allows specifying the
  * components of the "userinfo" separately.
  *
- * Return value: (not nullable) (transfer full): a new #GUri
+ * Return value: (transfer full): a new #GUri
  *
  * Since: 2.66
  */
@@ -1761,7 +1693,7 @@ g_uri_build (GUriFlags    flags,
  * of the ‘userinfo’ field separately. Note that @user must be non-%NULL
  * if either @password or @auth_params is non-%NULL.
  *
- * Return value: (not nullable) (transfer full): a new #GUri
+ * Return value: (transfer full): a new #GUri
  *
  * Since: 2.66
  */
@@ -1834,8 +1766,8 @@ g_uri_build_with_user (GUriFlags    flags,
  * or private data in its query string, and the returned string is going to be
  * logged, then consider using g_uri_to_string_partial() to redact parts.
  *
- * Return value: (not nullable) (transfer full): a string representing @uri,
- *     which the caller must free.
+ * Return value: (transfer full): a string representing @uri, which the caller
+ *     must free.
  *
  * Since: 2.66
  */
@@ -1855,8 +1787,8 @@ g_uri_to_string (GUri *uri)
  * Returns a string representing @uri, subject to the options in
  * @flags. See g_uri_to_string() and #GUriHideFlags for more details.
  *
- * Return value: (not nullable) (transfer full): a string representing
- *     @uri, which the caller must free.
+ * Return value: (transfer full): a string representing @uri, which the caller
+ *     must free.
  *
  * Since: 2.66
  */
@@ -2152,9 +2084,9 @@ g_uri_params_iter_next (GUriParamsIter *iter,
  * If @params cannot be parsed (for example, it contains two @separators
  * characters in a row), then @error is set and %NULL is returned.
  *
- * Return value: (transfer full) (element-type utf8 utf8):
- *     A hash table of attribute/value pairs, with both names and values
- *     fully-decoded; or %NULL on error.
+ * Return value: (transfer full) (element-type utf8 utf8): A hash table of
+ *     attribute/value pairs, with both names and values fully-decoded; or %NULL
+ *     on error.
  *
  * Since: 2.66
  */
@@ -2447,10 +2379,10 @@ g_uri_get_flags (GUri *uri)
  * Note: `NUL` byte is not accepted in the output, in contrast to
  * g_uri_unescape_bytes().
  *
- * Returns: (nullable): an unescaped version of @escaped_string,
- * or %NULL on error. The returned string should be freed when no longer
- * needed.  As a special case if %NULL is given for @escaped_string, this
- * function will return %NULL.
+ * Returns: an unescaped version of @escaped_string or %NULL on error.
+ * The returned string should be freed when no longer needed.  As a
+ * special case if %NULL is given for @escaped_string, this function
+ * will return %NULL.
  *
  * Since: 2.16
  **/
@@ -2503,8 +2435,8 @@ g_uri_unescape_segment (const gchar *escaped_string,
  * want to avoid for instance having a slash being expanded in an
  * escaped path element, which might confuse pathname handling.
  *
- * Returns: (nullable): an unescaped version of @escaped_string.
- * The returned string should be freed when no longer needed.
+ * Returns: an unescaped version of @escaped_string. The returned string
+ * should be freed when no longer needed.
  *
  * Since: 2.16
  **/
@@ -2531,8 +2463,8 @@ g_uri_unescape_string (const gchar *escaped_string,
  * in the URI specification, since those are allowed unescaped in some
  * portions of a URI.
  *
- * Returns: (not nullable): an escaped version of @unescaped. The
- * returned string should be freed when no longer needed.
+ * Returns: an escaped version of @unescaped. The returned string
+ * should be freed when no longer needed.
  *
  * Since: 2.16
  **/
@@ -2572,9 +2504,9 @@ g_uri_escape_string (const gchar *unescaped,
  * being expanded in an escaped path element, which might confuse pathname
  * handling.
  *
- * Returns: (transfer full): an unescaped version of @escaped_string
- *     or %NULL on error (if decoding failed, using %G_URI_ERROR_FAILED error
- *     code). The returned #GBytes should be unreffed when no longer needed.
+ * Returns: (transfer full): an unescaped version of @escaped_string or %NULL on
+ *     error (if decoding failed, using %G_URI_ERROR_FAILED error code). The
+ *     returned #GBytes should be unreffed when no longer needed.
  *
  * Since: 2.66
  **/
@@ -2625,8 +2557,8 @@ g_uri_unescape_bytes (const gchar *escaped_string,
  * Though technically incorrect, this will also allow escaping nul
  * bytes as `%``00`.
  *
- * Returns: (not nullable) (transfer full): an escaped version of @unescaped.
- *     The returned string should be freed when no longer needed.
+ * Returns: (transfer full): an escaped version of @unescaped. The returned
+ *     string should be freed when no longer needed.
  *
  * Since: 2.66
  */

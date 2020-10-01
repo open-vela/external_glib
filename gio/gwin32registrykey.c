@@ -946,7 +946,7 @@ g_win32_registry_subkey_iter_next (GWin32RegistrySubkeyIter  *iter,
  **/
 gboolean
 g_win32_registry_subkey_iter_get_name_w (GWin32RegistrySubkeyIter  *iter,
-                                         const gunichar2          **subkey_name,
+                                         gunichar2                **subkey_name,
                                          gsize                     *subkey_name_len,
                                          GError                   **error)
 {
@@ -988,7 +988,7 @@ g_win32_registry_subkey_iter_get_name_w (GWin32RegistrySubkeyIter  *iter,
  **/
 gboolean
 g_win32_registry_subkey_iter_get_name (GWin32RegistrySubkeyIter  *iter,
-                                       const gchar              **subkey_name,
+                                       gchar                    **subkey_name,
                                        gsize                     *subkey_name_len,
                                        GError                   **error)
 {
@@ -1013,15 +1013,13 @@ g_win32_registry_subkey_iter_get_name (GWin32RegistrySubkeyIter  *iter,
                                           &subkey_name_len_glong,
                                           error);
 
-  if (iter->subkey_name_u8 == NULL)
-    return FALSE;
+  if (iter->subkey_name_u8 != NULL)
+    {
+      *subkey_name_len = subkey_name_len_glong;
+      return TRUE;
+    }
 
-  *subkey_name = iter->subkey_name_u8;
-
-  if (subkey_name_len)
-    *subkey_name_len = subkey_name_len_glong;
-
-  return TRUE;
+  return FALSE;
 }
 
 /**
