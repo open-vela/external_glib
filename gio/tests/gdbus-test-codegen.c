@@ -33,11 +33,6 @@
 
 #include "gdbus-test-codegen-generated-interface-info.h"
 
-#if GLIB_VERSION_MIN_REQUIRED < GLIB_VERSION_2_68
-# undef G_DBUS_METHOD_INVOCATION_HANDLED
-# define G_DBUS_METHOD_INVOCATION_HANDLED TRUE
-#endif
-
 /* ---------------------------------------------------------------------------------------------------- */
 
 static guint
@@ -105,7 +100,7 @@ on_handle_hello_world (FooiGenBar             *object,
   response = g_strdup_printf ("Word! You said '%s'. I'm Skeleton, btw!", greeting);
   foo_igen_bar_complete_hello_world (object, invocation, response);
   g_free (response);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 static gboolean
@@ -150,7 +145,7 @@ on_handle_test_primitive_types (FooiGenBar            *object,
   g_free (s1);
   g_free (s2);
   g_free (s3);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 static gboolean
@@ -190,7 +185,7 @@ on_handle_test_non_primitive_types (FooiGenBar            *object,
                                                   array_of_bytestrings,
                                                   str->str);
   g_string_free (str, TRUE);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 static gboolean
@@ -207,7 +202,7 @@ on_handle_request_signal_emission (FooiGenBar             *object,
       foo_igen_bar_emit_test_signal (object, 43, a_strv, a_bytestring_array, a_variant); /* consumes a_variant */
       foo_igen_bar_complete_request_signal_emission (object, invocation);
     }
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 static gboolean
@@ -223,7 +218,7 @@ on_handle_request_multi_property_mods (FooiGenBar             *object,
   foo_igen_bar_set_y (object, foo_igen_bar_get_y (object) + 1);
   foo_igen_bar_set_i (object, foo_igen_bar_get_i (object) + 1);
   foo_igen_bar_complete_request_multi_property_mods (object, invocation);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 static gboolean
@@ -243,7 +238,7 @@ on_handle_property_cancellation (FooiGenBar             *object,
   g_dbus_interface_skeleton_flush (G_DBUS_INTERFACE_SKELETON (object));
   /* this makes us return the reply D-Bus method */
   foo_igen_bar_complete_property_cancellation (object, invocation);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -298,7 +293,7 @@ on_handle_force_method (FooiGenBat             *object,
   g_variant_unref (ret_ay);
   g_variant_unref (ret_struct);
 
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 
@@ -387,7 +382,7 @@ on_handle_check_not_authorized (FooiGenAuthorize       *object,
                                 gpointer                user_data)
 {
   foo_igen_authorize_complete_check_not_authorized (object, invocation);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 static gboolean
@@ -396,7 +391,7 @@ on_handle_check_authorized (FooiGenAuthorize       *object,
                             gpointer                user_data)
 {
   foo_igen_authorize_complete_check_authorized (object, invocation);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 static gboolean
@@ -405,7 +400,7 @@ on_handle_check_not_authorized_from_object (FooiGenAuthorize       *object,
                                             gpointer                user_data)
 {
   foo_igen_authorize_complete_check_not_authorized_from_object (object, invocation);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -419,7 +414,7 @@ on_handle_get_self (FooiGenMethodThreads   *object,
   s = g_strdup_printf ("%p", (void *)g_thread_self ());
   foo_igen_method_threads_complete_get_self (object, invocation, s);
   g_free (s);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -2650,7 +2645,7 @@ handle_hello_fd (FooiGenFDPassing *object,
                  const gchar *arg_greeting)
 {
   foo_igen_fdpassing_complete_hello_fd (object, invocation, fd_list, arg_greeting);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 #if GLIB_VERSION_MIN_REQUIRED >= GLIB_VERSION_2_64
@@ -2662,7 +2657,7 @@ handle_no_annotation (FooiGenFDPassing *object,
                       const gchar *arg_greeting_locale)
 {
   foo_igen_fdpassing_complete_no_annotation (object, invocation, fd_list, arg_greeting, arg_greeting_locale);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 static gboolean
@@ -2672,7 +2667,7 @@ handle_no_annotation_nested (FooiGenFDPassing *object,
                              GVariant *arg_files)
 {
   foo_igen_fdpassing_complete_no_annotation_nested (object, invocation, fd_list);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 #else
 static gboolean
@@ -2682,7 +2677,7 @@ handle_no_annotation (FooiGenFDPassing *object,
                       const gchar *arg_greeting_locale)
 {
   foo_igen_fdpassing_complete_no_annotation (object, invocation, arg_greeting, arg_greeting_locale);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 
 static gboolean
@@ -2691,7 +2686,7 @@ handle_no_annotation_nested (FooiGenFDPassing *object,
                              GVariant *arg_files)
 {
   foo_igen_fdpassing_complete_no_annotation_nested (object, invocation);
-  return G_DBUS_METHOD_INVOCATION_HANDLED;
+  return TRUE;
 }
 #endif
 

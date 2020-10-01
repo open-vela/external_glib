@@ -95,7 +95,7 @@ static gboolean
 overflow_on_500ms_later_func (gpointer user_data)
 {
   g_main_loop_quit (loop);
-  return G_SOURCE_REMOVE;
+  return FALSE; /* don't keep the idle */
 }
 
 static void
