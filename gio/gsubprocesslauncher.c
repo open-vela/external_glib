@@ -131,52 +131,47 @@ g_subprocess_launcher_set_property (GObject *object, guint prop_id,
 }
 
 static void
-g_subprocess_launcher_dispose (GObject *object)
+g_subprocess_launcher_finalize (GObject *object)
 {
   GSubprocessLauncher *self = G_SUBPROCESS_LAUNCHER (object);
 
 #ifdef G_OS_UNIX
   guint i;
 
-  g_clear_pointer (&self->stdin_path, g_free);
-  g_clear_pointer (&self->stdout_path, g_free);
-  g_clear_pointer (&self->stderr_path, g_free);
+  g_free (self->stdin_path);
+  g_free (self->stdout_path);
+  g_free (self->stderr_path);
 
   if (self->stdin_fd != -1)
     close (self->stdin_fd);
-  self->stdin_fd = -1;
 
   if (self->stdout_fd != -1)
     close (self->stdout_fd);
-  self->stdout_fd = -1;
 
   if (self->stderr_fd != -1)
     close (self->stderr_fd);
-  self->stderr_fd = -1;
 
   if (self->basic_fd_assignments)
     {
       for (i = 0; i < self->basic_fd_assignments->len; i++)
         (void) close (g_array_index (self->basic_fd_assignments, int, i));
-      g_clear_pointer (&self->basic_fd_assignments, g_array_unref);
+      g_array_unref (self->basic_fd_assignments);
     }
   if (self->needdup_fd_assignments)
     {
       for (i = 0; i < self->needdup_fd_assignments->len; i += 2)
         (void) close (g_array_index (self->needdup_fd_assignments, int, i));
-      g_clear_pointer (&self->needdup_fd_assignments, g_array_unref);
+      g_array_unref (self->needdup_fd_assignments);
     }
 
   if (self->child_setup_destroy_notify)
     (* self->child_setup_destroy_notify) (self->child_setup_user_data);
-  self->child_setup_destroy_notify = NULL;
-  self->child_setup_user_data = NULL;
 #endif
 
-  g_clear_pointer (&self->envp, g_strfreev);
-  g_clear_pointer (&self->cwd, g_free);
+  g_strfreev (self->envp);
+  g_free (self->cwd);
 
-  G_OBJECT_CLASS (g_subprocess_launcher_parent_class)->dispose (object);
+  G_OBJECT_CLASS (g_subprocess_launcher_parent_class)->finalize (object);
 }
 
 static void
@@ -199,7 +194,7 @@ g_subprocess_launcher_class_init (GSubprocessLauncherClass *class)
   GObjectClass *gobject_class = G_OBJECT_CLASS (class);
 
   gobject_class->set_property = g_subprocess_launcher_set_property;
-  gobject_class->dispose = g_subprocess_launcher_dispose;
+  gobject_class->finalize = g_subprocess_launcher_finalize;
 
   g_object_class_install_property (gobject_class, 1,
                                    g_param_spec_flags ("flags", "Flags", "GSubprocessFlags for launched processes",
@@ -639,16 +634,12 @@ g_subprocess_launcher_take_fd (GSubprocessLauncher   *self,
 {
   if (source_fd == target_fd)
     {
-      if (self->basic_fd_assignments)
-        g_array_append_val (self->basic_fd_assignments, source_fd);
+      g_array_append_val (self->basic_fd_assignments, source_fd);
     }
   else
     {
-      if (self->needdup_fd_assignments)
-        {
-          g_array_append_val (self->needdup_fd_assignments, source_fd);
-          g_array_append_val (self->needdup_fd_assignments, target_fd);
-        }
+      g_array_append_val (self->needdup_fd_assignments, source_fd);
+      g_array_append_val (self->needdup_fd_assignments, target_fd);
     }
 }
 
