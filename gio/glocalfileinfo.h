@@ -236,12 +236,12 @@ g_local_file_fstatat (int                  fd,
       return -1;
     }
 
-#if !defined(G_OS_WIN32) && defined(AT_FDCWD)
-  return fstatat (fd, path, stat_buf, flags);
-#else
-  /* Currently not supported on Windows or macOS < 10.10 */
+#ifdef G_OS_WIN32
+  /* Currently not supported on Windows */
   errno = ENOSYS;
   return -1;
+#else
+  return fstatat (fd, path, stat_buf, flags);
 #endif
 }
 
