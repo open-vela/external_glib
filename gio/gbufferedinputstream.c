@@ -896,8 +896,7 @@ g_buffered_input_stream_seek (GSeekable     *seekable,
   
   if (type == G_SEEK_CUR)
     {
-      if (offset <= (goffset) (priv->end - priv->pos) &&
-          offset >= (goffset) -priv->pos)
+      if (offset <= priv->end - priv->pos && offset >= -priv->pos)
 	{
 	  priv->pos += offset;
 	  return TRUE;
