@@ -380,9 +380,6 @@ g_strdup (const gchar *str)
  *
  * Returns: a pointer to the newly-allocated copy of the memory, or %NULL if @mem
  *  is %NULL.
- * Deprecated: 2.68: Use g_memdup2() instead, as it accepts a #gsize argument
- *     for @byte_size, avoiding the possibility of overflow in a #gsize → #guint
- *     conversion
  */
 gpointer
 g_memdup (gconstpointer mem,
