@@ -712,7 +712,6 @@ test_fetch_all (gconstpointer d)
   l_exp = data->expected;
   for (i = 0; l_exp != NULL; i++, l_exp = g_slist_next (l_exp))
     {
-      g_assert_nonnull (matches);
       g_assert_cmpstr (l_exp->data, ==, matches[i]);
     }
 
@@ -801,7 +800,6 @@ test_split_simple (gconstpointer d)
   l_exp = data->expected;
   for (i = 0; l_exp != NULL; i++, l_exp = g_slist_next (l_exp))
     {
-      g_assert_nonnull (tokens);
       g_assert_cmpstr (l_exp->data, ==, tokens[i]);
     }
 
@@ -885,7 +883,6 @@ test_split_full (gconstpointer d)
   l_exp = data->expected;
   for (i = 0; l_exp != NULL; i++, l_exp = g_slist_next (l_exp))
     {
-      g_assert_nonnull (tokens);
       g_assert_cmpstr (l_exp->data, ==, tokens[i]);
     }
 
@@ -918,7 +915,6 @@ test_split (gconstpointer d)
   l_exp = data->expected;
   for (i = 0; l_exp != NULL; i++, l_exp = g_slist_next (l_exp))
     {
-      g_assert_nonnull (tokens);
       g_assert_cmpstr (l_exp->data, ==, tokens[i]);
     }
 
