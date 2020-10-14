@@ -565,12 +565,13 @@ g_hash_table_remove_node (GHashTable   *hash_table,
 static void
 g_hash_table_setup_storage (GHashTable *hash_table)
 {
-  gboolean small = FALSE;
+  gboolean small;
 
   /* We want to use small arrays only if:
    *   - we are running on a system where that makes sense (64 bit); and
    *   - we are not running under valgrind.
    */
+  small = FALSE;
 
 #ifdef USE_SMALL_ARRAYS
   small = TRUE;
