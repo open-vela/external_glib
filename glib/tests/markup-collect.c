@@ -219,14 +219,14 @@ test_cleanup (void)
 int
 main (int argc, char **argv)
 {
-  gsize i;
+  int i;
   gchar *path;
 
   g_test_init (&argc, &argv, NULL);
 
   for (i = 0; i < G_N_ELEMENTS (tests); i++)
     {
-      path = g_strdup_printf ("/markup/collect/%" G_GSIZE_FORMAT, i);
+      path = g_strdup_printf ("/markup/collect/%d", i);
       g_test_add_data_func (path, &tests[i], test_collect);
       g_free (path);
     }

@@ -246,7 +246,7 @@ test_error (void)
           "/glib/testing/protocol/critical",
           "/glib/testing/protocol/error"
   };
-  gsize i;
+  gint i;
   int             messages = 0;
 
   for (i = 0; i < G_N_ELEMENTS (tests); i++)
