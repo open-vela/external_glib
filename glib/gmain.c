@@ -2293,7 +2293,7 @@ g_source_unref_internal (GSource      *source,
             g_slist_remove (source->priv->child_sources, child_source);
           child_source->priv->parent_source = NULL;
 
-          g_source_unref_internal (child_source, context, have_lock);
+          g_source_unref_internal (child_source, context, TRUE);
         }
 
       g_slice_free (GSourcePrivate, source->priv);
@@ -5618,7 +5618,7 @@ g_unix_signal_handler (int signum)
  * * the application must not wait for @pid to exit by any other
  *   mechanism, including `waitpid(pid, ...)` or a second child-watch
  *   source for the same @pid
- * * the application must not ignore SIGCHILD
+ * * the application must not ignore `SIGCHLD`
  *
  * If any of those conditions are not met, this and related APIs will
  * not work correctly. This can often be diagnosed via a GLib warning
