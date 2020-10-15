@@ -210,28 +210,28 @@ test_equal (gconstpointer d)
 int
 main (int argc, char** argv)
 {
-  gsize i;
+  gint i;
   gchar *path;
 
   g_test_init (&argc, &argv, NULL);
 
   for (i = 0; i < G_N_ELEMENTS (compile_tests); i++)
     {
-      path = g_strdup_printf ("/pattern/compile/%" G_GSIZE_FORMAT, i);
+      path = g_strdup_printf ("/pattern/compile/%d", i);
       g_test_add_data_func (path, &compile_tests[i], test_compilation);
       g_free (path);
     }
 
   for (i = 0; i < G_N_ELEMENTS (match_tests); i++)
     {
-      path = g_strdup_printf ("/pattern/match/%" G_GSIZE_FORMAT, i);
+      path = g_strdup_printf ("/pattern/match/%d", i);
       g_test_add_data_func (path, &match_tests[i], test_match);
       g_free (path);
     }
 
   for (i = 0; i < G_N_ELEMENTS (equal_tests); i++)
     {
-      path = g_strdup_printf ("/pattern/equal/%" G_GSIZE_FORMAT, i);
+      path = g_strdup_printf ("/pattern/equal/%d", i);
       g_test_add_data_func (path, &equal_tests[i], test_equal);
       g_free (path);
     }
