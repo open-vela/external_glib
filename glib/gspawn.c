@@ -1327,6 +1327,11 @@ safe_closefrom (int lowfd)
    * simple wrapper of the fcntl command.
    */
   (void) fcntl (lowfd, F_CLOSEM);
+#elif defined(HAVE_CLOSE_RANGE)
+  /* close_range() is available in Linux since kernel 5.9, and on FreeBSD at
+   * around the same time. It was designed for use in async-signal-safe
+   * situations: https://bugs.python.org/issue38061 */
+  (void) close_range (lowfd, G_MAXUINT);
 #else
   (void) safe_fdwalk (close_func, GINT_TO_POINTER (lowfd));
 #endif
@@ -1451,6 +1456,9 @@ do_exec (gint                  child_err_report_fd,
   else if (stderr_to_null)
     {
       gint write_null = safe_open ("/dev/null", O_WRONLY);
+      if (write_null < 0)
+        write_err_and_exit (child_err_report_fd,
+                            CHILD_DUP2_FAILED);
       safe_dup2 (write_null, 2);
       close_and_invalidate (&write_null);
     }
