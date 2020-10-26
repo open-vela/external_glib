@@ -79,26 +79,23 @@ on_connected_cancelled (GObject      *source_object,
   g_main_loop_quit (user_data);
 }
 
-typedef struct
+static int
+on_timer (GCancellable *cancel)
 {
-  GCancellable *cancellable;
-  gboolean completed;
-} EventCallbackData;
+  g_cancellable_cancel (cancel);
+  return G_SOURCE_REMOVE;
+}
 
 static void
 on_event (GSocketClient      *client,
           GSocketClientEvent  event,
           GSocketConnectable *connectable,
           GIOStream          *connection,
-          EventCallbackData  *data)
+          gboolean           *got_completed_event)
 {
-  if (data->cancellable && event == G_SOCKET_CLIENT_CONNECTED)
+  if (event == G_SOCKET_CLIENT_COMPLETE)
     {
-      g_cancellable_cancel (data->cancellable);
-    }
-  else if (event == G_SOCKET_CLIENT_COMPLETE)
-    {
-      data->completed = TRUE;
+      *got_completed_event = TRUE;
       g_assert_null (connection);
     }
 }
@@ -111,7 +108,8 @@ test_happy_eyeballs_cancel_delayed (void)
   GError *error = NULL;
   guint16 port;
   GMainLoop *loop;
-  EventCallbackData data = { NULL, FALSE };
+  GCancellable *cancel;
+  gboolean got_completed_event = FALSE;
 
   /* This just tests that cancellation works as expected, still emits the completed signal,
    * and never returns a connection */
@@ -124,16 +122,17 @@ test_happy_eyeballs_cancel_delayed (void)
   g_socket_service_start (service);
 
   client = g_socket_client_new ();
-  data.cancellable = g_cancellable_new ();
-  g_socket_client_connect_to_host_async (client, "localhost", port, data.cancellable, on_connected_cancelled, loop);
-  g_signal_connect (client, "event", G_CALLBACK (on_event), &data);
+  cancel = g_cancellable_new ();
+  g_socket_client_connect_to_host_async (client, "localhost", port, cancel, on_connected_cancelled, loop);
+  g_timeout_add (1, (GSourceFunc) on_timer, cancel);
+  g_signal_connect (client, "event", G_CALLBACK (on_event), &got_completed_event);
   g_main_loop_run (loop);
 
-  g_assert_true (data.completed);
+  g_assert_true (got_completed_event);
   g_main_loop_unref (loop);
   g_object_unref (service);
   g_object_unref (client);
-  g_object_unref (data.cancellable);
+  g_object_unref (cancel);
 }
 
 static void
@@ -145,7 +144,7 @@ test_happy_eyeballs_cancel_instant (void)
   guint16 port;
   GMainLoop *loop;
   GCancellable *cancel;
-  EventCallbackData data = { NULL, FALSE };
+  gboolean got_completed_event = FALSE;
 
   /* This tests the same things as above, test_happy_eyeballs_cancel_delayed(), but
    * with different timing since it sends an already cancelled cancellable */
@@ -161,10 +160,10 @@ test_happy_eyeballs_cancel_instant (void)
   cancel = g_cancellable_new ();
   g_cancellable_cancel (cancel);
   g_socket_client_connect_to_host_async (client, "localhost", port, cancel, on_connected_cancelled, loop);
-  g_signal_connect (client, "event", G_CALLBACK (on_event), &data);
+  g_signal_connect (client, "event", G_CALLBACK (on_event), &got_completed_event);
   g_main_loop_run (loop);
 
-  g_assert_true (data.completed);
+  g_assert_true (got_completed_event);
   g_main_loop_unref (loop);
   g_object_unref (service);
   g_object_unref (client);
