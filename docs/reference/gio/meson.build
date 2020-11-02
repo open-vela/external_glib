@@ -1,5 +1,7 @@
 if get_option('gtk_doc')
-  subdir('gdbus-object-manager-example')
+  if installed_tests_enabled
+    subdir('gdbus-object-manager-example')
+  endif
   subdir('xml')
 
   ignore_headers = [
@@ -176,11 +178,13 @@ if get_option('gtk_doc')
     'gdbus-codegen.xml',
   ]
 
-  content_files += [
-    gdbus_example_objectmanager_xml,
-    gdbus_example_objectmanager_sources,
-    gdbus_object_manager_example_doc
-  ]
+  if installed_tests_enabled
+    content_files += [
+      gdbus_example_objectmanager_xml,
+      gdbus_example_objectmanager_sources,
+      gdbus_object_manager_example_doc
+    ]
+  endif
 
   gnome.gtkdoc('gio',
     main_xml : 'gio-docs.xml',
