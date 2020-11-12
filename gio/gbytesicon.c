@@ -165,7 +165,7 @@ g_bytes_icon_new (GBytes *bytes)
  *
  * Gets the #GBytes associated with the given @icon.
  *
- * Returns: (transfer none): a #GBytes.
+ * Returns: (transfer none): a #GBytes, or %NULL.
  *
  * Since: 2.38
  **/

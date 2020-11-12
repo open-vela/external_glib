@@ -638,7 +638,7 @@ g_mount_operation_new (void)
  * 
  * Get the user name from the mount operation.
  *
- * Returns: (nullable): a string containing the user name.
+ * Returns: a string containing the user name.
  **/
 const char *
 g_mount_operation_get_username (GMountOperation *op)
@@ -650,7 +650,7 @@ g_mount_operation_get_username (GMountOperation *op)
 /**
  * g_mount_operation_set_username:
  * @op: a #GMountOperation.
- * @username: (nullable): input username.
+ * @username: input username.
  *
  * Sets the user name within @op to @username.
  **/
@@ -670,7 +670,7 @@ g_mount_operation_set_username (GMountOperation *op,
  *
  * Gets a password from the mount operation. 
  *
- * Returns: (nullable): a string containing the password within @op.
+ * Returns: a string containing the password within @op.
  **/
 const char *
 g_mount_operation_get_password (GMountOperation *op)
@@ -682,7 +682,7 @@ g_mount_operation_get_password (GMountOperation *op)
 /**
  * g_mount_operation_set_password:
  * @op: a #GMountOperation.
- * @password: (nullable): password to set.
+ * @password: password to set.
  * 
  * Sets the mount operation's password to @password.  
  *
@@ -741,7 +741,7 @@ g_mount_operation_set_anonymous (GMountOperation *op,
  * 
  * Gets the domain of the mount operation.
  * 
- * Returns: (nullable): a string set to the domain.
+ * Returns: a string set to the domain. 
  **/
 const char *
 g_mount_operation_get_domain (GMountOperation *op)
@@ -753,7 +753,7 @@ g_mount_operation_get_domain (GMountOperation *op)
 /**
  * g_mount_operation_set_domain:
  * @op: a #GMountOperation.
- * @domain: (nullable): the domain to set.
+ * @domain: the domain to set.
  * 
  * Sets the mount operation's domain. 
  **/  
