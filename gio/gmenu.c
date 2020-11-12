@@ -781,7 +781,7 @@ g_menu_item_set_link (GMenuItem   *menu_item,
  * type, %NULL is returned.  %NULL is also returned if the attribute
  * simply does not exist.
  *
- * Returns: (nullable) (transfer full): the attribute value, or %NULL
+ * Returns: (transfer full): the attribute value, or %NULL
  *
  * Since: 2.34
  */
@@ -865,7 +865,7 @@ g_menu_item_get_attribute (GMenuItem   *menu_item,
  *
  * Queries the named @link on @menu_item.
  *
- * Returns: (nullable) (transfer full): the link, or %NULL
+ * Returns: (transfer full): the link, or %NULL
  *
  * Since: 2.34
  */
