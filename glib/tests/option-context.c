@@ -111,8 +111,7 @@ test_group_captions (void)
 {
   const gchar *test_name_base[] = { "help", "help-all", "help-test" };
   gchar *test_name;
-  guint i;
-  gsize j;
+  gint i, j;
 
   g_test_bug ("504142");
 
@@ -133,7 +132,7 @@ test_group_captions (void)
           if (g_test_verbose ())
             trap_flags |= G_TEST_SUBPROCESS_INHERIT_STDOUT | G_TEST_SUBPROCESS_INHERIT_STDERR;
 
-          test_name = g_strdup_printf ("/option/group/captions/subprocess/%s-%u",
+          test_name = g_strdup_printf ("/option/group/captions/subprocess/%s-%d",
                                        test_name_base[j], i);
           g_test_trap_subprocess (test_name, 0, trap_flags);
           g_free (test_name);
@@ -943,7 +942,7 @@ callback_test_optional_5 (void)
   gchar **argv_copy;
   int argc;
   GOptionEntry entries [] =
-    { { "dummy", 'd', 0, G_OPTION_ARG_NONE, &dummy, NULL, NULL },
+    { { "dummy", 'd', 0, G_OPTION_ARG_NONE, &dummy, NULL },
       { "test", 't', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, 
 	callback_parse_optional, NULL, NULL },
       { NULL } };
@@ -981,7 +980,7 @@ callback_test_optional_6 (void)
   gchar **argv_copy;
   int argc;
   GOptionEntry entries [] =
-    { { "dummy", 'd', 0, G_OPTION_ARG_NONE, &dummy, NULL, NULL },
+    { { "dummy", 'd', 0, G_OPTION_ARG_NONE, &dummy, NULL },
       { "test", 't', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, 
 	callback_parse_optional, NULL, NULL },
       { NULL } };
@@ -1019,7 +1018,7 @@ callback_test_optional_7 (void)
   gchar **argv_copy;
   int argc;
   GOptionEntry entries [] =
-    { { "dummy", 'd', 0, G_OPTION_ARG_NONE, &dummy, NULL, NULL },
+    { { "dummy", 'd', 0, G_OPTION_ARG_NONE, &dummy, NULL },
       { "test", 't', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, 
 	callback_parse_optional, NULL, NULL },
       { NULL } };
@@ -1057,7 +1056,7 @@ callback_test_optional_8 (void)
   gchar **argv_copy;
   int argc;
   GOptionEntry entries [] =
-    { { "dummy", 'd', 0, G_OPTION_ARG_NONE, &dummy, NULL, NULL },
+    { { "dummy", 'd', 0, G_OPTION_ARG_NONE, &dummy, NULL },
       { "test", 't', G_OPTION_FLAG_OPTIONAL_ARG, G_OPTION_ARG_CALLBACK, 
 	callback_parse_optional, NULL, NULL },
       { NULL } };
@@ -1332,8 +1331,8 @@ ignore_test3 (void)
   g_option_context_free (context);
 }
 
-static void
-array_test1 (void)
+void
+static array_test1 (void)
 {
   GOptionContext *context;
   gboolean retval;
@@ -2362,7 +2361,7 @@ option_context_parse_command_line (GOptionContext *context,
   argv_new_len = g_strv_length (argv);
 
   g_strfreev (argv);
-  return success ? (gint) (argv_len - argv_new_len) : -1;
+  return success ? argv_len - argv_new_len : -1;
 }
 
 static void
