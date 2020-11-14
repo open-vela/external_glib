@@ -23,7 +23,8 @@
 #include <sysprof-capture.h>
 #endif
 
-#include "glib.h"
+#include "gmem.h"
+#include "gmacros.h"
 
 G_BEGIN_DECLS
 
@@ -64,17 +65,6 @@ void (g_trace_mark) (gint64       begin_time_nsec,
 #else
 /* no varargs macro support; the call will have to be optimised out by the compiler */
 #endif
-#endif
-
-guint   (g_trace_define_int64_counter) (const char *group,
-                                        const char *name,
-                                        const char *description);
-void    (g_trace_set_int64_counter)    (guint       id,
-                                        gint64      value);
-
-#ifndef HAVE_SYSPROF
-#define g_trace_define_int64_counter(g, n, d) ((guint) -1)
-#define g_trace_set_int64_counter(i,v)
 #endif
 
 G_END_DECLS
