@@ -2,7 +2,6 @@ FROM debian:buster
 
 RUN apt-get update -qq && apt-get install --no-install-recommends -qq -y \
     bindfs \
-    black \
     clang \
     clang-tools-7 \
     clang-format-7 \
@@ -10,7 +9,6 @@ RUN apt-get update -qq && apt-get install --no-install-recommends -qq -y \
     desktop-file-utils \
     elfutils \
     findutils \
-    flake8 \
     fuse \
     gcc \
     g++ \
@@ -38,7 +36,6 @@ RUN apt-get update -qq && apt-get install --no-install-recommends -qq -y \
     python3-setuptools \
     python3-wheel \
     shared-mime-info \
-    shellcheck \
     systemtap-sdt-dev \
     unzip \
     wget \
