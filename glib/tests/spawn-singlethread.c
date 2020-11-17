@@ -179,7 +179,7 @@ test_spawn_async_with_fds (void)
   int tnum = 1;
   GPtrArray *argv;
   char *arg;
-  gsize i;
+  int i;
 
   /* Each test has 3 variable parameters: stdin, stdout, stderr */
   enum fd_type {

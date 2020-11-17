@@ -752,7 +752,7 @@ static gboolean
 should_normalize_empty_path (const char *scheme)
 {
   const char * const schemes[] = { "https", "http", "wss", "ws" };
-  gsize i;
+  int i;
   for (i = 0; i < G_N_ELEMENTS (schemes); ++i)
     {
       if (!strcmp (schemes[i], scheme))
