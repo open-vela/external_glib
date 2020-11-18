@@ -24,7 +24,6 @@
 #error "Only <glib.h> can be included directly."
 #endif
 
-#include <glib/gerror.h>
 #include <glib/gtypes.h>
 
 G_BEGIN_DECLS
@@ -55,8 +54,6 @@ typedef enum
 
 GLIB_AVAILABLE_IN_ALL
 GTimeZone *             g_time_zone_new                                 (const gchar *identifier);
-GLIB_AVAILABLE_IN_2_68
-GTimeZone *             g_time_zone_new_identifier                      (const gchar *identifier);
 GLIB_AVAILABLE_IN_ALL
 GTimeZone *             g_time_zone_new_utc                             (void);
 GLIB_AVAILABLE_IN_ALL
