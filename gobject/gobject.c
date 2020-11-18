@@ -2005,10 +2005,9 @@ g_object_new_is_valid_property (GType                  object_type,
                                 GParamSpec            *pspec,
                                 const char            *name,
                                 GObjectConstructParam *params,
-                                guint                  n_params)
+                                int                    n_params)
 {
-  guint i;
-
+  gint i;
   if (G_UNLIKELY (pspec == NULL))
     {
       g_critical ("%s: object class '%s' has no property named '%s'",
