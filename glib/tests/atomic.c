@@ -94,9 +94,6 @@ test_types (void)
   res = g_atomic_pointer_compare_and_exchange (&vp_str, NULL, str);
   g_assert_true (res);
 
-  /* Note that atomic variables should almost certainly not be marked as
-   * `volatile` — see http://isvolatileusefulwiththreads.in/c/. This test exists
-   * to make sure that we don’t warn when built against older third party code. */
   g_atomic_pointer_set (&vp_str_vol, NULL);
   res = g_atomic_pointer_compare_and_exchange (&vp_str_vol, NULL, str);
   g_assert_true (res);
@@ -213,9 +210,6 @@ G_GNUC_END_IGNORE_DEPRECATIONS
   res = g_atomic_pointer_compare_and_exchange (&vp_str, NULL, (char *) str);
   g_assert_true (res);
 
-  /* Note that atomic variables should almost certainly not be marked as
-   * `volatile` — see http://isvolatileusefulwiththreads.in/c/. This test exists
-   * to make sure that we don’t warn when built against older third party code. */
   g_atomic_pointer_set (&vp_str_vol, NULL);
   res = g_atomic_pointer_compare_and_exchange (&vp_str_vol, NULL, (char *) str);
   g_assert_true (res);
@@ -254,8 +248,8 @@ G_GNUC_END_IGNORE_DEPRECATIONS
 #define THREADS 10
 #define ROUNDS 10000
 
-gint bucket[THREADS];  /* never contested by threads, not accessed atomically */
-gint atomic;  /* (atomic) */
+volatile gint bucket[THREADS];
+volatile gint atomic;
 
 static gpointer
 thread_func (gpointer data)

@@ -43,8 +43,7 @@ cd pcre
 # the file and then distribute it with GRegex.
 echo "Generating pcre_chartables.c"
 cp -R "${PCRE}" tmp-build
-(
-cd tmp-build || exit 1
+cd tmp-build
 ./configure --enable-utf8 --enable-unicode-properties --disable-cpp > /dev/null
 make pcre_chartables.c > /dev/null
 cat > ../pcre_chartables.c << \EOF
@@ -53,7 +52,7 @@ cat > ../pcre_chartables.c << \EOF
  */
 EOF
 cat pcre_chartables.c >> ../pcre_chartables.c
-)
+cd ..
 rm -R tmp-build
 
 # Compiled C files.

@@ -43,9 +43,9 @@ G_LOCK_DEFINE_STATIC (write);
 typedef struct {
     GFilterOutputStream parent;
 
-    gint started;  /* (atomic) */
-    gint finished;  /* (atomic) */
-    gint flushed;  /* (atomic) */
+    volatile gint started;
+    volatile gint finished;
+    volatile gint flushed;
 
     GOutputStream *real_output;
 } MyOutputStream;

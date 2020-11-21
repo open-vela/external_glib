@@ -1398,7 +1398,7 @@ register_lazy_static_resources (void)
 void
 g_static_resource_init (GStaticResource *static_resource)
 {
-  GStaticResource *next;
+  gpointer next;
 
   do
     {

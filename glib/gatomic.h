@@ -211,7 +211,7 @@ G_END_DECLS
   }))
 #define g_atomic_pointer_and(atomic, val) \
   (G_GNUC_EXTENSION ({                                                       \
-    gsize *gapa_atomic = (gsize *) (atomic);                                 \
+    volatile gsize *gapa_atomic = (volatile gsize *) (atomic);               \
     G_STATIC_ASSERT (sizeof *(atomic) == sizeof (gpointer));                 \
     G_STATIC_ASSERT (sizeof *(atomic) == sizeof (gsize));                    \
     (void) (0 ? (gpointer) *(atomic) : NULL);                                \
@@ -220,7 +220,7 @@ G_END_DECLS
   }))
 #define g_atomic_pointer_or(atomic, val) \
   (G_GNUC_EXTENSION ({                                                       \
-    gsize *gapo_atomic = (gsize *) (atomic);                                 \
+    volatile gsize *gapo_atomic = (volatile gsize *) (atomic);               \
     G_STATIC_ASSERT (sizeof *(atomic) == sizeof (gpointer));                 \
     G_STATIC_ASSERT (sizeof *(atomic) == sizeof (gsize));                    \
     (void) (0 ? (gpointer) *(atomic) : NULL);                                \
@@ -229,7 +229,7 @@ G_END_DECLS
   }))
 #define g_atomic_pointer_xor(atomic, val) \
   (G_GNUC_EXTENSION ({                                                       \
-    gsize *gapx_atomic = (gsize *) (atomic);                                 \
+    volatile gsize *gapx_atomic = (volatile gsize *) (atomic);               \
     G_STATIC_ASSERT (sizeof *(atomic) == sizeof (gpointer));                 \
     G_STATIC_ASSERT (sizeof *(atomic) == sizeof (gsize));                    \
     (void) (0 ? (gpointer) *(atomic) : NULL);                                \
