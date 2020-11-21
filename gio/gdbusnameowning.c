@@ -55,7 +55,7 @@ typedef enum
 
 typedef struct
 {
-  gint                      ref_count;  /* (atomic) */
+  volatile gint             ref_count;
   guint                     id;
   GBusNameOwnerFlags        flags;
   gchar                    *name;
@@ -73,7 +73,7 @@ typedef struct
   guint                     name_acquired_subscription_id;
   guint                     name_lost_subscription_id;
 
-  gboolean                  cancelled; /* must hold lock when reading or modifying */
+  volatile gboolean         cancelled; /* must hold lock when reading or modifying */
 
   gboolean                  needs_release;
 } Client;

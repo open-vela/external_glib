@@ -393,7 +393,7 @@ struct _GDBusConnection
    * FLAG_CLOSED is the closed property. It may be read at any time, but
    * may only be written while holding @lock.
    */
-  gint atomic_flags;  /* (atomic) */
+  volatile gint atomic_flags;
 
   /* If the connection could not be established during initable_init(),
    * this GError will be set.
@@ -1596,7 +1596,7 @@ static gboolean
 g_dbus_connection_send_message_unlocked (GDBusConnection   *connection,
                                          GDBusMessage      *message,
                                          GDBusSendMessageFlags flags,
-                                         guint32           *out_serial,
+                                         volatile guint32  *out_serial,
                                          GError           **error)
 {
   guchar *blob;
@@ -1708,9 +1708,7 @@ g_dbus_connection_send_message_unlocked (GDBusConnection   *connection,
  * will be assigned by @connection and set on @message via
  * g_dbus_message_set_serial(). If @out_serial is not %NULL, then the
  * serial number used will be written to this location prior to
- * submitting the message to the underlying transport. While it has a `volatile`
- * qualifier, this is a historical artifact and the argument passed to it should
- * not be `volatile`.
+ * submitting the message to the underlying transport.
  *
  * If @connection is closed then the operation will fail with
  * %G_IO_ERROR_CLOSED. If @message is not well-formed,
@@ -1743,7 +1741,7 @@ g_dbus_connection_send_message (GDBusConnection        *connection,
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   CONNECTION_LOCK (connection);
-  ret = g_dbus_connection_send_message_unlocked (connection, message, flags, (guint32 *) out_serial, error);
+  ret = g_dbus_connection_send_message_unlocked (connection, message, flags, out_serial, error);
   CONNECTION_UNLOCK (connection);
   return ret;
 }
@@ -1903,7 +1901,7 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
                                                     GDBusMessage        *message,
                                                     GDBusSendMessageFlags flags,
                                                     gint                 timeout_msec,
-                                                    guint32             *out_serial,
+                                                    volatile guint32    *out_serial,
                                                     GCancellable        *cancellable,
                                                     GAsyncReadyCallback  callback,
                                                     gpointer             user_data)
@@ -1911,7 +1909,7 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
   GTask *task;
   SendMessageData *data;
   GError *error = NULL;
-  guint32 serial;
+  volatile guint32 serial;
 
   if (out_serial == NULL)
     out_serial = &serial;
@@ -1981,9 +1979,7 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
  * will be assigned by @connection and set on @message via
  * g_dbus_message_set_serial(). If @out_serial is not %NULL, then the
  * serial number used will be written to this location prior to
- * submitting the message to the underlying transport. While it has a `volatile`
- * qualifier, this is a historical artifact and the argument passed to it should
- * not be `volatile`.
+ * submitting the message to the underlying transport.
  *
  * If @connection is closed then the operation will fail with
  * %G_IO_ERROR_CLOSED. If @cancellable is canceled, the operation will
@@ -2026,7 +2022,7 @@ g_dbus_connection_send_message_with_reply (GDBusConnection       *connection,
                                                       message,
                                                       flags,
                                                       timeout_msec,
-                                                      (guint32 *) out_serial,
+                                                      out_serial,
                                                       cancellable,
                                                       callback,
                                                       user_data);
@@ -2109,9 +2105,7 @@ send_message_with_reply_sync_cb (GDBusConnection *connection,
  * will be assigned by @connection and set on @message via
  * g_dbus_message_set_serial(). If @out_serial is not %NULL, then the
  * serial number used will be written to this location prior to
- * submitting the message to the underlying transport. While it has a `volatile`
- * qualifier, this is a historical artifact and the argument passed to it should
- * not be `volatile`.
+ * submitting the message to the underlying transport.
  *
  * If @connection is closed then the operation will fail with
  * %G_IO_ERROR_CLOSED. If @cancellable is canceled, the operation will
@@ -3088,7 +3082,7 @@ g_dbus_connection_get_peer_credentials (GDBusConnection *connection)
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-static guint _global_filter_id = 1;  /* (atomic) */
+static volatile guint _global_filter_id = 1;
 
 /**
  * g_dbus_connection_add_filter:
@@ -3333,9 +3327,9 @@ args_to_rule (const gchar      *sender,
   return g_string_free (rule, FALSE);
 }
 
-static guint _global_subscriber_id = 1;  /* (atomic) */
-static guint _global_registration_id = 1;  /* (atomic) */
-static guint _global_subtree_registration_id = 1;  /* (atomic) */
+static volatile guint _global_subscriber_id = 1;
+static volatile guint _global_registration_id = 1;
+static volatile guint _global_subtree_registration_id = 1;
 
 /* ---------------------------------------------------------------------------------------------------- */
 
@@ -5998,7 +5992,7 @@ g_dbus_connection_call_sync_internal (GDBusConnection         *connection,
                                                           message,
                                                           send_flags,
                                                           timeout_msec,
-                                                          NULL, /* guint32 *out_serial */
+                                                          NULL, /* volatile guint32 *out_serial */
                                                           cancellable,
                                                           &local_error);
 
