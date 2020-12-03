@@ -1824,7 +1824,6 @@ _g_local_file_has_trash_dir (const char *dirname, dev_t dir_dev)
 {
   static gsize home_dev_set = 0;
   static dev_t home_dev;
-  static gboolean home_dev_valid = FALSE;
   char *topdir, *globaldir, *trashdir, *tmpname;
   uid_t uid;
   char uid_str[32];
@@ -1835,23 +1834,13 @@ _g_local_file_has_trash_dir (const char *dirname, dev_t dir_dev)
     {
       GStatBuf home_stat;
 
-      if (g_stat (g_get_home_dir (), &home_stat) == 0)
-        {
-          home_dev = home_stat.st_dev;
-          home_dev_valid = TRUE;
-        }
-      else
-        {
-          home_dev_valid = FALSE;
-        }
-
+      g_stat (g_get_home_dir (), &home_stat);
+      home_dev = home_stat.st_dev;
       g_once_init_leave (&home_dev_set, 1);
     }
 
   /* Assume we can trash to the home */
-  if (!home_dev_valid)
-    return FALSE;
-  else if (dir_dev == home_dev)
+  if (dir_dev == home_dev)
     return TRUE;
 
   topdir = find_mountpoint_for (dirname, dir_dev, TRUE);
@@ -1983,15 +1972,7 @@ g_local_file_trash (GFile         *file,
     }
     
   homedir = g_get_home_dir ();
-  if (g_stat (homedir, &home_stat) != 0)
-    {
-      errsv = errno;
-
-      g_set_io_error (error,
-                      _("Error trashing file %s: %s"),
-                      file, errsv);
-      return FALSE;
-    }
+  g_stat (homedir, &home_stat);
 
   is_homedir_trash = FALSE;
   trashdir = NULL;
