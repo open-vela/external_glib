@@ -225,7 +225,7 @@ test_valuearray_basic (void)
   GValueArray *a2;
   GValue v = G_VALUE_INIT;
   GValue *p;
-  guint i;
+  gint i;
 
   a = g_value_array_new (20);
 
