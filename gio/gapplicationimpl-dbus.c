@@ -371,7 +371,6 @@ g_application_impl_attempt_primary (GApplicationImpl  *impl,
   GApplicationFlags app_flags;
   GVariant *reply;
   guint32 rval;
-  GError *local_error = NULL;
 
   if (org_gtk_Application == NULL)
     {
@@ -431,14 +430,8 @@ g_application_impl_attempt_primary (GApplicationImpl  *impl,
   if (!app_class->dbus_register (impl->app,
                                  impl->session_bus,
                                  impl->object_path,
-                                 &local_error))
-    {
-      g_return_val_if_fail (local_error != NULL, FALSE);
-      g_propagate_error (error, g_steal_pointer (&local_error));
-      return FALSE;
-    }
-
-  g_return_val_if_fail (local_error == NULL, FALSE);
+                                 error))
+    return FALSE;
 
   if (impl->bus_name == NULL)
     {
