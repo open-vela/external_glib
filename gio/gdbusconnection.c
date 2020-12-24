@@ -393,7 +393,7 @@ struct _GDBusConnection
    * FLAG_CLOSED is the closed property. It may be read at any time, but
    * may only be written while holding @lock.
    */
-  volatile gint atomic_flags;
+  gint atomic_flags;  /* (atomic) */
 
   /* If the connection could not be established during initable_init(),
    * this GError will be set.
@@ -885,7 +885,7 @@ g_dbus_connection_class_init (GDBusConnectionClass *klass)
    *
    * If you are constructing a #GDBusConnection and pass
    * %G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER in the
-   * #GDBusConnection:flags property then you MUST also set this
+   * #GDBusConnection:flags property then you **must** also set this
    * property to a valid guid.
    *
    * If you are constructing a #GDBusConnection and pass
@@ -1102,7 +1102,7 @@ g_dbus_connection_init (GDBusConnection *connection)
  * stream from a worker thread, so it is not safe to interact with
  * the stream directly.
  *
- * Returns: (transfer none): the stream used for IO
+ * Returns: (transfer none) (not nullable): the stream used for IO
  *
  * Since: 2.26
  */
@@ -1596,7 +1596,7 @@ static gboolean
 g_dbus_connection_send_message_unlocked (GDBusConnection   *connection,
                                          GDBusMessage      *message,
                                          GDBusSendMessageFlags flags,
-                                         volatile guint32  *out_serial,
+                                         guint32           *out_serial,
                                          GError           **error)
 {
   guchar *blob;
@@ -1708,7 +1708,9 @@ g_dbus_connection_send_message_unlocked (GDBusConnection   *connection,
  * will be assigned by @connection and set on @message via
  * g_dbus_message_set_serial(). If @out_serial is not %NULL, then the
  * serial number used will be written to this location prior to
- * submitting the message to the underlying transport.
+ * submitting the message to the underlying transport. While it has a `volatile`
+ * qualifier, this is a historical artifact and the argument passed to it should
+ * not be `volatile`.
  *
  * If @connection is closed then the operation will fail with
  * %G_IO_ERROR_CLOSED. If @message is not well-formed,
@@ -1741,7 +1743,7 @@ g_dbus_connection_send_message (GDBusConnection        *connection,
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   CONNECTION_LOCK (connection);
-  ret = g_dbus_connection_send_message_unlocked (connection, message, flags, out_serial, error);
+  ret = g_dbus_connection_send_message_unlocked (connection, message, flags, (guint32 *) out_serial, error);
   CONNECTION_UNLOCK (connection);
   return ret;
 }
@@ -1901,7 +1903,7 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
                                                     GDBusMessage        *message,
                                                     GDBusSendMessageFlags flags,
                                                     gint                 timeout_msec,
-                                                    volatile guint32    *out_serial,
+                                                    guint32             *out_serial,
                                                     GCancellable        *cancellable,
                                                     GAsyncReadyCallback  callback,
                                                     gpointer             user_data)
@@ -1909,7 +1911,7 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
   GTask *task;
   SendMessageData *data;
   GError *error = NULL;
-  volatile guint32 serial;
+  guint32 serial;
 
   if (out_serial == NULL)
     out_serial = &serial;
@@ -1979,7 +1981,9 @@ g_dbus_connection_send_message_with_reply_unlocked (GDBusConnection     *connect
  * will be assigned by @connection and set on @message via
  * g_dbus_message_set_serial(). If @out_serial is not %NULL, then the
  * serial number used will be written to this location prior to
- * submitting the message to the underlying transport.
+ * submitting the message to the underlying transport. While it has a `volatile`
+ * qualifier, this is a historical artifact and the argument passed to it should
+ * not be `volatile`.
  *
  * If @connection is closed then the operation will fail with
  * %G_IO_ERROR_CLOSED. If @cancellable is canceled, the operation will
@@ -2022,7 +2026,7 @@ g_dbus_connection_send_message_with_reply (GDBusConnection       *connection,
                                                       message,
                                                       flags,
                                                       timeout_msec,
-                                                      out_serial,
+                                                      (guint32 *) out_serial,
                                                       cancellable,
                                                       callback,
                                                       user_data);
@@ -2105,7 +2109,9 @@ send_message_with_reply_sync_cb (GDBusConnection *connection,
  * will be assigned by @connection and set on @message via
  * g_dbus_message_set_serial(). If @out_serial is not %NULL, then the
  * serial number used will be written to this location prior to
- * submitting the message to the underlying transport.
+ * submitting the message to the underlying transport. While it has a `volatile`
+ * qualifier, this is a historical artifact and the argument passed to it should
+ * not be `volatile`.
  *
  * If @connection is closed then the operation will fail with
  * %G_IO_ERROR_CLOSED. If @cancellable is canceled, the operation will
@@ -2726,7 +2732,7 @@ g_dbus_connection_new (GIOStream            *stream,
  *
  * Finishes an operation started with g_dbus_connection_new().
  *
- * Returns: a #GDBusConnection or %NULL if @error is set. Free
+ * Returns: (transfer full): a #GDBusConnection or %NULL if @error is set. Free
  *     with g_object_unref().
  *
  * Since: 2.26
@@ -2778,7 +2784,8 @@ g_dbus_connection_new_finish (GAsyncResult  *res,
  * This is a synchronous failable constructor. See
  * g_dbus_connection_new() for the asynchronous version.
  *
- * Returns: a #GDBusConnection or %NULL if @error is set. Free with g_object_unref().
+ * Returns: (transfer full): a #GDBusConnection or %NULL if @error is set.
+ *     Free with g_object_unref().
  *
  * Since: 2.26
  */
@@ -2869,8 +2876,8 @@ g_dbus_connection_new_for_address (const gchar          *address,
  *
  * Finishes an operation started with g_dbus_connection_new_for_address().
  *
- * Returns: a #GDBusConnection or %NULL if @error is set. Free with
- *     g_object_unref().
+ * Returns: (transfer full): a #GDBusConnection or %NULL if @error is set.
+ *     Free with g_object_unref().
  *
  * Since: 2.26
  */
@@ -2921,8 +2928,8 @@ g_dbus_connection_new_for_address_finish (GAsyncResult  *res,
  * If @observer is not %NULL it may be used to control the
  * authentication process.
  *
- * Returns: a #GDBusConnection or %NULL if @error is set. Free with
- *     g_object_unref().
+ * Returns: (transfer full): a #GDBusConnection or %NULL if @error is set.
+ *     Free with g_object_unref().
  *
  * Since: 2.26
  */
@@ -3011,7 +3018,7 @@ g_dbus_connection_get_exit_on_close (GDBusConnection *connection)
  * The GUID of the peer performing the role of server when
  * authenticating. See #GDBusConnection:guid for more details.
  *
- * Returns: The GUID. Do not free this string, it is owned by
+ * Returns: (not nullable): The GUID. Do not free this string, it is owned by
  *     @connection.
  *
  * Since: 2.26
@@ -3082,7 +3089,7 @@ g_dbus_connection_get_peer_credentials (GDBusConnection *connection)
 
 /* ---------------------------------------------------------------------------------------------------- */
 
-static volatile guint _global_filter_id = 1;
+static guint _global_filter_id = 1;  /* (atomic) */
 
 /**
  * g_dbus_connection_add_filter:
@@ -3327,9 +3334,9 @@ args_to_rule (const gchar      *sender,
   return g_string_free (rule, FALSE);
 }
 
-static volatile guint _global_subscriber_id = 1;
-static volatile guint _global_registration_id = 1;
-static volatile guint _global_subtree_registration_id = 1;
+static guint _global_subscriber_id = 1;  /* (atomic) */
+static guint _global_registration_id = 1;  /* (atomic) */
+static guint _global_subtree_registration_id = 1;  /* (atomic) */
 
 /* ---------------------------------------------------------------------------------------------------- */
 
@@ -5504,7 +5511,7 @@ register_with_closures_on_set_property (GDBusConnection *connection,
  * Version of g_dbus_connection_register_object() using closures instead of a
  * #GDBusInterfaceVTable for easier binding in other languages.
  *
- * Returns: 0 if @error is set, otherwise a registration id (never 0)
+ * Returns: 0 if @error is set, otherwise a registration ID (never 0)
  * that can be used with g_dbus_connection_unregister_object() .
  *
  * Since: 2.46
@@ -5992,7 +5999,7 @@ g_dbus_connection_call_sync_internal (GDBusConnection         *connection,
                                                           message,
                                                           send_flags,
                                                           timeout_msec,
-                                                          NULL, /* volatile guint32 *out_serial */
+                                                          NULL, /* guint32 *out_serial */
                                                           cancellable,
                                                           &local_error);
 
@@ -6133,8 +6140,8 @@ g_dbus_connection_call (GDBusConnection     *connection,
  *
  * Finishes an operation started with g_dbus_connection_call().
  *
- * Returns: %NULL if @error is set. Otherwise a #GVariant tuple with
- *     return values. Free with g_variant_unref().
+ * Returns: (transfer full): %NULL if @error is set. Otherwise a non-floating
+ *     #GVariant tuple with return values. Free with g_variant_unref().
  *
  * Since: 2.26
  */
@@ -6200,8 +6207,8 @@ g_dbus_connection_call_finish (GDBusConnection  *connection,
  * g_dbus_connection_call() for the asynchronous version of
  * this method.
  *
- * Returns: %NULL if @error is set. Otherwise a #GVariant tuple with
- *     return values. Free with g_variant_unref().
+ * Returns: (transfer full): %NULL if @error is set. Otherwise a non-floating
+ *     #GVariant tuple with return values. Free with g_variant_unref().
  *
  * Since: 2.26
  */
@@ -6303,8 +6310,8 @@ g_dbus_connection_call_with_unix_fd_list (GDBusConnection     *connection,
  * access file descriptors if they are referenced in this way by a
  * value of type %G_VARIANT_TYPE_HANDLE in the body of the message.
  *
- * Returns: %NULL if @error is set. Otherwise a #GVariant tuple with
- *     return values. Free with g_variant_unref().
+ * Returns: (transfer full): %NULL if @error is set. Otherwise a non-floating
+ *     #GVariant tuple with return values. Free with g_variant_unref().
  *
  * Since: 2.30
  */
@@ -6342,8 +6349,8 @@ g_dbus_connection_call_with_unix_fd_list_finish (GDBusConnection  *connection,
  *
  * This method is only available on UNIX.
  *
- * Returns: %NULL if @error is set. Otherwise a #GVariant tuple with
- *     return values. Free with g_variant_unref().
+ * Returns: (transfer full): %NULL if @error is set. Otherwise a non-floating
+ *     #GVariant tuple with return values. Free with g_variant_unref().
  *
  * Since: 2.30
  */
@@ -6853,8 +6860,8 @@ subtree_message_func (GDBusConnection *connection,
  * See this [server][gdbus-subtree-server] for an example of how to use
  * this method.
  *
- * Returns: 0 if @error is set, otherwise a subtree registration id (never 0)
- * that can be used with g_dbus_connection_unregister_subtree() .
+ * Returns: 0 if @error is set, otherwise a subtree registration ID (never 0)
+ * that can be used with g_dbus_connection_unregister_subtree()
  *
  * Since: 2.26
  */

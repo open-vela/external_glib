@@ -430,16 +430,12 @@ else
                     cc.find_library('dnsapi'),
                     iphlpapi_dep,
                     winsock2]
-  platform_deps += uwp_gio_deps
-
   win32_sources += files(
     'gwin32registrykey.c',
     'gwin32mount.c',
     'gwin32volumemonitor.c',
     'gwin32inputstream.c',
     'gwin32outputstream.c',
-    'gwin32file-sync-stream.c',
-    'gwin32packageparser.c',
     'gwin32networkmonitor.c',
     'gwin32networkmonitor.h',
     'gwin32notificationbackend.c',
@@ -912,6 +908,7 @@ gio_tool_sources = [
   'gio-tool-cat.c',
   'gio-tool-copy.c',
   'gio-tool-info.c',
+  'gio-tool-launch.c',
   'gio-tool-list.c',
   'gio-tool-mime.c',
   'gio-tool-mkdir.c',
