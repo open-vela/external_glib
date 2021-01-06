@@ -275,6 +275,7 @@ headers = [
   'pwd.h',
   'sched.h',
   'spawn.h',
+  'stdatomic.h',
   'stdint.h',
   'stdlib.h',
   'string.h',
@@ -608,7 +609,7 @@ endif
 # When building for Android-20 and earlier, require Meson 0.54.2 or newer.
 # This is needed, because Meson build versions prior to 0.54.2 return false
 # positive for stpcpy has_function check when building for legacy Android.
-if host_system == 'android'
+if host_system.startswith('android-')
     android_is_older = cc.compiles('''#if __ANDROID_API__ >= 21
                                         #error Android is 21 or newer
                                     #endif''')
@@ -1273,7 +1274,7 @@ sizet_size = cc.sizeof('size_t')
 if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
   ssizet_size = cc.sizeof('SSIZE_T', prefix : '#include <BaseTsd.h>')
 else
-  ssizet_size = cc.sizeof('ssize_t', prefix : '#include <unistd.h>')
+  ssizet_size = cc.sizeof('ssize_t')
 endif
 
 # Some platforms (Apple) hard-code int64_t to long long instead of
