@@ -1012,7 +1012,8 @@ g_propagate_error (GError **dest,
  
   if (dest == NULL)
     {
-      g_error_free (src);
+      if (src)
+        g_error_free (src);
       return;
     }
   else
@@ -1111,11 +1112,10 @@ g_propagate_prefixed_error (GError      **dest,
 {
   g_propagate_error (dest, src);
 
-  if (dest)
+  if (dest && *dest)
     {
       va_list ap;
 
-      g_assert (*dest != NULL);
       va_start (ap, format);
       g_error_add_prefix (&(*dest)->message, format, ap);
       va_end (ap);
