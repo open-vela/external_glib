@@ -3767,7 +3767,9 @@ static GSourceFuncs broken_funcs =
   NULL,
   NULL,
   broken_dispatch,
-  NULL
+  NULL,
+  NULL,
+  NULL,
 };
 
 #ifdef G_OS_WIN32
@@ -4082,6 +4084,7 @@ static GSourceFuncs socket_source_funcs =
   socket_source_dispatch,
   socket_source_finalize,
   (GSourceFunc)socket_source_closure_callback,
+  NULL,
 };
 
 static GSource *
@@ -4533,7 +4536,7 @@ G_STMT_START { \
     else \
       /* ABI is incompatible */ \
       { \
-        gint i; \
+        guint i; \
  \
         _msg->msg_iov = g_newa (struct iovec, _message->num_vectors); \
         for (i = 0; i < _message->num_vectors; i++) \
@@ -4548,7 +4551,7 @@ G_STMT_START { \
   /* control */ \
   { \
     struct cmsghdr *cmsg; \
-    gint i; \
+    guint i; \
  \
     _msg->msg_controllen = 0; \
     for (i = 0; i < _message->num_control_messages; i++) \
@@ -4754,9 +4757,9 @@ input_message_from_msghdr (const struct msghdr  *msg,
  * notified of a %G_IO_OUT condition. (On Windows in particular, this is
  * very common due to the way the underlying APIs work.)
  *
- * The sum of the sizes of each #GOutputVector in vectors must not be
- * greater than %G_MAXSSIZE. If the message can be larger than this,
- * then it is mandatory to use the g_socket_send_message_with_timeout()
+ * Finally, it must be mentioned that the whole message buffer cannot
+ * exceed %G_MAXSSIZE, if the message can be more than this, then it
+ * is mandatory to use the g_socket_send_message_with_timeout()
  * function.
  *
  * On error -1 is returned and @error is set accordingly.
@@ -4788,19 +4791,18 @@ g_socket_send_message (GSocket                *socket,
         {
           g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
                        _("Unable to send message: %s"),
-                       _("Message vectors too large"));
+                       _("Message too large"));
           return -1;
         }
 
       vectors_size += vectors[i].size;
     }
-
-  /* Check if vector's buffers are too big for gssize */
+  /* Check if vectors buffers are too big for gssize */
   if (vectors_size > G_MAXSSIZE)
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
                    _("Unable to send message: %s"),
-                   _("Message vectors too large"));
+                   _("Message too large"));
       return -1;
     }
 
@@ -5162,7 +5164,7 @@ g_socket_send_messages_with_timeout (GSocket        *socket,
 #if !defined (G_OS_WIN32) && defined (HAVE_SENDMMSG)
   {
     struct mmsghdr *msgvec;
-    gint i, num_sent;
+    guint i, num_sent;
 
     /* Clamp the number of vectors if more given than we can write in one go.
      * The caller has to handle short writes anyway.
