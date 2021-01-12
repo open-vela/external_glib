@@ -214,7 +214,7 @@ g_pollable_output_stream_default_writev_nonblocking (GPollableOutputStream  *str
 
       _bytes_written += res;
       /* if we had a short write break the loop here */
-      if ((gsize) res < vectors[i].size)
+      if (res < vectors[i].size)
         break;
     }
 
