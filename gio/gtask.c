@@ -2162,9 +2162,7 @@ GSourceFuncs trivial_source_funcs = {
   NULL, /* prepare */
   NULL, /* check */
   trivial_source_dispatch,
-  NULL, /* finalize */
-  NULL, /* closure */
-  NULL  /* marshal */
+  NULL
 };
 
 static void

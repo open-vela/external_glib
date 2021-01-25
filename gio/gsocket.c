@@ -6243,9 +6243,7 @@ g_socket_set_option (GSocket  *socket,
 
   g_return_val_if_fail (G_IS_SOCKET (socket), FALSE);
 
-  /* g_socket_set_option() is called during socket init, so skip the init checks
-   * in check_socket() */
-  if (socket->priv->inited && !check_socket (socket, error))
+  if (!check_socket (socket, error))
     return FALSE;
 
   if (setsockopt (socket->priv->fd, level, optname, &value, sizeof (gint)) == 0)
