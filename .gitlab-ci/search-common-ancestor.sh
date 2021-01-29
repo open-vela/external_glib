@@ -11,9 +11,7 @@ ancestor_horizon=28  # days (4 weeks)
 # Limit the fetch to a certain date horizon to limit the amount of data we get.
 # If the branch was forked from origin/master before this horizon, it should
 # probably be rebased.
-if ! git ls-remote --exit-code upstream >/dev/null 2>&1 ; then
-    git remote add upstream https://gitlab.gnome.org/GNOME/glib.git
-fi
+git remote add upstream https://gitlab.gnome.org/GNOME/glib.git
 git fetch --shallow-since="$(date --date="${ancestor_horizon} days ago" +%Y-%m-%d)" upstream
 
 # Work out the newest common ancestor between the detached HEAD that this CI job

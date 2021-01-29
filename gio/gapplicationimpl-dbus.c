@@ -361,11 +361,10 @@ g_application_impl_attempt_primary (GApplicationImpl  *impl,
                                     GCancellable      *cancellable,
                                     GError           **error)
 {
-  static const GDBusInterfaceVTable vtable = {
+  const static GDBusInterfaceVTable vtable = {
     g_application_impl_method_call,
     g_application_impl_get_property,
-    NULL, /* set_property */
-    { 0 }
+    NULL /* set_property */
   };
   GApplicationClass *app_class = G_APPLICATION_GET_CLASS (impl->app);
   GBusNameOwnerFlags name_owner_flags;
@@ -776,8 +775,8 @@ g_application_impl_command_line (GApplicationImpl    *impl,
                                  const gchar * const *arguments,
                                  GVariant            *platform_data)
 {
-  static const GDBusInterfaceVTable vtable = {
-    g_application_impl_cmdline_method_call, NULL, NULL, { 0 }
+  const static GDBusInterfaceVTable vtable = {
+    g_application_impl_cmdline_method_call
   };
   const gchar *object_path = "/org/gtk/Application/CommandLine";
   GMainContext *context;
