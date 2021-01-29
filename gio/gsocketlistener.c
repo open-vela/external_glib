@@ -606,7 +606,7 @@ add_sources (GSocketListener   *listener,
   GSocket *socket;
   GSource *source;
   GList *sources;
-  guint i;
+  int i;
 
   sources = NULL;
   for (i = 0; i < listener->priv->sockets->len; i++)
@@ -983,7 +983,7 @@ g_socket_listener_set_backlog (GSocketListener *listener,
 			       int              listen_backlog)
 {
   GSocket *socket;
-  guint i;
+  int i;
 
   if (listener->priv->closed)
     return;
@@ -1009,7 +1009,7 @@ void
 g_socket_listener_close (GSocketListener *listener)
 {
   GSocket *socket;
-  guint i;
+  int i;
 
   g_return_if_fail (G_IS_SOCKET_LISTENER (listener));
 

@@ -342,7 +342,6 @@ writtenv_read_write_async_cb (GOutputStream *ostream,
 
   conn = data->conn;
   g_free (data->data);
-  g_free (data->vectors);
   g_free (data);
 
   res = g_output_stream_writev_all_finish (ostream, result, &bytes_written, &error);
