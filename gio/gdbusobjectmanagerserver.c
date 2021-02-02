@@ -888,8 +888,7 @@ static const GDBusInterfaceVTable manager_interface_vtable =
 {
   manager_method_call, /* handle_method_call */
   NULL, /* get_property */
-  NULL, /* set_property */
-  { 0 }
+  NULL  /* set_property */
 };
 
 /* ---------------------------------------------------------------------------------------------------- */
