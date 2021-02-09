@@ -187,28 +187,25 @@ test_pollable_unix_pty (void)
 {
   int (*openpty_impl) (int *, int *, char *, void *, void *);
   int a, b, status;
-#ifdef __linux__
-  void *handle;
-#endif
 
   g_test_summary ("Test that PTYs are considered pollable");
 
 #ifdef __linux__
-  handle = dlopen ("libutil.so", RTLD_GLOBAL | RTLD_LAZY);
+  dlopen ("libutil.so", RTLD_GLOBAL | RTLD_LAZY);
 #endif
 
   openpty_impl = dlsym (RTLD_DEFAULT, "openpty");
   if (openpty_impl == NULL)
     {
       g_test_skip ("System does not support openpty()");
-      goto close_libutil;
+      return;
     }
 
   status = openpty_impl (&a, &b, NULL, NULL, NULL);
   if (status == -1)
     {
       g_test_skip ("Unable to open PTY");
-      goto close_libutil;
+      return;
     }
 
   in = G_POLLABLE_INPUT_STREAM (g_unix_input_stream_new (a, TRUE));
@@ -221,11 +218,6 @@ test_pollable_unix_pty (void)
 
   close (a);
   close (b);
-
-close_libutil:
-#ifdef __linux__
-  dlclose (handle);
-#endif
 }
 
 static void
