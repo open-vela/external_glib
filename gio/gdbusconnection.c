@@ -120,13 +120,6 @@
 
 #include "glibintl.h"
 
-#define G_DBUS_CONNECTION_FLAGS_ALL \
-  (G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT | \
-   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER | \
-   G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS | \
-   G_DBUS_CONNECTION_FLAGS_MESSAGE_BUS_CONNECTION | \
-   G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING)
-
 /**
  * SECTION:gdbusconnection
  * @short_description: D-Bus Connections
@@ -2718,7 +2711,6 @@ g_dbus_connection_new (GIOStream            *stream,
   _g_dbus_initialize ();
 
   g_return_if_fail (G_IS_IO_STREAM (stream));
-  g_return_if_fail ((flags & ~G_DBUS_CONNECTION_FLAGS_ALL) == 0);
 
   g_async_initable_new_async (G_TYPE_DBUS_CONNECTION,
                               G_PRIORITY_DEFAULT,
@@ -2807,7 +2799,6 @@ g_dbus_connection_new_sync (GIOStream             *stream,
 {
   _g_dbus_initialize ();
   g_return_val_if_fail (G_IS_IO_STREAM (stream), NULL);
-  g_return_val_if_fail ((flags & ~G_DBUS_CONNECTION_FLAGS_ALL) == 0, NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
   return g_initable_new (G_TYPE_DBUS_CONNECTION,
                          cancellable,
@@ -2865,7 +2856,6 @@ g_dbus_connection_new_for_address (const gchar          *address,
   _g_dbus_initialize ();
 
   g_return_if_fail (address != NULL);
-  g_return_if_fail ((flags & ~G_DBUS_CONNECTION_FLAGS_ALL) == 0);
 
   g_async_initable_new_async (G_TYPE_DBUS_CONNECTION,
                               G_PRIORITY_DEFAULT,
@@ -2953,7 +2943,6 @@ g_dbus_connection_new_for_address_sync (const gchar           *address,
   _g_dbus_initialize ();
 
   g_return_val_if_fail (address != NULL, NULL);
-  g_return_val_if_fail ((flags & ~G_DBUS_CONNECTION_FLAGS_ALL) == 0, NULL);
   g_return_val_if_fail (error == NULL || *error == NULL, NULL);
   return g_initable_new (G_TYPE_DBUS_CONNECTION,
                          cancellable,
