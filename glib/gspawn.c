@@ -870,25 +870,25 @@ g_spawn_async_with_fds (const gchar          *working_directory,
                         !(flags & G_SPAWN_CHILD_INHERITS_STDIN), FALSE);
 
   return fork_exec_with_fds (!(flags & G_SPAWN_DO_NOT_REAP_CHILD),
-                             working_directory,
-                             argv,
-                             envp,
-                             !(flags & G_SPAWN_LEAVE_DESCRIPTORS_OPEN),
-                             (flags & G_SPAWN_SEARCH_PATH) != 0,
-                             (flags & G_SPAWN_SEARCH_PATH_FROM_ENVP) != 0,
-                             (flags & G_SPAWN_STDOUT_TO_DEV_NULL) != 0,
-                             (flags & G_SPAWN_STDERR_TO_DEV_NULL) != 0,
-                             (flags & G_SPAWN_CHILD_INHERITS_STDIN) != 0,
-                             (flags & G_SPAWN_FILE_AND_ARGV_ZERO) != 0,
-                             (flags & G_SPAWN_CLOEXEC_PIPES) != 0,
-                             child_setup,
-                             user_data,
-                             child_pid,
-                             NULL,
-                             stdin_fd,
-                             stdout_fd,
-                             stderr_fd,
-                             error);
+                               working_directory,
+                               argv,
+                               envp,
+                               !(flags & G_SPAWN_LEAVE_DESCRIPTORS_OPEN),
+                               (flags & G_SPAWN_SEARCH_PATH) != 0,
+                               (flags & G_SPAWN_SEARCH_PATH_FROM_ENVP) != 0,
+                               (flags & G_SPAWN_STDOUT_TO_DEV_NULL) != 0,
+                               (flags & G_SPAWN_STDERR_TO_DEV_NULL) != 0,
+                               (flags & G_SPAWN_CHILD_INHERITS_STDIN) != 0,
+                               (flags & G_SPAWN_FILE_AND_ARGV_ZERO) != 0,
+                               (flags & G_SPAWN_CLOEXEC_PIPES) != 0,
+                               child_setup,
+                               user_data,
+                               child_pid,
+                               NULL,
+                               stdin_fd,
+                               stdout_fd,
+                               stderr_fd,
+                               error);
 }
 
 /**
@@ -1409,9 +1409,11 @@ do_exec (gint                  child_err_report_fd,
                         CHILD_CHDIR_FAILED);
   
   /* Redirect pipes as required */
+  
   if (stdin_fd >= 0)
     {
       /* dup2 can't actually fail here I don't think */
+          
       if (safe_dup2 (stdin_fd, 0) < 0)
         write_err_and_exit (child_err_report_fd,
                             CHILD_DUP2_FAILED);
@@ -1432,6 +1434,7 @@ do_exec (gint                  child_err_report_fd,
   if (stdout_fd >= 0)
     {
       /* dup2 can't actually fail here I don't think */
+          
       if (safe_dup2 (stdout_fd, 1) < 0)
         write_err_and_exit (child_err_report_fd,
                             CHILD_DUP2_FAILED);
@@ -1451,6 +1454,7 @@ do_exec (gint                  child_err_report_fd,
   if (stderr_fd >= 0)
     {
       /* dup2 can't actually fail here I don't think */
+          
       if (safe_dup2 (stderr_fd, 2) < 0)
         write_err_and_exit (child_err_report_fd,
                             CHILD_DUP2_FAILED);
