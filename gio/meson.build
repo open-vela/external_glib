@@ -2,7 +2,6 @@ gio_c_args = [
   '-DG_LOG_DOMAIN="GLib-GIO"',
   '-DGIO_COMPILATION',
   '-DGIO_MODULE_DIR="@0@"'.format(glib_giomodulesdir),
-  '-DLOCALSTATEDIR="@0@"'.format(glib_localstatedir),
 ]
 
 gio_c_args += glib_hidden_visibility_args

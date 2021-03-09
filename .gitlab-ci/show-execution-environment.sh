@@ -9,5 +9,3 @@ setpriv --dump || :
 ulimit -a || :
 cat /proc/self/status || :
 cat /proc/self/mountinfo || :
-stat /etc/machine-id || :
-stat /var/lib/dbus/machine-id || :
