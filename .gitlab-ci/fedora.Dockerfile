@@ -1,8 +1,5 @@
 FROM fedora:31
 
-# Set /etc/machine-id as it’s needed for some D-Bus tests
-RUN systemd-machine-id-setup
-
 RUN dnf -y update \
  && dnf -y install \
     bindfs \
