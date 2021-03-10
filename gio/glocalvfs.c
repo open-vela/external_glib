@@ -80,10 +80,7 @@ static GFile *
 g_local_vfs_get_file_for_path (GVfs       *vfs,
                                const char *path)
 {
-  if (*path == '\0')
-    return _g_dummy_file_new (path);
-  else
-    return _g_local_file_new (path);
+  return _g_local_file_new (path);
 }
 
 static GFile *
