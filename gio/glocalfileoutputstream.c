@@ -943,7 +943,7 @@ handle_overwrite_open (const char    *filename,
 		   _("Error when getting information for file “%s”: %s"),
 		   display_name, g_strerror (errsv));
       g_free (display_name);
-      goto error;
+      goto err_out;
     }
   
   /* not a regular file */
@@ -955,7 +955,7 @@ handle_overwrite_open (const char    *filename,
                                G_IO_ERROR,
                                G_IO_ERROR_IS_DIRECTORY,
                                _("Target file is a directory"));
-          goto error;
+          goto err_out;
         }
       else if (!is_symlink ||
 #ifdef S_ISLNK
@@ -969,7 +969,7 @@ handle_overwrite_open (const char    *filename,
                              G_IO_ERROR,
                              G_IO_ERROR_NOT_REGULAR_FILE,
                              _("Target file is not a regular file"));
-          goto error;
+          goto err_out;
         }
     }
   
@@ -983,7 +983,7 @@ handle_overwrite_open (const char    *filename,
                                G_IO_ERROR_WRONG_ETAG,
                                _("The file was externally modified"));
 	  g_free (current_etag);
-          goto error;
+	  goto err_out;
 	}
       g_free (current_etag);
     }
@@ -1078,7 +1078,7 @@ handle_overwrite_open (const char    *filename,
                                G_IO_ERROR_CANT_CREATE_BACKUP,
                                _("Backup file creation failed"));
 	  g_free (backup_filename);
-          goto error;
+	  goto err_out;
 	}
 
       bfd = g_open (backup_filename,
@@ -1092,7 +1092,7 @@ handle_overwrite_open (const char    *filename,
                                G_IO_ERROR_CANT_CREATE_BACKUP,
                                _("Backup file creation failed"));
 	  g_free (backup_filename);
-          goto error;
+	  goto err_out;
 	}
 
       /* If needed, Try to set the group of the backup same as the
@@ -1109,7 +1109,7 @@ handle_overwrite_open (const char    *filename,
 	  g_unlink (backup_filename);
 	  g_close (bfd, NULL);
 	  g_free (backup_filename);
-          goto error;
+	  goto err_out;
 	}
       
       if ((_g_stat_gid (&original_stat) != _g_stat_gid (&tmp_statbuf))  &&
@@ -1126,7 +1126,7 @@ handle_overwrite_open (const char    *filename,
 	      g_unlink (backup_filename);
 	      g_close (bfd, NULL);
 	      g_free (backup_filename);
-              goto error;
+	      goto err_out;
 	    }
 	}
 #endif
@@ -1141,7 +1141,7 @@ handle_overwrite_open (const char    *filename,
           g_close (bfd, NULL);
 	  g_free (backup_filename);
 	  
-          goto error;
+	  goto err_out;
 	}
       
       g_close (bfd, NULL);
@@ -1156,7 +1156,7 @@ handle_overwrite_open (const char    *filename,
 		       g_io_error_from_errno (errsv),
 		       _("Error seeking in file: %s"),
 		       g_strerror (errsv));
-          goto error;
+	  goto err_out;
 	}
     }
 
@@ -1172,7 +1172,7 @@ handle_overwrite_open (const char    *filename,
 		       g_io_error_from_errno (errsv),
 		       _("Error removing old file: %s"),
 		       g_strerror (errsv));
-          goto error;
+	  goto err_out2;
 	}
 
       if (readable)
@@ -1189,7 +1189,7 @@ handle_overwrite_open (const char    *filename,
 		       _("Error opening file “%s”: %s"),
 		       display_name, g_strerror (errsv));
 	  g_free (display_name);
-          goto error;
+	  goto err_out2;
 	}
     }
   else
@@ -1207,16 +1207,15 @@ handle_overwrite_open (const char    *filename,
 			 g_io_error_from_errno (errsv),
 			 _("Error truncating file: %s"),
 			 g_strerror (errsv));
-            goto error;
+	    goto err_out;
 	  }
     }
     
   return fd;
 
-error:
-  if (fd >= 0)
-    g_close (fd, NULL);
-
+ err_out:
+  g_close (fd, NULL);
+ err_out2:
   return -1;
 }
 
