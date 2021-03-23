@@ -338,16 +338,7 @@ g_tree_node_next (GTreeNode *node)
   return tmp;
 }
 
-/**
- * g_tree_remove_all:
- * @tree: a #GTree
- *
- * Removes all nodes from a #GTree and destroys their keys and values,
- * then resets the #GTree’s root to %NULL.
- *
- * Since: 2.70
- */
-void
+static void
 g_tree_remove_all (GTree *tree)
 {
   GTreeNode *node;
