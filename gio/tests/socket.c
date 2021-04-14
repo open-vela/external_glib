@@ -1694,8 +1694,7 @@ test_get_available (gconstpointer user_data)
 
       for (tries = 0; tries < 100; tries++)
         {
-          gssize res = g_socket_get_available_bytes (server);
-          if ((res == -1) || ((gsize) res > sizeof (data)))
+          if (g_socket_get_available_bytes (server) > sizeof (data))
             break;
           g_usleep (100000);
         }
