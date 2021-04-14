@@ -86,8 +86,7 @@ static const GDBusInterfaceVTable boo_vtable =
 {
   NULL, /* _method_call */
   NULL, /* _get_property */
-  NULL,  /* _set_property */
-  { 0 }
+  NULL  /* _set_property */
 };
 
 /* Runs in a worker thread. */
