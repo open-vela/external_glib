@@ -22,7 +22,7 @@ struct dirent
 	long		d_ino;		/* Always zero. */
 	unsigned short	d_reclen;	/* Always zero. */
 	unsigned short	d_namlen;	/* Length of name in d_name. */
-	char		d_name[FILENAME_MAX+1]; /* File name plus nul delimiter. */
+	char		d_name[FILENAME_MAX]; /* File name. */
 };
 
 #ifdef _WIN64
@@ -76,7 +76,7 @@ struct _wdirent
 	long		d_ino;		/* Always zero. */
 	unsigned short	d_reclen;	/* Always zero. */
 	unsigned short	d_namlen;	/* Length of name in d_name. */
-	wchar_t		d_name[FILENAME_MAX+1]; /* File name plus nul delimiter. */
+	wchar_t		d_name[FILENAME_MAX]; /* File name. */
 };
 
 /*
