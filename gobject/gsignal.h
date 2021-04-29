@@ -87,11 +87,8 @@ typedef gboolean (*GSignalEmissionHook) (GSignalInvocationHint *ihint,
  * value returned by the last callback.
  * 
  * Returns: The accumulator function returns whether the signal emission
- *  should be aborted. Returning %TRUE will continue with
- *  the signal emission. Returning %FALSE will abort the current emission.
- *  Since 2.62, returning %FALSE will skip to the CLEANUP stage. In this case,
- *  emission will occur as normal in the CLEANUP stage and the handler's
- *  return value will be accumulated.
+ *  should be aborted. Returning %FALSE means to abort the
+ *  current emission and %TRUE is returned for continuation.
  */
 typedef gboolean (*GSignalAccumulator)	(GSignalInvocationHint *ihint,
 					 GValue		       *return_accu,
