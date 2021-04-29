@@ -1069,7 +1069,7 @@ g_dtls_connection_get_negotiated_protocol (GDtlsConnection *conn)
   GDtlsConnectionInterface *iface;
 
   iface = G_DTLS_CONNECTION_GET_INTERFACE (conn);
-  if (iface->get_negotiated_protocol == NULL)
+  if (iface->set_advertised_protocols == NULL)
     return NULL;
 
   return iface->get_negotiated_protocol (conn);
