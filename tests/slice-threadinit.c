@@ -70,7 +70,7 @@ int
 main (int   argc,
       char *argv[])
 {
-  gsize j, n_pages = 0;
+  int j, n_pages = 0;
   void *mps[N_MAGAZINE_PROBES];
 
   /* probe some magazine sizes */

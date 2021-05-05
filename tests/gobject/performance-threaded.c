@@ -357,7 +357,7 @@ main (int   argc,
 
   if (argc > 1)
     {
-      int k;
+      gsize k;
       for (k = 1; k < argc; k++)
 	{
 	  test = find_test (argv[k]);

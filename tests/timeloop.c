@@ -32,7 +32,7 @@ io_pipe (GIOChannel **channels)
 }
 
 static gboolean
-read_all (GIOChannel *channel, char *buf, gsize len)
+read_all (GIOChannel *channel, char *buf, int len)
 {
   gsize bytes_read = 0;
   gsize count;
@@ -56,7 +56,7 @@ read_all (GIOChannel *channel, char *buf, gsize len)
 }
 
 static gboolean
-write_all (GIOChannel *channel, char *buf, gsize len)
+write_all (GIOChannel *channel, char *buf, int len)
 {
   gsize bytes_written = 0;
   gsize count;
