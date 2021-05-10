@@ -31,14 +31,14 @@ typedef struct
   gsize             depth;  /* same semantics as GVariant.depth */
 } GVariantSerialised;
 
-/* deserialization */
+/* deserialisation */
 GLIB_AVAILABLE_IN_ALL
 gsize                           g_variant_serialised_n_children         (GVariantSerialised        container);
 GLIB_AVAILABLE_IN_ALL
 GVariantSerialised              g_variant_serialised_get_child          (GVariantSerialised        container,
                                                                          gsize                     index);
 
-/* serialization */
+/* serialisation */
 typedef void                  (*GVariantSerialisedFiller)               (GVariantSerialised       *serialised,
                                                                          gpointer                  data);
 
