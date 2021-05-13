@@ -35,7 +35,7 @@ test_platform_argv0 (void)
   gboolean arg;
   GOptionEntry entries [] =
     { { "test", 't', 0, G_OPTION_ARG_STRING, &arg, NULL, NULL },
-      G_OPTION_ENTRY_NULL };
+      { NULL } };
   const gchar * const expected_prgnames[] =
     {
       "option-argv0",
