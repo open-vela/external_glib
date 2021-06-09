@@ -1593,8 +1593,6 @@ g_unix_mounts_get (guint64 *time_read)
  * If more mounts have the same mount path, the last matching mount
  * is returned.
  *
- * This will return %NULL if there is no mount point at @mount_path.
- *
  * Returns: (transfer full) (nullable): a #GUnixMountEntry.
  **/
 GUnixMountEntry *
@@ -1637,9 +1635,6 @@ g_unix_mount_at (const char *mount_path,
  *
  * If more mounts have the same mount path, the last matching mount
  * is returned.
- *
- * This will return %NULL if looking up the mount entry fails, if
- * @file_path doesn’t exist or there is an I/O error.
  *
  * Returns: (transfer full)  (nullable): a #GUnixMountEntry.
  *
