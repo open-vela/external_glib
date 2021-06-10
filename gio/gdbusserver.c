@@ -320,9 +320,7 @@ g_dbus_server_class_init (GDBusServerClass *klass)
   /**
    * GDBusServer:guid:
    *
-   * The GUID of the server.
-   *
-   * See #GDBusConnection:guid for more details.
+   * The guid of the server.
    *
    * Since: 2.26
    */
