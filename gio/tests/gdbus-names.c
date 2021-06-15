@@ -46,7 +46,6 @@ own_name_data_free_func (OwnNameData *data)
 {
   data->num_free_func++;
   g_main_loop_quit (loop);
-  g_main_context_wakeup (g_main_loop_get_context (loop));
 }
 
 static void
@@ -58,7 +57,6 @@ bus_acquired_handler (GDBusConnection *connection,
   g_dbus_connection_set_exit_on_close (connection, FALSE);
   data->num_bus_acquired += 1;
   g_main_loop_quit (loop);
-  g_main_context_wakeup (g_main_loop_get_context (loop));
 }
 
 static void
@@ -69,7 +67,6 @@ name_acquired_handler (GDBusConnection *connection,
   OwnNameData *data = user_data;
   data->num_acquired += 1;
   g_main_loop_quit (loop);
-  g_main_context_wakeup (g_main_loop_get_context (loop));
 }
 
 static void
@@ -89,7 +86,6 @@ name_lost_handler (GDBusConnection *connection,
     }
   data->num_lost += 1;
   g_main_loop_quit (loop);
-  g_main_context_wakeup (g_main_loop_get_context (loop));
 }
 
 static void
@@ -520,7 +516,6 @@ watch_name_data_free_func (WatchNameData *data)
 {
   data->num_free_func++;
   g_main_loop_quit (loop);
-  g_main_context_wakeup (g_main_loop_get_context (loop));
 }
 
 static void
@@ -538,7 +533,6 @@ w_name_acquired_handler (GDBusConnection *connection,
   OwnNameData *data = user_data;
   data->num_acquired += 1;
   g_main_loop_quit (loop);
-  g_main_context_wakeup (g_main_loop_get_context (loop));
 }
 
 static void
@@ -549,7 +543,6 @@ w_name_lost_handler (GDBusConnection *connection,
   OwnNameData *data = user_data;
   data->num_lost += 1;
   g_main_loop_quit (loop);
-  g_main_context_wakeup (g_main_loop_get_context (loop));
 }
 
 static void
@@ -571,7 +564,6 @@ name_appeared_handler (GDBusConnection *connection,
     }
   data->num_appeared += 1;
   g_main_loop_quit (loop);
-  g_main_context_wakeup (g_main_loop_get_context (loop));
 }
 
 static void
@@ -592,7 +584,6 @@ name_vanished_handler (GDBusConnection *connection,
     }
   data->num_vanished += 1;
   g_main_loop_quit (loop);
-  g_main_context_wakeup (g_main_loop_get_context (loop));
 }
 
 typedef struct
