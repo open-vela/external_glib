@@ -509,7 +509,6 @@ typedef struct
   gboolean unwatch_early;
   GMutex mutex;
   guint watch_id;
-  GMainContext *thread_context;  /* (unowned), only accessed from watcher_thread() */
 } WatchNameThreadData;
 
 static void
@@ -884,9 +883,6 @@ static void
 t_watch_name_data_free_func (WatchNameThreadData *thread_data)
 {
   thread_data->data.num_free_func++;
-
-  g_assert_true (g_main_context_is_owner (thread_data->thread_context));
-  g_main_context_wakeup (thread_data->thread_context);
 }
 
 /* Called in the same thread as watcher_thread() */
@@ -898,9 +894,6 @@ t_name_appeared_handler (GDBusConnection *connection,
 {
   WatchNameThreadData *thread_data = user_data;
   thread_data->data.num_appeared += 1;
-
-  g_assert_true (g_main_context_is_owner (thread_data->thread_context));
-  g_main_context_wakeup (thread_data->thread_context);
 }
 
 /* Called in the same thread as watcher_thread() */
@@ -911,9 +904,6 @@ t_name_vanished_handler (GDBusConnection *connection,
 {
   WatchNameThreadData *thread_data = user_data;
   thread_data->data.num_vanished += 1;
-
-  g_assert_true (g_main_context_is_owner (thread_data->thread_context));
-  g_main_context_wakeup (thread_data->thread_context);
 }
 
 /* Called in the thread which constructed the GDBusConnection */
@@ -941,7 +931,6 @@ watcher_thread (gpointer user_data)
   GMainContext *thread_context;
 
   thread_context = g_main_context_new ();
-  thread_data->thread_context = thread_context;
   g_main_context_push_thread_default (thread_context);
 
   // Notify that the thread has started
