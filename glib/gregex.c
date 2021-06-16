@@ -22,7 +22,11 @@
 
 #include <string.h>
 
+#ifdef USE_SYSTEM_PCRE
 #include <pcre.h>
+#else
+#include "pcre/pcre.h"
+#endif
 
 #include "gtypes.h"
 #include "gregex.h"
