@@ -40,7 +40,7 @@ pem_parser (const Reference *ref)
   gchar *pem;
   gsize pem_len = 0;
   gchar *parsed_cert_pem = NULL;
-  gchar *parsed_key_pem = NULL;
+  const gchar *parsed_key_pem = NULL;
   GError *error = NULL;
 
   /* Check PEM parsing in certificate, private key order. */
@@ -55,12 +55,13 @@ pem_parser (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_pems[0]);
-  g_clear_pointer (&parsed_cert_pem, g_free);
+  g_free (parsed_cert_pem);
+  parsed_cert_pem = NULL;
   g_assert_cmpstr (parsed_key_pem, ==, ref->key_pem);
-  g_clear_pointer (&parsed_key_pem, g_free);
+  parsed_key_pem = NULL;
 
   g_object_unref (cert);
 
@@ -88,12 +89,13 @@ pem_parser (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_pems[0]);
-  g_clear_pointer (&parsed_cert_pem, g_free);
+  g_free (parsed_cert_pem);
+  parsed_cert_pem = NULL;
   g_assert_cmpstr (parsed_key_pem, ==, ref->key_pem);
-  g_clear_pointer (&parsed_key_pem, g_free);
+  parsed_key_pem = NULL;
 
   g_free (pem);
   g_object_unref (cert);
@@ -109,10 +111,11 @@ pem_parser (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_pems[0]);
-  g_clear_pointer (&parsed_cert_pem, g_free);
+  g_free (parsed_cert_pem);
+  parsed_cert_pem = NULL;
   g_assert_null (parsed_key_pem);
 
   g_free (pem);
@@ -138,7 +141,7 @@ pem_parser_handles_chain (const Reference *ref)
   GTlsCertificate *original_cert;
   gchar *pem;
   gchar *parsed_cert_pem = NULL;
-  gchar *parsed_key_pem = NULL;
+  const gchar *parsed_key_pem = NULL;
   GError *error = NULL;
 
   /* Check that a chain with exactly three certificates is returned */
@@ -153,14 +156,14 @@ pem_parser_handles_chain (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_pems[0]);
   g_clear_pointer (&parsed_cert_pem, g_free);
 
   /* Make sure the private key was parsed */
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_cmpstr (parsed_key_pem, ==, ref->key_pem);
-  g_clear_pointer (&parsed_key_pem, g_free);
+  parsed_key_pem = NULL;
 
   /* Now test the second cert */
   issuer = g_tls_certificate_get_issuer (cert);
@@ -172,12 +175,12 @@ pem_parser_handles_chain (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_pems[1]);
   g_clear_pointer (&parsed_cert_pem, g_free);
 
   /* Only the first cert should have a private key */
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_null (parsed_key_pem);
 
   /* Now test the final cert */
@@ -187,11 +190,11 @@ pem_parser_handles_chain (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_pems[2]);
   g_clear_pointer (&parsed_cert_pem, g_free);
 
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_null (parsed_key_pem);
 
   g_object_unref (original_cert);
@@ -234,7 +237,7 @@ from_file (const Reference *ref)
 {
   GTlsCertificate *cert;
   gchar *parsed_cert_pem = NULL;
-  gchar *parsed_key_pem = NULL;
+  const gchar *parsed_key_pem = NULL;
   GError *error = NULL;
 
   cert = g_tls_certificate_new_from_file (g_test_get_filename (G_TEST_DIST, "cert-tests", "key-cert.pem", NULL),
@@ -244,12 +247,13 @@ from_file (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_pems[0]);
-  g_clear_pointer (&parsed_cert_pem, g_free);
+  g_free (parsed_cert_pem);
+  parsed_cert_pem = NULL;
   g_assert_cmpstr (parsed_key_pem, ==, ref->key_pem);
-  g_clear_pointer (&parsed_key_pem, g_free);
+  parsed_key_pem = NULL;
 
   g_object_unref (cert);
 }
@@ -259,7 +263,7 @@ from_files (const Reference *ref)
 {
   GTlsCertificate *cert;
   gchar *parsed_cert_pem = NULL;
-  gchar *parsed_key_pem = NULL;
+  const gchar *parsed_key_pem = NULL;
   GError *error = NULL;
 
   cert = g_tls_certificate_new_from_files (g_test_get_filename (G_TEST_DIST, "cert-tests", "cert1.pem", NULL),
@@ -270,12 +274,13 @@ from_files (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_pems[0]);
-  g_clear_pointer (&parsed_cert_pem, g_free);
+  g_free (parsed_cert_pem);
+  parsed_cert_pem = NULL;
   g_assert_cmpstr (parsed_key_pem, ==, ref->key_pem);
-  g_clear_pointer (&parsed_key_pem, g_free);
+  parsed_key_pem = NULL;
 
   g_object_unref (cert);
 
@@ -327,7 +332,7 @@ from_files_crlf (const Reference *ref)
 {
   GTlsCertificate *cert;
   gchar *parsed_cert_pem = NULL;
-  gchar *parsed_key_pem = NULL;
+  const gchar *parsed_key_pem = NULL;
   GError *error = NULL;
 
   cert = g_tls_certificate_new_from_files (g_test_get_filename (G_TEST_DIST, "cert-tests", "cert-crlf.pem", NULL),
@@ -338,12 +343,13 @@ from_files_crlf (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_crlf_pem);
-  g_clear_pointer (&parsed_cert_pem, g_free);
+  g_free (parsed_cert_pem);
+  parsed_cert_pem = NULL;
   g_assert_cmpstr (parsed_key_pem, ==, ref->key_crlf_pem);
-  g_clear_pointer (&parsed_key_pem, g_free);
+  parsed_key_pem = NULL;
 
   g_object_unref (cert);
 }
@@ -353,7 +359,7 @@ from_files_pkcs8 (const Reference *ref)
 {
   GTlsCertificate *cert;
   gchar *parsed_cert_pem = NULL;
-  gchar *parsed_key_pem = NULL;
+  const gchar *parsed_key_pem = NULL;
   GError *error = NULL;
 
   cert = g_tls_certificate_new_from_files (g_test_get_filename (G_TEST_DIST, "cert-tests", "cert1.pem", NULL),
@@ -364,12 +370,13 @@ from_files_pkcs8 (const Reference *ref)
 
   g_object_get (cert,
       "certificate-pem", &parsed_cert_pem,
-      "private-key-pem", &parsed_key_pem,
       NULL);
+  parsed_key_pem = g_test_tls_connection_get_private_key_pem (cert);
   g_assert_cmpstr (parsed_cert_pem, ==, ref->cert_pems[0]);
-  g_clear_pointer (&parsed_cert_pem, g_free);
+  g_free (parsed_cert_pem);
+  parsed_cert_pem = NULL;
   g_assert_cmpstr (parsed_key_pem, ==, ref->key8_pem);
-  g_clear_pointer (&parsed_key_pem, g_free);
+  parsed_key_pem = NULL;
 
   g_object_unref (cert);
 }
