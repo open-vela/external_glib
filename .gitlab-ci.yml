@@ -10,11 +10,11 @@ cache:
     - _ccache/
 
 variables:
-  FEDORA_IMAGE: "registry.gitlab.gnome.org/gnome/glib/fedora:v11"
+  FEDORA_IMAGE: "registry.gitlab.gnome.org/gnome/glib/fedora:v10"
   COVERITY_IMAGE: "registry.gitlab.gnome.org/gnome/glib/coverity:v1"
-  DEBIAN_IMAGE: "registry.gitlab.gnome.org/gnome/glib/debian-stable:v8"
-  ANDROID_IMAGE: "registry.gitlab.gnome.org/gnome/glib/android-ndk:v4"
-  MINGW_IMAGE: "registry.gitlab.gnome.org/gnome/glib/mingw:v3"
+  DEBIAN_IMAGE: "registry.gitlab.gnome.org/gnome/glib/debian-stable:v7"
+  ANDROID_IMAGE: "registry.gitlab.gnome.org/gnome/glib/android-ndk:v3"
+  MINGW_IMAGE: "registry.gitlab.gnome.org/gnome/glib/mingw:v2"
   MESON_TEST_TIMEOUT_MULTIPLIER: 2
   G_MESSAGES_DEBUG: all
   MESON_COMMON_OPTIONS_NO_WARNING: "--buildtype debug --wrap-mode=nodownload"
@@ -270,7 +270,7 @@ cross-android_api21_arm64:
     # FIXME: add --werror
     # We use -Diconv=auto to test that we successfully detect that iconv is not
     # provided by android api 21, and detect the external iconv instead.
-    - meson ${MESON_COMMON_OPTIONS} --cross-file=/opt/cross_file_android_arm64_21.txt -Diconv=auto _build
+    - meson ${MESON_COMMON_OPTIONS} --cross-file=/opt/cross_file_android_arm64_21.txt -Diconv=auto -Dinternal_pcre=true _build
     - ninja -C _build
 
 cross-android_api28_arm64:
@@ -278,7 +278,7 @@ cross-android_api28_arm64:
   image: $ANDROID_IMAGE
   script:
     # FIXME: add --werror
-    - meson ${MESON_COMMON_OPTIONS} --cross-file=/opt/cross_file_android_arm64_28.txt _build
+    - meson ${MESON_COMMON_OPTIONS} --cross-file=/opt/cross_file_android_arm64_28.txt -Dinternal_pcre=true _build
     - ninja -C _build
 
 cross-mingw64:
