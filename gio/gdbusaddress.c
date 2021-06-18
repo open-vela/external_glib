@@ -1082,7 +1082,7 @@ get_session_address_dbus_launch (GError **error)
   gchar *command_line;
   gchar *launch_stdout;
   gchar *launch_stderr;
-  gint wait_status;
+  gint exit_status;
   gchar *old_dbus_verbose;
   gboolean restore_dbus_verbose;
 
@@ -1146,13 +1146,13 @@ get_session_address_dbus_launch (GError **error)
   if (!g_spawn_command_line_sync (command_line,
                                   &launch_stdout,
                                   &launch_stderr,
-                                  &wait_status,
+                                  &exit_status,
                                   error))
     {
       goto out;
     }
 
-  if (!g_spawn_check_wait_status (wait_status, error))
+  if (!g_spawn_check_exit_status (exit_status, error))
     {
       g_prefix_error (error, _("Error spawning command line “%s”: "), command_line);
       goto out;

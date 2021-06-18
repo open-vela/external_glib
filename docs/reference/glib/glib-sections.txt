@@ -749,6 +749,7 @@ G_ANALYZER_ANALYZING
 G_ANALYZER_NORETURN
 g_autoptr_cleanup_generic_gfree
 glib_typeof
+glib_typeof_2_68
 g_macro__has_attribute
 g_macro__has_builtin
 g_macro__has_feature
@@ -1567,7 +1568,6 @@ g_spawn_async_with_pipes_and_fds
 g_spawn_async
 g_spawn_sync
 G_SPAWN_EXIT_ERROR
-g_spawn_check_wait_status
 g_spawn_check_exit_status
 g_spawn_command_line_async
 g_spawn_command_line_sync
@@ -3029,7 +3029,6 @@ g_bytes_new_static
 g_bytes_new_with_free_func
 g_bytes_new_from_bytes
 g_bytes_get_data
-g_bytes_get_region
 g_bytes_get_size
 g_bytes_hash
 g_bytes_equal
