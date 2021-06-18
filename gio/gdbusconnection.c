@@ -386,7 +386,7 @@ struct _GDBusConnection
    */
   gchar *bus_unique_name;
 
-  /* The GUID returned by the other side if we authenticated as a client or
+  /* The GUID returned by the other side if we authenticed as a client or
    * the GUID to use if authenticating as a server.
    * Read-only after initable_init(), so it may be read if you either
    * hold @init_lock or check for initialization first.
@@ -901,15 +901,6 @@ g_dbus_connection_class_init (GDBusConnectionClass *klass)
    * #GDBusConnection:flags property you will be able to read the GUID
    * of the other peer here after the connection has been successfully
    * initialized.
-   *
-   * Note that the
-   * [D-Bus specification](https://dbus.freedesktop.org/doc/dbus-specification.html#addresses)
-   * uses the term ‘UUID’ to refer to this, whereas GLib consistently uses the
-   * term ‘GUID’ for historical reasons.
-   *
-   * Despite its name, the format of #GDBusConnection:guid does not follow
-   * [RFC 4122](https://datatracker.ietf.org/doc/html/rfc4122) or the Microsoft
-   * GUID format.
    *
    * Since: 2.26
    */
@@ -5061,8 +5052,7 @@ validate_and_maybe_schedule_method_call (GDBusConnection            *connection,
 static gboolean
 obj_message_func (GDBusConnection *connection,
                   ExportedObject  *eo,
-                  GDBusMessage    *message,
-                  gboolean        *object_found)
+                  GDBusMessage    *message)
 {
   const gchar *interface_name;
   const gchar *member;
@@ -5097,10 +5087,6 @@ obj_message_func (GDBusConnection *connection,
                                                              ei->context,
                                                              ei->user_data);
           goto out;
-        }
-      else
-        {
-          *object_found = TRUE;
         }
     }
 
@@ -7127,7 +7113,6 @@ distribute_method_call (GDBusConnection *connection,
   const gchar *path;
   gchar *subtree_path;
   gchar *needle;
-  gboolean object_found = FALSE;
 
   g_assert (g_dbus_message_get_message_type (message) == G_DBUS_MESSAGE_TYPE_METHOD_CALL);
 
@@ -7169,7 +7154,7 @@ distribute_method_call (GDBusConnection *connection,
   eo = g_hash_table_lookup (connection->map_object_path_to_eo, object_path);
   if (eo != NULL)
     {
-      if (obj_message_func (connection, eo, message, &object_found))
+      if (obj_message_func (connection, eo, message))
         goto out;
     }
 
@@ -7194,22 +7179,11 @@ distribute_method_call (GDBusConnection *connection,
     goto out;
 
   /* if we end up here, the message has not been not handled - so return an error saying this */
-  if (object_found == TRUE)
-    {
-      reply = g_dbus_message_new_method_error (message,
-                                               "org.freedesktop.DBus.Error.UnknownMethod",
-                                               _("No such interface “%s” on object at path %s"),
-                                               interface_name,
-                                               object_path);
-    }
-  else
-    {
-      reply = g_dbus_message_new_method_error (message,
+  reply = g_dbus_message_new_method_error (message,
                                            "org.freedesktop.DBus.Error.UnknownMethod",
-                                           _("Object does not exist at path “%s”"),
+                                           _("No such interface “%s” on object at path %s"),
+                                           interface_name,
                                            object_path);
-    }
-
   g_dbus_connection_send_message_unlocked (connection, reply, G_DBUS_SEND_MESSAGE_FLAGS_NONE, NULL, NULL);
   g_object_unref (reply);
 

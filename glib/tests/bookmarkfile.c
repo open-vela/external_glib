@@ -1,7 +1,6 @@
 #undef G_DISABLE_ASSERT
 
 #include <glib.h>
-#include <glib/gstdio.h>
 #include <time.h>
 #include <locale.h>
 #include <string.h>
@@ -45,25 +44,19 @@ test_to_file (void)
   gboolean res;
   GError *error = NULL;
   char *in, *out;
-  gchar *tmp_filename = NULL;
-  gint fd;
-
-  fd = g_file_open_tmp ("bookmarkfile-test-XXXXXX.xbel", &tmp_filename, NULL);
-  g_assert_cmpint (fd, >, -1);
-  g_close (fd, NULL);
 
   bookmark = g_bookmark_file_new ();
 
-  g_test_message ("Roundtrip from newly created bookmark file %s", tmp_filename);
+  g_test_message ("Roundtrip from newly created bookmark file");
   g_bookmark_file_set_title (bookmark, "file:///tmp/schedule.ps", "schedule.ps");
   g_bookmark_file_set_mime_type (bookmark, "file:///tmp/schedule.ps", "application/postscript");
   g_bookmark_file_add_application (bookmark, "file:///tmp/schedule.ps", "ghostscript", "ghostscript %F");
 
-  res = g_bookmark_file_to_file (bookmark, tmp_filename, &error);
+  res = g_bookmark_file_to_file (bookmark, "out.xbel", &error);
   g_assert_no_error (error);
   g_assert_true (res);
 
-  res = g_bookmark_file_load_from_file (bookmark, tmp_filename, &error);
+  res = g_bookmark_file_load_from_file (bookmark, "out.xbel", &error);
   g_assert_no_error (error);
   g_assert_true (res);
 
@@ -77,7 +70,7 @@ test_to_file (void)
   g_assert_cmpstr (out, ==, "application/postscript");
   g_free (out);
 
-  remove (tmp_filename);
+  remove ("out.xbel");
 
   g_test_message ("Roundtrip from a valid bookmark file");
   filename = g_test_get_filename (G_TEST_DIST, "bookmarks", "valid-01.xbel", NULL);
@@ -85,7 +78,7 @@ test_to_file (void)
   g_assert_no_error (error);
   g_assert_true (res);
 
-  res = g_bookmark_file_to_file (bookmark, tmp_filename, &error);
+  res = g_bookmark_file_to_file (bookmark, "out.xbel", &error);
   g_assert_no_error (error);
   g_assert_true (res);
 
@@ -93,17 +86,16 @@ test_to_file (void)
   g_assert_no_error (error);
   g_assert_true (res);
 
-  res = g_file_get_contents (tmp_filename, &out, NULL, &error);
+  res = g_file_get_contents ("out.xbel", &out, NULL, &error);
   g_assert_no_error (error);
   g_assert_true (res);
-  remove (tmp_filename);
+  remove ("out.xbel");
 
   g_assert_cmpstr (in, ==, out);
   g_free (in);
   g_free (out);
 
   g_bookmark_file_free (bookmark);
-  g_free (tmp_filename);
 }
 
 static void
