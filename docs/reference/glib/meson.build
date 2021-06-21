@@ -25,6 +25,8 @@ if get_option('gtk_doc')
     'gtrace-private.h',
     'glib-mirroring-tab',
     'gnulib',
+    'pcre',
+    'update-pcre',
     'gbytesprivate.h',
     'gvariant-internal.h',
     'gvariant-serialiser.h',
