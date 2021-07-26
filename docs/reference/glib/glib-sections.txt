@@ -916,7 +916,6 @@ g_source_get_can_recurse
 g_source_get_id
 g_source_get_name
 g_source_set_name
-g_source_set_static_name
 g_source_set_name_by_id
 g_source_get_context
 g_source_set_callback
@@ -3639,8 +3638,6 @@ g_test_get_root
 g_test_suite_add
 g_test_suite_add_suite
 g_test_run_suite
-g_test_case_free
-g_test_suite_free
 
 <SUBSECTION Private>
 g_test_trap_assertions
