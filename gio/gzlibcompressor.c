@@ -41,7 +41,7 @@ enum {
 };
 
 /**
- * SECTION:gzlibcompressor
+ * SECTION:gzcompressor
  * @short_description: Zlib compressor
  * @include: gio/gio.h
  *
