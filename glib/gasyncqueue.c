@@ -88,9 +88,9 @@
 /**
  * GAsyncQueue:
  *
- * An opaque data structure which represents an asynchronous queue.
- *
- * It should only be accessed through the `g_async_queue_*` functions.
+ * The GAsyncQueue struct is an opaque data structure which represents
+ * an asynchronous queue. It should only be accessed through the
+ * g_async_queue_* functions.
  */
 struct _GAsyncQueue
 {
