@@ -188,8 +188,7 @@ struct _GLogField
  * chained and fall back to simpler handlers in case of failure.
  *
  * Returns: %G_LOG_WRITER_HANDLED if the log entry was handled successfully;
- *   %G_LOG_WRITER_UNHANDLED otherwise
- *
+ *    %G_LOG_WRITER_UNHANDLED otherwise
  * Since: 2.50
  */
 typedef GLogWriterOutput (*GLogWriterFunc)     (GLogLevelFlags   log_level,

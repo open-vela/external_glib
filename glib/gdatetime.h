@@ -89,7 +89,8 @@ typedef gint64 GTimeSpan;
 /**
  * GDateTime:
  *
- * An opaque structure that represents a date and time, including a time zone.
+ * `GDateTime` is an opaque structure whose members
+ * cannot be accessed directly.
  *
  * Since: 2.26
  */
