@@ -15,8 +15,7 @@ struct _GSequence
 
 struct _GSequenceNode
 {
-  gint                  n_nodes;
-  guint32               priority;
+  guint                 n_nodes;
   GSequenceNode *       parent;
   GSequenceNode *       left;
   GSequenceNode *       right;
@@ -26,9 +25,15 @@ struct _GSequenceNode
 static guint
 get_priority (GSequenceNode *node)
 {
-  guint key = node->priority;
+  guint key = GPOINTER_TO_UINT (node);
 
-  /* We rely on 0 being less than all other priorities */
+  key = (key << 15) - key - 1;
+  key = key ^ (key >> 12);
+  key = key + (key << 2);
+  key = key ^ (key >> 4);
+  key = key + (key << 3) + (key << 11);
+  key = key ^ (key >> 16);
+
   return key? key : 1;
 }
 
