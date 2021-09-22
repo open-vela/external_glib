@@ -983,10 +983,7 @@ get_verbs (GWin32RegistryKey  *program_id_key,
                                                  name,
                                                  NULL);
 
-      /* We may not have the required access rights to open the child key */
-      if (subkey == NULL)
-        continue;
-
+      g_assert (subkey != NULL);
       /* The key we're looking at is "<some_root>/Shell/<this_key>",
        * where "Shell" is verbshell_prefix.
        * If it has a value named 'Subcommands' (doesn't matter what its data is),
