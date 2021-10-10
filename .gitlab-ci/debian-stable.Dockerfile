@@ -1,11 +1,11 @@
-FROM debian:bullseye
+FROM debian:buster
 
 RUN apt-get update -qq && apt-get install --no-install-recommends -qq -y \
     bindfs \
     black \
     clang \
-    clang-tools \
-    clang-format \
+    clang-tools-7 \
+    clang-format-7 \
     dbus \
     desktop-file-utils \
     elfutils \
@@ -26,7 +26,7 @@ RUN apt-get update -qq && apt-get install --no-install-recommends -qq -y \
     libffi-dev \
     libgamin-dev \
     libmount-dev \
-    libpcre3-dev \
+    libpcre2-dev \
     libselinux1-dev \
     libxml2-utils \
     libxslt1-dev \
@@ -66,7 +66,7 @@ RUN locale-gen de_DE.UTF-8 \
 
 ENV LANG=C.UTF-8 LANGUAGE=C.UTF-8 LC_ALL=C.UTF-8
 
-RUN pip3 install meson==0.52.0
+RUN pip3 install meson==0.49.2
 
 ARG HOST_USER_ID=5555
 ENV HOST_USER_ID ${HOST_USER_ID}

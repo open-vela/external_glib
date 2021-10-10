@@ -1,4 +1,7 @@
-FROM fedora:33
+FROM fedora:31
+
+# Set /etc/machine-id as it’s needed for some D-Bus tests
+RUN systemd-machine-id-setup
 
 RUN dnf -y update \
  && dnf -y install \
@@ -75,9 +78,6 @@ RUN dnf -y update \
  && dnf clean all
 
 RUN pip3 install meson==0.52.1
-
-# Set /etc/machine-id as it’s needed for some D-Bus tests
-RUN systemd-machine-id-setup
 
 # Enable sudo for wheel users
 RUN sed -i -e 's/# %wheel/%wheel/' -e '0,/%wheel/{s/%wheel/# %wheel/}' /etc/sudoers
