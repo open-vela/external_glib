@@ -159,7 +159,6 @@ configure_file(
   output: 'libgobject-2.0.so.@0@-gdb.py'.format(library_version),
   configuration: gdb_conf,
   install_dir: gdb_install_dir,
-  install: gdb_install,
 )
 
 if enable_systemtap
