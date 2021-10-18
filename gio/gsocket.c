@@ -621,7 +621,7 @@ g_socket (gint     domain,
 	(flags & FD_CLOEXEC) == 0)
       {
 	flags |= FD_CLOEXEC;
-	(void) fcntl (fd, F_SETFD, flags);
+	fcntl (fd, F_SETFD, flags);
       }
   }
 #else

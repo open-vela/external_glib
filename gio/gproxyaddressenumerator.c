@@ -262,12 +262,8 @@ g_proxy_address_enumerator_next (GSocketAddressEnumerator  *enumerator,
 	}
       dest_protocol = g_uri_parse_scheme (priv->dest_uri);
 		 		  
-      if (!G_IS_INET_SOCKET_ADDRESS (priv->proxy_address))
-        {
-	  g_free (dest_hostname);
-	  g_free (dest_protocol);
-        }
-      g_return_val_if_fail (G_IS_INET_SOCKET_ADDRESS (priv->proxy_address), NULL);
+      g_return_val_if_fail (G_IS_INET_SOCKET_ADDRESS (priv->proxy_address),
+			    NULL);
 
       inetsaddr = G_INET_SOCKET_ADDRESS (priv->proxy_address);
       inetaddr = g_inet_socket_address_get_address (inetsaddr);
@@ -356,11 +352,6 @@ return_result (GTask *task)
 	}
       dest_protocol = g_uri_parse_scheme (priv->dest_uri);
 
-      if (!G_IS_INET_SOCKET_ADDRESS (priv->proxy_address))
-        {
-	  g_free (dest_hostname);
-	  g_free (dest_protocol);
-        }
       g_return_if_fail (G_IS_INET_SOCKET_ADDRESS (priv->proxy_address));
 
       inetsaddr = G_INET_SOCKET_ADDRESS (priv->proxy_address);

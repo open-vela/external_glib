@@ -324,7 +324,7 @@ read_helper_report (int      fd,
 		    gintptr  report[2],
 		    GError **error)
 {
-  gsize bytes = 0;
+  gint bytes = 0;
   
   while (bytes < sizeof(gintptr)*2)
     {

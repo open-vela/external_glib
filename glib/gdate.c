@@ -2588,8 +2588,7 @@ win32_strftime_helper (const GDate     *d,
       return 0;
     }
   
-  g_assert (convlen >= 0);
-  if ((gsize) convlen >= slen)
+  if (slen <= convlen)
     {
       /* Ensure only whole characters are copied into the buffer. */
       gchar *end = g_utf8_find_prev_char (convbuf, convbuf + slen);
