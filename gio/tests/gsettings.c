@@ -56,15 +56,6 @@ check_and_free (GVariant    *value,
   g_variant_unref (value);
 }
 
-/* Wrapper around g_assert_cmpstr() which gets a setting from a #GSettings
- * using g_settings_get(). */
-#define settings_assert_cmpstr(settings, key, op, expected_value) G_STMT_START { \
-  gchar *__str; \
-  g_settings_get ((settings), (key), "s", &__str); \
-  g_assert_cmpstr (__str, op, (expected_value)); \
-  g_free (__str); \
-} G_STMT_END
-
 
 /* Just to get warmed up: Read and set a string, and
  * verify that can read the changed string back
@@ -97,10 +88,15 @@ test_basic (void)
   g_object_unref (b);
   g_free (path);
 
-  settings_assert_cmpstr (settings, "greeting", ==, "Hello, earthlings");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "Hello, earthlings");
+  g_free (str);
 
   g_settings_set (settings, "greeting", "s", "goodbye world");
-  settings_assert_cmpstr (settings, "greeting", ==, "goodbye world");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "goodbye world");
+  g_free (str);
+  str = NULL;
 
   if (!backend_set && g_test_undefined ())
     {
@@ -114,7 +110,10 @@ test_basic (void)
       g_object_unref (tmp_settings);
     }
 
-  settings_assert_cmpstr (settings, "greeting", ==, "goodbye world");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "goodbye world");
+  g_free (str);
+  str = NULL;
 
   g_settings_reset (settings, "greeting");
   str = g_settings_get_string (settings, "greeting");
@@ -343,7 +342,10 @@ test_basic_types (void)
   g_settings_get (settings, "test-double", "d", &d);
   g_assert_cmpfloat (d, ==, G_MAXDOUBLE);
 
-  settings_assert_cmpstr (settings, "test-string", ==, "a string, it seems");
+  g_settings_get (settings, "test-string", "s", &str);
+  g_assert_cmpstr (str, ==, "a string, it seems");
+  g_free (str);
+  str = NULL;
 
   g_settings_get (settings, "test-objectpath", "o", &str);
   g_assert_cmpstr (str, ==, "/a/object/path");
@@ -482,6 +484,7 @@ test_delay_apply (void)
 {
   GSettings *settings;
   GSettings *settings2;
+  gchar *str;
   gboolean writable;
   GVariant *v;
   const gchar *s;
@@ -527,14 +530,20 @@ test_delay_apply (void)
   writable = g_settings_is_writable (settings, "greeting");
   g_assert_true (writable);
 
-  settings_assert_cmpstr (settings, "greeting", ==, "greetings from test_delay_apply");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "greetings from test_delay_apply");
+  g_free (str);
+  str = NULL;
 
   v = g_settings_get_user_value (settings, "greeting");
   s = g_variant_get_string (v, NULL);
   g_assert_cmpstr (s, ==, "greetings from test_delay_apply");
   g_variant_unref (v);
 
-  settings_assert_cmpstr (settings2, "greeting", ==, "top o' the morning");
+  g_settings_get (settings2, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "top o' the morning");
+  g_free (str);
+  str = NULL;
 
   g_assert_true (g_settings_get_has_unapplied (settings));
   g_assert_false (g_settings_get_has_unapplied (settings2));
@@ -547,8 +556,15 @@ test_delay_apply (void)
   g_assert_false (changed_cb_called);
   g_assert_true (changed_cb_called2);
 
-  settings_assert_cmpstr (settings, "greeting", ==, "greetings from test_delay_apply");
-  settings_assert_cmpstr (settings2, "greeting", ==, "greetings from test_delay_apply");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "greetings from test_delay_apply");
+  g_free (str);
+  str = NULL;
+
+  g_settings_get (settings2, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "greetings from test_delay_apply");
+  g_free (str);
+  str = NULL;
 
   g_assert_false (g_settings_get_has_unapplied (settings));
   g_assert_false (g_settings_get_has_unapplied (settings2));
@@ -556,7 +572,9 @@ test_delay_apply (void)
   g_settings_reset (settings, "greeting");
   g_settings_apply (settings);
 
-  settings_assert_cmpstr (settings, "greeting", ==, "Hello, earthlings");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "Hello, earthlings");
+  g_free (str);
 
   g_object_unref (settings2);
   g_object_unref (settings);
@@ -570,20 +588,30 @@ test_delay_revert (void)
 {
   GSettings *settings;
   GSettings *settings2;
+  gchar *str;
 
   settings = g_settings_new ("org.gtk.test");
   settings2 = g_settings_new ("org.gtk.test");
 
   g_settings_set (settings2, "greeting", "s", "top o' the morning");
 
-  settings_assert_cmpstr (settings, "greeting", ==, "top o' the morning");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "top o' the morning");
+  g_free (str);
 
   g_settings_delay (settings);
 
   g_settings_set (settings, "greeting", "s", "greetings from test_delay_revert");
 
-  settings_assert_cmpstr (settings, "greeting", ==, "greetings from test_delay_revert");
-  settings_assert_cmpstr (settings2, "greeting", ==, "top o' the morning");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "greetings from test_delay_revert");
+  g_free (str);
+  str = NULL;
+
+  g_settings_get (settings2, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "top o' the morning");
+  g_free (str);
+  str = NULL;
 
   g_assert_true (g_settings_get_has_unapplied (settings));
 
@@ -591,8 +619,15 @@ test_delay_revert (void)
 
   g_assert_false (g_settings_get_has_unapplied (settings));
 
-  settings_assert_cmpstr (settings, "greeting", ==, "top o' the morning");
-  settings_assert_cmpstr (settings2, "greeting", ==, "top o' the morning");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "top o' the morning");
+  g_free (str);
+  str = NULL;
+
+  g_settings_get (settings2, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "top o' the morning");
+  g_free (str);
+  str = NULL;
 
   g_object_unref (settings2);
   g_object_unref (settings);
@@ -619,7 +654,7 @@ test_delay_child (void)
   g_assert_nonnull (child);
 
   g_object_get (child, "delay-apply", &delay, NULL);
-  g_assert_true (delay);
+  g_assert_false (delay);
 
   g_settings_get (child, "test-byte", "y", &byte);
   g_assert_cmpuint (byte, ==, 36);
@@ -630,59 +665,9 @@ test_delay_child (void)
   g_settings_get (base, "test-byte", "y", &byte);
   g_assert_cmpuint (byte, ==, 36);
 
-  /* apply the child and the changes should be saved */
-  g_settings_apply (child);
-  g_settings_get (base, "test-byte", "y", &byte);
-  g_assert_cmpuint (byte, ==, 42);
-
   g_object_unref (child);
   g_object_unref (settings);
   g_object_unref (base);
-}
-
-static void
-test_delay_reset_key (void)
-{
-  GSettings *direct_settings = NULL, *delayed_settings = NULL;
-
-  g_test_summary ("Test that resetting a key on a delayed settings instance works");
-
-  delayed_settings = g_settings_new ("org.gtk.test");
-  direct_settings = g_settings_new ("org.gtk.test");
-
-  g_settings_set (direct_settings, "greeting", "s", "ey up");
-
-  settings_assert_cmpstr (delayed_settings, "greeting", ==, "ey up");
-
-  /* Set up a delayed settings backend. */
-  g_settings_delay (delayed_settings);
-
-  g_settings_set (delayed_settings, "greeting", "s", "how do");
-
-  settings_assert_cmpstr (delayed_settings, "greeting", ==, "how do");
-  settings_assert_cmpstr (direct_settings, "greeting", ==, "ey up");
-
-  g_assert_true (g_settings_get_has_unapplied (delayed_settings));
-
-  g_settings_reset (delayed_settings, "greeting");
-
-  /* There are still unapplied settings, because the reset is resetting to the
-   * value from the schema, not the value from @direct_settings. */
-  g_assert_true (g_settings_get_has_unapplied (delayed_settings));
-
-  settings_assert_cmpstr (delayed_settings, "greeting", ==, "Hello, earthlings");
-  settings_assert_cmpstr (direct_settings, "greeting", ==, "ey up");
-
-  /* Apply the settings changes (i.e. the reset). */
-  g_settings_apply (delayed_settings);
-
-  g_assert_false (g_settings_get_has_unapplied (delayed_settings));
-
-  settings_assert_cmpstr (delayed_settings, "greeting", ==, "Hello, earthlings");
-  settings_assert_cmpstr (direct_settings, "greeting", ==, "Hello, earthlings");
-
-  g_object_unref (direct_settings);
-  g_object_unref (delayed_settings);
 }
 
 static void
@@ -690,6 +675,8 @@ keys_changed_cb (GSettings    *settings,
                  const GQuark *keys,
                  gint          n_keys)
 {
+  gchar *str;
+
   g_assert_cmpint (n_keys, ==, 2);
 
   g_assert_true ((keys[0] == g_quark_from_static_string ("greeting") &&
@@ -697,8 +684,15 @@ keys_changed_cb (GSettings    *settings,
                  (keys[1] == g_quark_from_static_string ("greeting") &&
                   keys[0] == g_quark_from_static_string ("farewell")));
 
-  settings_assert_cmpstr (settings, "greeting", ==, "greetings from test_atomic");
-  settings_assert_cmpstr (settings, "farewell", ==, "atomic bye-bye");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "greetings from test_atomic");
+  g_free (str);
+  str = NULL;
+
+  g_settings_get (settings, "farewell", "s", &str);
+  g_assert_cmpstr (str, ==, "atomic bye-bye");
+  g_free (str);
+  str = NULL;
 }
 
 /* Check that delay-applied changes appear atomically.
@@ -710,6 +704,7 @@ test_atomic (void)
 {
   GSettings *settings;
   GSettings *settings2;
+  gchar *str;
 
   settings = g_settings_new ("org.gtk.test");
   settings2 = g_settings_new ("org.gtk.test");
@@ -729,10 +724,25 @@ test_atomic (void)
 
   g_settings_apply (settings);
 
-  settings_assert_cmpstr (settings, "greeting", ==, "greetings from test_atomic");
-  settings_assert_cmpstr (settings, "farewell", ==, "atomic bye-bye");
-  settings_assert_cmpstr (settings2, "greeting", ==, "greetings from test_atomic");
-  settings_assert_cmpstr (settings2, "farewell", ==, "atomic bye-bye");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "greetings from test_atomic");
+  g_free (str);
+  str = NULL;
+
+  g_settings_get (settings, "farewell", "s", &str);
+  g_assert_cmpstr (str, ==, "atomic bye-bye");
+  g_free (str);
+  str = NULL;
+
+  g_settings_get (settings2, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "greetings from test_atomic");
+  g_free (str);
+  str = NULL;
+
+  g_settings_get (settings2, "farewell", "s", &str);
+  g_assert_cmpstr (str, ==, "atomic bye-bye");
+  g_free (str);
+  str = NULL;
 
   g_object_unref (settings2);
   g_object_unref (settings);
@@ -841,7 +851,13 @@ test_l10n_context (void)
   setlocale (LC_MESSAGES, "de_DE.UTF-8");
   /* Only do the test if translation is actually working... */
   if (g_str_equal (dgettext ("test", "\"Unnamed\""), "\"Unbenannt\""))
-    settings_assert_cmpstr (settings, "backspace", ==, "Löschen");
+    {
+      g_settings_get (settings, "backspace", "s", &str);
+
+      g_assert_cmpstr (str, ==, "Löschen");
+      g_free (str);
+      str = NULL;
+    }
   else
     g_printerr ("warning: translation is not working... skipping test.  ");
 
@@ -2751,10 +2767,14 @@ test_null_backend (void)
   g_assert_cmpstr (str, ==, "org.gtk.test");
   g_free (str);
 
-  settings_assert_cmpstr (settings, "greeting", ==, "Hello, earthlings");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "Hello, earthlings");
+  g_free (str);
 
   g_settings_set (settings, "greeting", "s", "goodbye world");
-  settings_assert_cmpstr (settings, "greeting", ==, "Hello, earthlings");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "Hello, earthlings");
+  g_free (str);
 
   writable = g_settings_is_writable (settings, "greeting");
   g_assert_false (writable);
@@ -2764,7 +2784,9 @@ test_null_backend (void)
   g_settings_delay (settings);
   g_settings_set (settings, "greeting", "s", "goodbye world");
   g_settings_apply (settings);
-  settings_assert_cmpstr (settings, "greeting", ==, "Hello, earthlings");
+  g_settings_get (settings, "greeting", "s", &str);
+  g_assert_cmpstr (str, ==, "Hello, earthlings");
+  g_free (str);
 
   g_object_unref (settings);
   g_object_unref (backend);
@@ -3092,7 +3114,6 @@ main (int argc, char *argv[])
   g_test_add_func ("/gsettings/delay-apply", test_delay_apply);
   g_test_add_func ("/gsettings/delay-revert", test_delay_revert);
   g_test_add_func ("/gsettings/delay-child", test_delay_child);
-  g_test_add_func ("/gsettings/delay-reset-key", test_delay_reset_key);
   g_test_add_func ("/gsettings/atomic", test_atomic);
 
   g_test_add_func ("/gsettings/simple-binding", test_simple_binding);
