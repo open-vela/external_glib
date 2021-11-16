@@ -59,9 +59,9 @@ GIOStream *           g_tls_client_connection_new                  (GIOStream   
 								    GSocketConnectable      *server_identity,
 								    GError                 **error);
 
-GLIB_DEPRECATED_IN_2_72
+GLIB_AVAILABLE_IN_ALL
 GTlsCertificateFlags  g_tls_client_connection_get_validation_flags (GTlsClientConnection    *conn);
-GLIB_DEPRECATED_IN_2_72
+GLIB_AVAILABLE_IN_ALL
 void                  g_tls_client_connection_set_validation_flags (GTlsClientConnection    *conn,
 								    GTlsCertificateFlags     flags);
 GLIB_AVAILABLE_IN_ALL
