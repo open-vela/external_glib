@@ -424,62 +424,56 @@ typedef const gchar *   (*GTranslateFunc)       (const gchar   *str,
 /* https://bugzilla.gnome.org/show_bug.cgi?id=769104 */
 #if __GNUC__ >= 5 && !defined(__INTEL_COMPILER)
 #define _GLIB_HAVE_BUILTIN_OVERFLOW_CHECKS
-#elif g_macro__has_builtin(__builtin_add_overflow)
+#elif g_macro__has_builtin(__builtin_uadd_overflow)
 #define _GLIB_HAVE_BUILTIN_OVERFLOW_CHECKS
 #endif
 #endif
 
-#ifdef _GLIB_HAVE_BUILTIN_OVERFLOW_CHECKS
-
 #define g_uint_checked_add(dest, a, b) \
-    (!__builtin_add_overflow(a, b, dest))
+    _GLIB_CHECKED_ADD_U32(dest, a, b)
 #define g_uint_checked_mul(dest, a, b) \
-    (!__builtin_mul_overflow(a, b, dest))
+    _GLIB_CHECKED_MUL_U32(dest, a, b)
 
 #define g_uint64_checked_add(dest, a, b) \
-    (!__builtin_add_overflow(a, b, dest))
+    _GLIB_CHECKED_ADD_U64(dest, a, b)
 #define g_uint64_checked_mul(dest, a, b) \
-    (!__builtin_mul_overflow(a, b, dest))
+    _GLIB_CHECKED_MUL_U64(dest, a, b)
 
+#if GLIB_SIZEOF_SIZE_T == 8
 #define g_size_checked_add(dest, a, b) \
-    (!__builtin_add_overflow(a, b, dest))
+    _GLIB_CHECKED_ADD_U64(dest, a, b)
 #define g_size_checked_mul(dest, a, b) \
-    (!__builtin_mul_overflow(a, b, dest))
-
-#else  /* !_GLIB_HAVE_BUILTIN_OVERFLOW_CHECKS */
+    _GLIB_CHECKED_MUL_U64(dest, a, b)
+#else
+#define g_size_checked_add(dest, a, b) \
+    _GLIB_CHECKED_ADD_U32(dest, a, b)
+#define g_size_checked_mul(dest, a, b) \
+    _GLIB_CHECKED_MUL_U32(dest, a, b)
+#endif
 
 /* The names of the following inlines are private.  Use the macro
  * definitions above.
  */
-static inline gboolean _GLIB_CHECKED_ADD_UINT (guint *dest, guint a, guint b) {
+#ifdef _GLIB_HAVE_BUILTIN_OVERFLOW_CHECKS
+static inline gboolean _GLIB_CHECKED_ADD_U32 (guint32 *dest, guint32 a, guint32 b) {
+  return !__builtin_uadd_overflow(a, b, dest); }
+static inline gboolean _GLIB_CHECKED_MUL_U32 (guint32 *dest, guint32 a, guint32 b) {
+  return !__builtin_umul_overflow(a, b, dest); }
+static inline gboolean _GLIB_CHECKED_ADD_U64 (guint64 *dest, guint64 a, guint64 b) {
+  G_STATIC_ASSERT(sizeof (unsigned long long) == sizeof (guint64));
+  return !__builtin_uaddll_overflow(a, b, (unsigned long long *) dest); }
+static inline gboolean _GLIB_CHECKED_MUL_U64 (guint64 *dest, guint64 a, guint64 b) {
+  return !__builtin_umulll_overflow(a, b, (unsigned long long *) dest); }
+#else
+static inline gboolean _GLIB_CHECKED_ADD_U32 (guint32 *dest, guint32 a, guint32 b) {
   *dest = a + b; return *dest >= a; }
-static inline gboolean _GLIB_CHECKED_MUL_UINT (guint *dest, guint a, guint b) {
+static inline gboolean _GLIB_CHECKED_MUL_U32 (guint32 *dest, guint32 a, guint32 b) {
   *dest = a * b; return !a || *dest / a == b; }
-static inline gboolean _GLIB_CHECKED_ADD_UINT64 (guint64 *dest, guint64 a, guint64 b) {
+static inline gboolean _GLIB_CHECKED_ADD_U64 (guint64 *dest, guint64 a, guint64 b) {
   *dest = a + b; return *dest >= a; }
-static inline gboolean _GLIB_CHECKED_MUL_UINT64 (guint64 *dest, guint64 a, guint64 b) {
+static inline gboolean _GLIB_CHECKED_MUL_U64 (guint64 *dest, guint64 a, guint64 b) {
   *dest = a * b; return !a || *dest / a == b; }
-static inline gboolean _GLIB_CHECKED_ADD_SIZE (gsize *dest, gsize a, gsize b) {
-  *dest = a + b; return *dest >= a; }
-static inline gboolean _GLIB_CHECKED_MUL_SIZE (gsize *dest, gsize a, gsize b) {
-  *dest = a * b; return !a || *dest / a == b; }
-
-#define g_uint_checked_add(dest, a, b) \
-    _GLIB_CHECKED_ADD_UINT(dest, a, b)
-#define g_uint_checked_mul(dest, a, b) \
-    _GLIB_CHECKED_MUL_UINT(dest, a, b)
-
-#define g_uint64_checked_add(dest, a, b) \
-    _GLIB_CHECKED_ADD_UINT64(dest, a, b)
-#define g_uint64_checked_mul(dest, a, b) \
-    _GLIB_CHECKED_MUL_UINT64(dest, a, b)
-
-#define g_size_checked_add(dest, a, b) \
-    _GLIB_CHECKED_ADD_SIZE(dest, a, b)
-#define g_size_checked_mul(dest, a, b) \
-    _GLIB_CHECKED_MUL_SIZE(dest, a, b)
-
-#endif  /* !_GLIB_HAVE_BUILTIN_OVERFLOW_CHECKS */
+#endif
 
 /* IEEE Standard 754 Single Precision Storage Format (gfloat):
  *
