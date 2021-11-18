@@ -1368,7 +1368,7 @@ get_windows_version (gboolean with_windows)
 }
 #endif
 
-#if defined (G_OS_UNIX) && !defined (__APPLE__)
+#ifdef G_OS_UNIX
 static gchar *
 get_os_info_from_os_release (const gchar *key_name,
                              const gchar *buffer)
@@ -1497,7 +1497,7 @@ get_os_info_from_uname (const gchar *key_name)
   else
     return NULL;
 }
-#endif  /* defined (G_OS_UNIX) && !defined (__APPLE__) */
+#endif
 
 /**
  * g_get_os_info:
