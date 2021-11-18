@@ -112,19 +112,11 @@ check_path (const gchar *path)
   return TRUE;
 }
 
-static int
-qsort_cmp (const void *a,
-           const void *b)
-{
-  return g_strcmp0 (*(gchar* const*)a, *(gchar* const*)b);
-}
-
 static void
 output_list (gchar **list)
 {
   gint i;
 
-  qsort (list, g_strv_length (list), sizeof (gchar*), qsort_cmp);
   for (i = 0; list[i]; i++)
     g_print ("%s\n", list[i]);
 }
@@ -203,7 +195,6 @@ gsettings_list_children (void)
   gint i;
 
   children = g_settings_list_children (global_settings);
-  qsort (children, g_strv_length (children), sizeof (gchar*), qsort_cmp);
   for (i = 0; children[i]; i++)
     {
       gsize len = strlen (children[i]);
@@ -248,7 +239,6 @@ enumerate (GSettings *settings)
   g_object_get (settings, "settings-schema", &schema, NULL);
 
   keys = g_settings_schema_list_keys (schema);
-  qsort (keys, g_strv_length (keys), sizeof (gchar*), qsort_cmp);
   for (i = 0; keys[i]; i++)
     {
       GVariant *value;
@@ -273,7 +263,6 @@ list_recursively (GSettings *settings)
 
   enumerate (settings);
   children = g_settings_list_children (settings);
-  qsort (children, g_strv_length (children), sizeof (gchar*), qsort_cmp);
   for (i = 0; children[i]; i++)
     {
       gboolean will_see_elsewhere = FALSE;
@@ -317,7 +306,6 @@ gsettings_list_recursively (void)
       gint i;
 
       g_settings_schema_source_list_schemas (global_schema_source, TRUE, &schemas, NULL);
-      qsort (schemas, g_strv_length (schemas), sizeof (gchar*), qsort_cmp);
 
       for (i = 0; schemas[i]; i++)
         {
