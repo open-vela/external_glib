@@ -29,6 +29,7 @@ tests = {
   'mainloop-test' : {},
   'mapping-test' : {},
   'onceinit' : {},
+  'asyncqueue-test' : {},
   'relation-test' : {},
   'slice-concurrent' : {},
   'slice-threadinit' : {
