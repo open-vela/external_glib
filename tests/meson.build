@@ -18,6 +18,7 @@ subdir('refcount')
 tests = {
   'testglib' : {'tap' : true},
   'testgdate' : {},
+  'datetime' : {},
   'child-test' : {},
   'dirname-test' : {},
   'file-test' : {},
