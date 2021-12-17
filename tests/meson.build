@@ -19,6 +19,7 @@ tests = {
   'testglib' : {'tap' : true},
   'testgdate' : {},
   'file-test' : {},
+  'env-test' : {},
   'gio-test' : {},
   'mainloop-test' : {},
   'mapping-test' : {},
