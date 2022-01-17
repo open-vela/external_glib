@@ -56,6 +56,7 @@ test_extra_programs = {
     'extra_sources' : ['memchunks.c'],
   },
   'assert-msg-test' : {},
+  'unicode-collate' : {},
 }
 
 if host_machine.system() != 'windows'
