@@ -27,6 +27,7 @@ testmarshal_c = custom_target('testmarshal_c',
 )
 
 gobject_tests = {
+  'paramspec-test' : {'tap' : true},
   'deftype' : {},
   'defaultiface' : {
     'extra_sources' : ['testmodule.c'],
