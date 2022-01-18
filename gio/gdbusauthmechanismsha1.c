@@ -32,7 +32,6 @@
 #endif
 #ifdef G_OS_WIN32
 #include <io.h>
-#include "gwin32sid.h"
 #endif
 
 #include "gdbusauthmechanismsha1.h"
@@ -991,12 +990,9 @@ mechanism_server_initiate (GDBusAuthMechanism   *mechanism,
         }
 #elif defined(G_OS_WIN32)
       gchar *sid;
-
-      sid = _g_win32_current_process_sid_string (NULL);
-
+      sid = _g_dbus_win32_get_user_sid ();
       if (g_strcmp0 (initial_response, sid) == 0)
         m->priv->state = G_DBUS_AUTH_MECHANISM_STATE_HAVE_DATA_TO_SEND;
-
       g_free (sid);
 #else
 #error Please implement for your OS
@@ -1146,25 +1142,20 @@ mechanism_client_initiate (GDBusAuthMechanism   *mechanism,
   g_return_val_if_fail (!m->priv->is_server && !m->priv->is_client, NULL);
 
   m->priv->is_client = TRUE;
+  m->priv->state = G_DBUS_AUTH_MECHANISM_STATE_WAITING_FOR_DATA;
 
   *out_initial_response_len = 0;
 
 #ifdef G_OS_UNIX
   initial_response = g_strdup_printf ("%" G_GINT64_FORMAT, (gint64) getuid ());
+  *out_initial_response_len = strlen (initial_response);
 #elif defined (G_OS_WIN32)
-  initial_response = _g_win32_current_process_sid_string (NULL);
+  initial_response = _g_dbus_win32_get_user_sid ();
+  *out_initial_response_len = strlen (initial_response);
 #else
 #error Please implement for your OS
 #endif
-  if (initial_response)
-    {
-      m->priv->state = G_DBUS_AUTH_MECHANISM_STATE_WAITING_FOR_DATA;
-      *out_initial_response_len = strlen (initial_response);
-    }
-  else
-    {
-      m->priv->state = G_DBUS_AUTH_MECHANISM_STATE_REJECTED;
-    }
+  g_assert (initial_response != NULL);
 
   return initial_response;
 }

@@ -433,8 +433,6 @@ else
     'gwin32networkmonitor.c',
     'gwin32networkmonitor.h',
     'gwin32notificationbackend.c',
-    'gwin32sid.c',
-    'gwin32sid.h',
   )
 
   gio_win_rc = configure_file(
