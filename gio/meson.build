@@ -465,8 +465,6 @@ gio_sources = files(
   'gdatagrambased.c',
   'gdatainputstream.c',
   'gdataoutputstream.c',
-  'gdebugcontroller.c',
-  'gdebugcontrollerdbus.c',
   'gdrive.c',
   'gdummyfile.c',
   'gdummyproxyresolver.c',
@@ -617,8 +615,6 @@ gio_headers = files(
   'gdatagrambased.h',
   'gdatainputstream.h',
   'gdataoutputstream.h',
-  'gdebugcontroller.h',
-  'gdebugcontrollerdbus.h',
   'gdrive.h',
   'gemblem.h',
   'gemblemedicon.h',
@@ -850,7 +846,7 @@ endif
 
 
 if host_system == 'windows'
-  pkg.generate(requires : ['gobject-2.0', 'gmodule-no-export-2.0', 'gio-2.0', 'zlib'],
+  pkg.generate(requires : ['gobject-2.0', 'gmodule-no-export-2.0', 'gio-2.0'],
     subdirs : ['gio-win32-2.0'],
     version : glib_version,
     install_dir : glib_pkgconfigreldir,

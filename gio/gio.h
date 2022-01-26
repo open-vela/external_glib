@@ -69,8 +69,6 @@
 #include <gio/gdbusproxy.h>
 #include <gio/gdbusserver.h>
 #include <gio/gdbusutils.h>
-#include <gio/gdebugcontroller.h>
-#include <gio/gdebugcontrollerdbus.h>
 #include <gio/gdrive.h>
 #include <gio/gdtlsclientconnection.h>
 #include <gio/gdtlsconnection.h>
