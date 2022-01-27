@@ -909,7 +909,6 @@ keyring_generate_entry (const gchar  *cookie_context,
                                   _("(Additionally, releasing the lock for “%s” also failed: %s) "),
                                   path,
                                   local_error->message);
-                  g_error_free (local_error);
                 }
             }
           else
