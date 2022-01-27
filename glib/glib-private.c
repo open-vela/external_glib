@@ -54,7 +54,6 @@ glib__private__ (void)
     g_win32_lstat_utf8,
     g_win32_readlink_utf8,
     g_win32_fstat,
-    g_win32_find_helper_executable_path,
 #endif
   };
 
