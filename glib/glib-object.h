@@ -20,7 +20,6 @@
 #define __GLIB_GOBJECT_H_INSIDE__
 
 #include <gobject/gbinding.h>
-#include <gobject/gbindinggroup.h>
 #include <gobject/gboxed.h>
 #include <gobject/genums.h>
 #include <gobject/glib-enumtypes.h>
