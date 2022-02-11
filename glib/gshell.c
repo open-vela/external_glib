@@ -646,11 +646,6 @@ tokenize_command_line (const gchar *command_line,
  *
  * Possible errors are those from the %G_SHELL_ERROR domain.
  *
- * In particular, if @command_line is an empty string (or a string containing
- * only whitespace), %G_SHELL_ERROR_EMPTY_STRING will be returned. It’s
- * guaranteed that @argvp will be a non-empty array if this function returns
- * successfully.
- *
  * Free the returned vector with g_strfreev().
  * 
  * Returns: %TRUE on success, %FALSE if error set
@@ -707,10 +702,7 @@ g_shell_parse_argv (const gchar *command_line,
     }
   
   g_slist_free_full (tokens, g_free);
-
-  g_assert (argc > 0);
-  g_assert (argv != NULL && argv[0] != NULL);
-
+  
   if (argcp)
     *argcp = argc;
 

@@ -319,7 +319,7 @@ read_data (GString *str,
  * @working_directory: (type filename) (nullable): child's current working
  *     directory, or %NULL to inherit parent's
  * @argv: (array zero-terminated=1) (element-type filename):
- *     child's argument vector, which must be non-empty and %NULL-terminated
+ *     child's argument vector
  * @envp: (array zero-terminated=1) (element-type filename) (nullable):
  *     child's environment, or %NULL to inherit parent's
  * @flags: flags from #GSpawnFlags
@@ -378,7 +378,6 @@ g_spawn_sync (const gchar          *working_directory,
   gint status;
   
   g_return_val_if_fail (argv != NULL, FALSE);
-  g_return_val_if_fail (argv[0] != NULL, FALSE);
   g_return_val_if_fail (!(flags & G_SPAWN_DO_NOT_REAP_CHILD), FALSE);
   g_return_val_if_fail (standard_output == NULL ||
                         !(flags & G_SPAWN_STDOUT_TO_DEV_NULL), FALSE);
@@ -579,7 +578,7 @@ g_spawn_sync (const gchar          *working_directory,
  * @working_directory: (type filename) (nullable): child's current working
  *     directory, or %NULL to inherit parent's, in the GLib file name encoding
  * @argv: (array zero-terminated=1) (element-type filename): child's argument
- *     vector, in the GLib file name encoding; it must be non-empty and %NULL-terminated
+ *     vector, in the GLib file name encoding
  * @envp: (array zero-terminated=1) (element-type filename) (nullable):
  *     child's environment, or %NULL to inherit parent's, in the GLib file
  *     name encoding
@@ -611,7 +610,6 @@ g_spawn_async_with_pipes (const gchar          *working_directory,
                           GError              **error)
 {
   g_return_val_if_fail (argv != NULL, FALSE);
-  g_return_val_if_fail (argv[0] != NULL, FALSE);
   g_return_val_if_fail (standard_output == NULL ||
                         !(flags & G_SPAWN_STDOUT_TO_DEV_NULL), FALSE);
   g_return_val_if_fail (standard_error == NULL ||
@@ -648,7 +646,7 @@ g_spawn_async_with_pipes (const gchar          *working_directory,
  * @working_directory: (type filename) (nullable): child's current working
  *     directory, or %NULL to inherit parent's, in the GLib file name encoding
  * @argv: (array zero-terminated=1) (element-type filename): child's argument
- *     vector, in the GLib file name encoding; it must be non-empty and %NULL-terminated
+ *     vector, in the GLib file name encoding
  * @envp: (array zero-terminated=1) (element-type filename) (nullable):
  *     child's environment, or %NULL to inherit parent's, in the GLib file
  *     name encoding
@@ -882,7 +880,6 @@ g_spawn_async_with_pipes_and_fds (const gchar           *working_directory,
                                   GError               **error)
 {
   g_return_val_if_fail (argv != NULL, FALSE);
-  g_return_val_if_fail (argv[0] != NULL, FALSE);
   g_return_val_if_fail (stdout_pipe_out == NULL ||
                         !(flags & G_SPAWN_STDOUT_TO_DEV_NULL), FALSE);
   g_return_val_if_fail (stderr_pipe_out == NULL ||
@@ -925,8 +922,7 @@ g_spawn_async_with_pipes_and_fds (const gchar           *working_directory,
 /**
  * g_spawn_async_with_fds:
  * @working_directory: (type filename) (nullable): child's current working directory, or %NULL to inherit parent's, in the GLib file name encoding
- * @argv: (array zero-terminated=1): child's argument vector, in the GLib file name encoding;
- *   it must be non-empty and %NULL-terminated
+ * @argv: (array zero-terminated=1): child's argument vector, in the GLib file name encoding
  * @envp: (array zero-terminated=1) (nullable): child's environment, or %NULL to inherit parent's, in the GLib file name encoding
  * @flags: flags from #GSpawnFlags
  * @child_setup: (scope async) (nullable): function to run in the child just before exec()
@@ -960,7 +956,6 @@ g_spawn_async_with_fds (const gchar          *working_directory,
                         GError              **error)
 {
   g_return_val_if_fail (argv != NULL, FALSE);
-  g_return_val_if_fail (argv[0] != NULL, FALSE);
   g_return_val_if_fail (stdout_fd < 0 ||
                         !(flags & G_SPAWN_STDOUT_TO_DEV_NULL), FALSE);
   g_return_val_if_fail (stderr_fd < 0 ||
@@ -1044,7 +1039,6 @@ g_spawn_command_line_sync (const gchar  *command_line,
 
   g_return_val_if_fail (command_line != NULL, FALSE);
   
-  /* This will return a runtime error if @command_line is the empty string. */
   if (!g_shell_parse_argv (command_line,
                            NULL, &argv,
                            error))
@@ -1092,7 +1086,6 @@ g_spawn_command_line_async (const gchar *command_line,
 
   g_return_val_if_fail (command_line != NULL, FALSE);
 
-  /* This will return a runtime error if @command_line is the empty string. */
   if (!g_shell_parse_argv (command_line,
                            NULL, &argv,
                            error))
@@ -1643,9 +1636,7 @@ enum
 };
 
 /* This function is called between fork() and exec() and hence must be
- * async-signal-safe (see signal-safety(7)) until it calls exec().
- *
- * All callers must guarantee that @argv and @argv[0] are non-NULL. */
+ * async-signal-safe (see signal-safety(7)) until it calls exec(). */
 static void
 do_exec (gint                  child_err_report_fd,
          gint                  stdin_fd,
@@ -1935,8 +1926,6 @@ do_posix_spawn (const gchar * const *argv,
   gsize i;
   int r;
 
-  g_assert (argv != NULL && argv[0] != NULL);
-
   if (*argv[0] == '\0')
     {
       /* We check the simple case first. */
@@ -2187,7 +2176,6 @@ fork_exec (gboolean              intermediate_child,
   gint n_child_close_fds = 0;
   gint *source_fds_copy = NULL;
 
-  g_assert (argv != NULL && argv[0] != NULL);
   g_assert (stdin_pipe_out == NULL || stdin_fd < 0);
   g_assert (stdout_pipe_out == NULL || stdout_fd < 0);
   g_assert (stderr_pipe_out == NULL || stderr_fd < 0);
@@ -2746,7 +2734,7 @@ g_execute (const gchar  *file,
            gchar        *search_path_buffer,
            gsize         search_path_buffer_len)
 {
-  if (file == NULL || *file == '\0')
+  if (*file == '\0')
     {
       /* We check the simple case first. */
       errno = ENOENT;
