@@ -104,47 +104,6 @@
 #include <langinfo.h>
 #endif
 
-#ifdef G_PLATFORM_WIN32
-
-gchar *
-_glib_get_dll_directory (void)
-{
-  gchar *retval;
-  gchar *p;
-  wchar_t wc_fn[MAX_PATH];
-
-#ifdef DLL_EXPORT
-  if (glib_dll == NULL)
-    return NULL;
-#endif
-
-  /* This code is different from that in
-   * g_win32_get_package_installation_directory_of_module() in that
-   * here we return the actual folder where the GLib DLL is. We don't
-   * do the check for it being in a "bin" or "lib" subfolder and then
-   * returning the parent of that.
-   *
-   * In a statically built GLib, glib_dll will be NULL and we will
-   * thus look up the application's .exe file's location.
-   */
-  if (!GetModuleFileNameW (glib_dll, wc_fn, MAX_PATH))
-    return NULL;
-
-  retval = g_utf16_to_utf8 (wc_fn, -1, NULL, NULL, NULL);
-
-  p = strrchr (retval, G_DIR_SEPARATOR);
-  if (p == NULL)
-    {
-      /* Wtf? */
-      return NULL;
-    }
-  *p = '\0';
-
-  return retval;
-}
-
-#endif
-
 /**
  * g_memmove: 
  * @dest: the destination address to copy the bytes to.
@@ -456,7 +415,14 @@ g_find_program_in_path (const gchar *program)
 	  !g_file_test (startp, G_FILE_TEST_IS_DIR))
         {
           gchar *ret;
-          ret = g_strdup (startp);
+          if (g_path_is_absolute (startp)) {
+            ret = g_strdup (startp);
+          } else {
+            gchar *cwd = NULL;
+            cwd = g_get_current_dir ();
+            ret = g_build_filename (cwd, startp, NULL);
+            g_free (cwd);
+          }
           g_free (freeme);
 #ifdef G_OS_WIN32
 	  g_free ((gchar *) path_copy);

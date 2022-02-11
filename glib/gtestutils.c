@@ -1923,9 +1923,10 @@ g_test_timer_start (void)
 /**
  * g_test_timer_elapsed:
  *
- * Get the time since the last start of the timer with g_test_timer_start().
+ * Get the number of seconds since the last start of the timer with
+ * g_test_timer_start().
  *
- * Returns: the time since the last start of the timer, as a double
+ * Returns: the time since the last start of the timer in seconds, as a double
  *
  * Since: 2.16
  */
@@ -4400,9 +4401,9 @@ g_test_get_dir (GTestFileType file_type)
  * Gets the pathname to a data file that is required for a test.
  *
  * This is the same as g_test_build_filename() with two differences.
- * The first difference is that must only use this function from within
+ * The first difference is that you must only use this function from within
  * a testcase function.  The second difference is that you need not free
- * the return value -- it will be automatically freed when the testcase
+ * the return value — it will be automatically freed when the testcase
  * finishes running.
  *
  * It is safe to use this function from a thread inside of a testcase

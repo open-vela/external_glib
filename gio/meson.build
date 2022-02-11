@@ -346,13 +346,10 @@ if host_system != 'windows'
   unix_sources = files(
     'gfiledescriptorbased.c',
     'giounix-private.c',
-    'gunixconnection.c',
-    'gunixcredentialsmessage.c',
     'gunixfdlist.c',
     'gunixfdmessage.c',
     'gunixmount.c',
     'gunixmounts.c',
-    'gunixsocketaddress.c',
     'gunixvolume.c',
     'gunixvolumemonitor.c',
     'gunixinputstream.c',
@@ -376,14 +373,11 @@ if host_system != 'windows'
 
   gio_unix_include_headers = files(
     'gfiledescriptorbased.h',
-    'gunixconnection.h',
-    'gunixcredentialsmessage.h',
     'gunixmounts.h',
     'gunixfdlist.h',
     'gunixfdmessage.h',
     'gunixinputstream.h',
     'gunixoutputstream.h',
-    'gunixsocketaddress.h',
   )
 
   if glib_have_cocoa
@@ -423,6 +417,7 @@ else
   platform_deps += uwp_gio_deps
 
   win32_sources += files(
+    'gmemorymonitorwin32.c',
     'gwin32registrykey.c',
     'gwin32mount.c',
     'gwin32volumemonitor.c',
@@ -433,6 +428,8 @@ else
     'gwin32networkmonitor.c',
     'gwin32networkmonitor.h',
     'gwin32notificationbackend.c',
+    'gwin32sid.c',
+    'gwin32sid.h',
   )
 
   gio_win_rc = configure_file(
@@ -468,6 +465,8 @@ gio_sources = files(
   'gdatagrambased.c',
   'gdatainputstream.c',
   'gdataoutputstream.c',
+  'gdebugcontroller.c',
+  'gdebugcontrollerdbus.c',
   'gdrive.c',
   'gdummyfile.c',
   'gdummyproxyresolver.c',
@@ -566,6 +565,9 @@ gio_sources = files(
   'gdtlsclientconnection.c',
   'gdtlsserverconnection.c',
   'gunionvolumemonitor.c',
+  'gunixconnection.c',
+  'gunixcredentialsmessage.c',
+  'gunixsocketaddress.c',
   'gvfs.c',
   'gvolume.c',
   'gvolumemonitor.c',
@@ -615,6 +617,8 @@ gio_headers = files(
   'gdatagrambased.h',
   'gdatainputstream.h',
   'gdataoutputstream.h',
+  'gdebugcontroller.h',
+  'gdebugcontrollerdbus.h',
   'gdrive.h',
   'gemblem.h',
   'gemblemedicon.h',
@@ -701,6 +705,9 @@ gio_headers = files(
   'gdtlsconnection.h',
   'gdtlsclientconnection.h',
   'gdtlsserverconnection.h',
+  'gunixconnection.h',
+  'gunixcredentialsmessage.h',
+  'gunixsocketaddress.h',
   'gvfs.h',
   'gvolume.h',
   'gvolumemonitor.h',
