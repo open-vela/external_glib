@@ -435,7 +435,6 @@ typedef enum
  * @G_UNICODE_SCRIPT_TANGSA:               Tangsa. Since: 2.72
  * @G_UNICODE_SCRIPT_TOTO:                 Toto. Since: 2.72
  * @G_UNICODE_SCRIPT_VITHKUQI:             Vithkuqi. Since: 2.72
- * @G_UNICODE_SCRIPT_MATH:                 Mathematical notation. Since: 2.72
  *
  * The #GUnicodeScript enumeration identifies different writing
  * systems. The values correspond to the names as defined in the
@@ -641,9 +640,6 @@ typedef enum
   G_UNICODE_SCRIPT_TANGSA,                 /* Tnsa */
   G_UNICODE_SCRIPT_TOTO,                   /* Toto */
   G_UNICODE_SCRIPT_VITHKUQI,               /* Vith */
-
-  /* not really a Unicode script, but part of ISO 15924 */
-  G_UNICODE_SCRIPT_MATH,                   /* Zmth */
 } GUnicodeScript;
 
 GLIB_AVAILABLE_IN_ALL

@@ -772,8 +772,6 @@ g_spawn_async_with_pipes (const gchar          *working_directory,
  * any target FDs which equal @stdin_fd, @stdout_fd or @stderr_fd will overwrite
  * them in the spawned process.
  *
- * @source_fds is supported on Windows since 2.72.
- *
  * %G_SPAWN_FILE_AND_ARGV_ZERO means that the first element of @argv is
  * the file to execute, while the remaining elements are the actual
  * argument vector to pass to the file. Normally g_spawn_async_with_pipes()
@@ -1522,7 +1520,7 @@ safe_fdwalk (int (*cb)(void *data, int fd), void *data)
 
 /* This function is called between fork() and exec() and hence must be
  * async-signal-safe (see signal-safety(7)). */
-static int
+static void
 safe_fdwalk_set_cloexec (int lowfd)
 {
 #if defined(HAVE_CLOSE_RANGE) && defined(CLOSE_RANGE_CLOEXEC)
@@ -1536,18 +1534,15 @@ safe_fdwalk_set_cloexec (int lowfd)
    * Handle ENOSYS in case it’s supported in libc but not the kernel; if so,
    * fall back to safe_fdwalk(). Handle EINVAL in case `CLOSE_RANGE_CLOEXEC`
    * is not supported. */
-  int ret = close_range (lowfd, G_MAXUINT, CLOSE_RANGE_CLOEXEC);
-  if (ret == 0 || !(errno == ENOSYS || errno == EINVAL))
-    return ret;
+  if (close_range (lowfd, G_MAXUINT, CLOSE_RANGE_CLOEXEC) != 0 &&
+      (errno == ENOSYS || errno == EINVAL))
 #endif  /* HAVE_CLOSE_RANGE */
-  return safe_fdwalk (set_cloexec, GINT_TO_POINTER (lowfd));
+  (void) safe_fdwalk (set_cloexec, GINT_TO_POINTER (lowfd));
 }
 
 /* This function is called between fork() and exec() and hence must be
- * async-signal-safe (see signal-safety(7)).
- *
- * On failure, `-1` will be returned and errno will be set. */
-static int
+ * async-signal-safe (see signal-safety(7)). */
+static void
 safe_closefrom (int lowfd)
 {
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || \
@@ -1565,7 +1560,6 @@ safe_closefrom (int lowfd)
    * On such systems, F_CLOSEFROM is defined.
    */
   (void) closefrom (lowfd);
-  return 0;
 #elif defined(__DragonFly__)
   /* It is unclear whether closefrom function included in DragonFlyBSD libc_r
    * is safe to use because it calls a lot of library functions. It is also
@@ -1573,13 +1567,12 @@ safe_closefrom (int lowfd)
    * direct system call here ourselves to avoid possible issues.
    */
   (void) syscall (SYS_closefrom, lowfd);
-  return 0;
 #elif defined(F_CLOSEM)
   /* NetBSD and AIX have a special fcntl command which does the same thing as
    * closefrom. NetBSD also includes closefrom function, which seems to be a
    * simple wrapper of the fcntl command.
    */
-  return fcntl (lowfd, F_CLOSEM);
+  (void) fcntl (lowfd, F_CLOSEM);
 #else
 
 #if defined(HAVE_CLOSE_RANGE)
@@ -1589,11 +1582,9 @@ safe_closefrom (int lowfd)
    *
    * Handle ENOSYS in case it’s supported in libc but not the kernel; if so,
    * fall back to safe_fdwalk(). */
-  int ret = close_range (lowfd, G_MAXUINT, 0);
-  if (ret == 0 || errno != ENOSYS)
-    return ret;
+  if (close_range (lowfd, G_MAXUINT, 0) != 0 && errno == ENOSYS)
 #endif  /* HAVE_CLOSE_RANGE */
-  return safe_fdwalk (close_func, GINT_TO_POINTER (lowfd));
+  (void) safe_fdwalk (close_func, GINT_TO_POINTER (lowfd));
 #endif
 }
 
@@ -1631,8 +1622,7 @@ enum
   CHILD_EXEC_FAILED,
   CHILD_OPEN_FAILED,
   CHILD_DUP2_FAILED,
-  CHILD_FORK_FAILED,
-  CHILD_CLOSE_FAILED,
+  CHILD_FORK_FAILED
 };
 
 /* This function is called between fork() and exec() and hence must be
@@ -1748,14 +1738,12 @@ do_exec (gint                  child_err_report_fd,
           if (safe_dup2 (child_err_report_fd, 3) < 0)
             write_err_and_exit (child_err_report_fd, CHILD_DUP2_FAILED);
           set_cloexec (GINT_TO_POINTER (0), 3);
-          if (safe_closefrom (4) < 0)
-            write_err_and_exit (child_err_report_fd, CHILD_CLOSE_FAILED);
+          safe_closefrom (4);
           child_err_report_fd = 3;
         }
       else
         {
-          if (safe_fdwalk_set_cloexec (3) < 0)
-            write_err_and_exit (child_err_report_fd, CHILD_CLOSE_FAILED);
+          safe_fdwalk_set_cloexec (3);
         }
     }
   else
@@ -2555,15 +2543,7 @@ fork_exec (gboolean              intermediate_child,
                            _("Failed to fork child process (%s)"),
                            g_strerror (buf[1]));
               break;
-
-            case CHILD_CLOSE_FAILED:
-              g_set_error (error,
-                           G_SPAWN_ERROR,
-                           G_SPAWN_ERROR_FAILED,
-                           _("Failed to close file descriptor for child process (%s)"),
-                           g_strerror (buf[1]));
-              break;
-
+              
             default:
               g_set_error (error,
                            G_SPAWN_ERROR,

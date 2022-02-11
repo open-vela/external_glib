@@ -72,9 +72,6 @@
  * On Solaris (including OpenSolaris and its derivatives), the native
  * credential type is a `ucred_t`. This corresponds to
  * %G_CREDENTIALS_TYPE_SOLARIS_UCRED.
- *
- * Since GLib 2.72, on Windows, the native credentials may contain the PID of a
- * process. This corresponds to %G_CREDENTIALS_TYPE_WIN32_PID.
  */
 
 /**
@@ -94,7 +91,6 @@ struct _GCredentials
   struct ucred native;
 #elif G_CREDENTIALS_USE_APPLE_XUCRED
   struct xucred native;
-  pid_t pid;
 #elif G_CREDENTIALS_USE_FREEBSD_CMSGCRED
   struct cmsgcred native;
 #elif G_CREDENTIALS_USE_NETBSD_UNPCBID
@@ -103,8 +99,6 @@ struct _GCredentials
   struct sockpeercred native;
 #elif G_CREDENTIALS_USE_SOLARIS_UCRED
   ucred_t *native;
-#elif G_CREDENTIALS_USE_WIN32_PID
-  DWORD native;
 #else
   #ifdef __GNUC__
   #pragma GCC diagnostic push
@@ -176,8 +170,6 @@ g_credentials_init (GCredentials *credentials)
    * For now we fill it with -1 (meaning "no data"). */
   for (i = 1; i < NGROUPS; i++)
     credentials->native.cr_groups[i] = -1;
-
-  credentials->pid = -1;
 #elif G_CREDENTIALS_USE_FREEBSD_CMSGCRED
   memset (&credentials->native, 0, sizeof (struct cmsgcred));
   credentials->native.cmcred_pid  = getpid ();
@@ -193,8 +185,6 @@ g_credentials_init (GCredentials *credentials)
   credentials->native.gid = getegid ();
 #elif G_CREDENTIALS_USE_SOLARIS_UCRED
   credentials->native = ucred_get (P_MYID);
-#elif G_CREDENTIALS_USE_WIN32_PID
-  credentials->native = GetCurrentProcessId ();
 #endif
 }
 
@@ -300,8 +290,6 @@ g_credentials_to_string (GCredentials *credentials)
     if (ret->str[ret->len - 1] == ',')
       ret->str[ret->len - 1] = '\0';
   }
-#elif G_CREDENTIALS_USE_WIN32_PID
-  g_string_append_printf (ret, "win32-pid:pid=%lu", credentials->native);
 #else
   g_string_append (ret, "unknown");
 #endif
@@ -581,7 +569,8 @@ g_credentials_get_unix_user (GCredentials    *credentials,
  *
  * This operation can fail if #GCredentials is not supported on the
  * OS or if the native credentials type does not contain information
- * about the UNIX process ID.
+ * about the UNIX process ID (for example this is the case for
+ * %G_CREDENTIALS_TYPE_APPLE_XUCRED).
  *
  * Returns: The UNIX process ID, or `-1` if @error is set.
  *
@@ -609,21 +598,13 @@ g_credentials_get_unix_pid (GCredentials    *credentials,
   ret = credentials->native.pid;
 #elif G_CREDENTIALS_USE_SOLARIS_UCRED
   ret = ucred_getpid (credentials->native);
-#elif G_CREDENTIALS_USE_WIN32_PID
-  ret = credentials->native;
 #else
-
-#if G_CREDENTIALS_USE_APPLE_XUCRED
-  ret = credentials->pid;
-#else
+  /* this case includes G_CREDENTIALS_USE_APPLE_XUCRED */
   ret = -1;
-#endif
-
-  if (ret == -1)
-    g_set_error_literal (error,
-                         G_IO_ERROR,
-                         G_IO_ERROR_NOT_SUPPORTED,
-                         _("GCredentials does not contain a process ID on this OS"));
+  g_set_error_literal (error,
+                       G_IO_ERROR,
+                       G_IO_ERROR_NOT_SUPPORTED,
+                       _("GCredentials does not contain a process ID on this OS"));
 #endif
 
   return ret;
@@ -689,17 +670,5 @@ g_credentials_set_unix_user (GCredentials    *credentials,
 
   return ret;
 }
-
-#ifdef __APPLE__
-void
-_g_credentials_set_local_peerid (GCredentials *credentials,
-                                 pid_t         pid)
-{
-  g_return_if_fail (G_IS_CREDENTIALS (credentials));
-  g_return_if_fail (pid >= 0);
-
-  credentials->pid = pid;
-}
-#endif /* __APPLE__ */
 
 #endif /* G_OS_UNIX */

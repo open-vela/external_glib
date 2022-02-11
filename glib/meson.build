@@ -1,4 +1,4 @@
-glibconfig_h = configure_file(input : 'glibconfig.h.in', output : 'glibconfig.h',
+configure_file(input : 'glibconfig.h.in', output : 'glibconfig.h',
   install_dir : join_paths(get_option('libdir'), 'glib-2.0/include'),
   configuration : glibconfig_conf)
 
@@ -119,10 +119,6 @@ glib_headers = files(
   'glib-object.h',
 )
 install_headers(glib_headers, subdir : 'glib-2.0')
-
-# Expose as variable to be used by gobject-introspection
-# when it includes GLib as a subproject
-glib_unix_h = files('glib-unix.h')
 
 glib_deprecated_headers = files(
   'deprecated/gallocator.h',
@@ -317,15 +313,13 @@ glib_sources = files(
 platform_deps = []
 
 if host_system == 'windows'
-  if get_option('default_library') == 'shared'
-    glib_win_rc = configure_file(
-      input: 'glib.rc.in',
-      output: 'glib.rc',
-      configuration: glibconfig_conf,
-    )
-    glib_win_res = windows.compile_resources(glib_win_rc)
-    glib_sources += [glib_win_res]
-  endif
+  glib_win_rc = configure_file(
+    input: 'glib.rc.in',
+    output: 'glib.rc',
+    configuration: glibconfig_conf,
+  )
+  glib_win_res = windows.compile_resources(glib_win_rc)
+  glib_sources += [glib_win_res]
   glib_sources += files('gwin32.c', 'gspawn-win32.c', 'giowin32.c')
   platform_deps = [winsock2, cc.find_library('winmm')]
   if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'

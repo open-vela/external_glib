@@ -37,7 +37,6 @@ gobject_tests = {
   'threadtests' : {},
   'dynamictests' : {},
   'binding' : {},
-  'bindinggroup' : {},
   'properties' : {},
   'reference' : {},
   'flags' : {},
@@ -54,7 +53,6 @@ gobject_tests = {
   'signals' : {
     'source' : ['signals.c', marshalers_h, marshalers_c],
   },
-  'signalgroup' : {},
   'testing' : {},
   'type-flags' : {},
 }
