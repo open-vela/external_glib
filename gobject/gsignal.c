@@ -3117,8 +3117,7 @@ g_signal_has_handler_pending (gpointer instance,
  * store the return value of the signal emission. This must be provided if the
  * specified signal returns a value, but may be ignored otherwise.
  *
- * Emits a signal. Signal emission is done synchronously.
- * The method will only return control after all handlers are called or signal emission was stopped.
+ * Emits a signal.
  *
  * Note that g_signal_emitv() doesn't change @return_value if no handlers are
  * connected, in contrast to g_signal_emit() and g_signal_emit_valist().
@@ -3256,8 +3255,7 @@ accumulate (GSignalInvocationHint *ihint,
  *  location for the return value. If the return type of the signal
  *  is #G_TYPE_NONE, the return value location can be omitted.
  *
- * Emits a signal. Signal emission is done synchronously.
- * The method will only return control after all handlers are called or signal emission was stopped.
+ * Emits a signal.
  *
  * Note that g_signal_emit_valist() resets the return value to the default
  * if no handlers are connected, in contrast to g_signal_emitv().
@@ -3536,8 +3534,7 @@ g_signal_emit_valist (gpointer instance,
  *  location for the return value. If the return type of the signal
  *  is #G_TYPE_NONE, the return value location can be omitted.
  *
- * Emits a signal. Signal emission is done synchronously.
- * The method will only return control after all handlers are called or signal emission was stopped.
+ * Emits a signal.
  *
  * Note that g_signal_emit() resets the return value to the default
  * if no handlers are connected, in contrast to g_signal_emitv().
@@ -3564,8 +3561,7 @@ g_signal_emit (gpointer instance,
  *  is %G_TYPE_NONE, the return value location can be omitted. The
  *  number of parameters to pass to this function is defined when creating the signal.
  *
- * Emits a signal. Signal emission is done synchronously.
- * The method will only return control after all handlers are called or signal emission was stopped.
+ * Emits a signal.
  *
  * Note that g_signal_emit_by_name() resets the return value to the default
  * if no handlers are connected, in contrast to g_signal_emitv().

@@ -59,14 +59,9 @@ gmoduleconf_h = configure_file(input : 'gmoduleconf.h.in',
                                output : 'gmoduleconf.h',
                                configuration : gmoduleconf_conf)
 
-# Expose as variable to be used by gobject-introspection
-# when it includes GLib as a subproject
-gmodule_h = files('gmodule.h')
-gmodule_c = files('gmodule.c')
+install_headers(['gmodule.h'], subdir : 'glib-2.0')
 
-install_headers([gmodule_h], subdir : 'glib-2.0')
-
-gmodule_sources = [gmodule_c]
+gmodule_sources = ['gmodule.c']
 if host_system == 'windows'
   gmodule_win_rc = configure_file(
     input: 'gmodule.rc.in',

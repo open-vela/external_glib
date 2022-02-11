@@ -76,7 +76,7 @@ test_search (gconstpointer d)
   for (i = 0; tests[i].string != NULL; i++)
     {
       gboolean match;
-      gboolean ok = FALSE;
+      gboolean ok;
       gboolean skipped;
 
       if (setlocale (LC_ALL, tests[i].locale))
