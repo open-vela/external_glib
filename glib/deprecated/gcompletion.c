@@ -463,8 +463,7 @@ main (int   argc,
   
   if (argc < 3)
     {
-      g_warning ("Usage: %s filename prefix1 [prefix2 ...]",
-                 (argc > 0) ? argv[0] : "gcompletion");
+      g_warning ("Usage: %s filename prefix1 [prefix2 ...]", argv[0]);
       return 1;
     }
   
