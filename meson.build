@@ -1,5 +1,5 @@
 project('glib', 'c', 'cpp',
-  version : '2.71.0',
+  version : '2.71.1',
   # NOTE: We keep this pinned at 0.52 because that's what Debian Stable ships
   meson_version : '>= 0.52.0',
   default_options : [
@@ -200,6 +200,9 @@ endif
 glib_hidden_visibility_args = []
 if get_option('default_library') != 'static'
   if host_system == 'windows' or host_system == 'cygwin'
+    if get_option('default_library') != 'shared'
+      error('On Windows default_library must be "shared" or "static" but not "both"')
+    endif
     glib_conf.set('DLL_EXPORT', true)
     if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
       glib_conf.set('_GLIB_EXTERN', '__declspec(dllexport) extern')
@@ -214,8 +217,10 @@ if get_option('default_library') != 'static'
 endif
 
 if get_option('default_library') == 'static'
-    glibconfig_conf.set('GLIB_STATIC_COMPILATION', '1')
-    glibconfig_conf.set('GOBJECT_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('GLIB_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('GOBJECT_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('G_INTL_STATIC_COMPILATION', '1')
+  glibconfig_conf.set('FFI_STATIC_BUILD', '1')
 endif
 
 # Cygwin glib port maintainers made it clear
@@ -275,6 +280,7 @@ add_project_arguments(glib_debug_cflags, language: 'c')
 
 headers = [
   'alloca.h',
+  'afunix.h',
   'crt_externs.h',
   'dirent.h', # MSC does not come with this by default
   'float.h',
@@ -282,7 +288,6 @@ headers = [
   'grp.h',
   'inttypes.h',
   'limits.h',
-  'linux/magic.h',
   'locale.h',
   'mach/mach_time.h',
   'memory.h',
@@ -1852,6 +1857,10 @@ endif
 glibconfig_conf.set('G_ATOMIC_LOCK_FREE', have_atomic_lock_free)
 
 # === Threads ===
+
+if get_option('force_posix_threads')
+  warning('DEPRECATION: Option \'force_posix_threads\' is deprecated and will be removed after GLib 2.72; please file an issue with your use case if you still require it')
+endif
 
 # Determination of thread implementation
 if host_system == 'windows' and not get_option('force_posix_threads')
