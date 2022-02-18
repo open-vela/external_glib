@@ -978,7 +978,7 @@ g_spawn_sync (const gchar          *working_directory,
   gint reportpipe = -1;
   GIOChannel *outchannel = NULL;
   GIOChannel *errchannel = NULL;
-  GPollFD outfd = { -1, 0, 0 }, errfd = { -1, 0, 0 };
+  GPollFD outfd, errfd;
   GPollFD fds[2];
   gint nfds;
   gint outindex = -1;
