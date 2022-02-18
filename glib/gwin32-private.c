@@ -23,7 +23,7 @@
  * than `e` or `p`.
  */
 static gboolean
-_g_win32_subst_pid_and_event_w (wchar_t       *local_debugger,
+_g_win32_subst_pid_and_event_w (wchar_t       *debugger,
                                 gsize          debugger_size,
                                 const wchar_t *cmdline,
                                 DWORD          pid,
@@ -51,26 +51,26 @@ _g_win32_subst_pid_and_event_w (wchar_t       *local_debugger,
   while (cmdline[i] != 0 && dbg_i < debugger_size)
     {
       if (cmdline[i] != L'%')
-        local_debugger[dbg_i++] = cmdline[i++];
+        debugger[dbg_i++] = cmdline[i++];
       else if (cmdline[i + 1] == L'p')
         {
           gsize j = 0;
           while (j < pid_str_len && dbg_i < debugger_size)
-            local_debugger[dbg_i++] = pid_str[j++];
+            debugger[dbg_i++] = pid_str[j++];
           i += 2;
         }
       else if (cmdline[i + 1] == L'e')
         {
           gsize j = 0;
           while (j < event_str_len && dbg_i < debugger_size)
-            local_debugger[dbg_i++] = event_str[j++];
+            debugger[dbg_i++] = event_str[j++];
           i += 2;
         }
       else
         return FALSE;
     }
   if (dbg_i < debugger_size)
-    local_debugger[dbg_i] = 0;
+    debugger[dbg_i] = 0;
   else
     return FALSE;
 

@@ -812,7 +812,7 @@ main (int argc, char **argv)
   char *c_name = NULL;
   char *c_name_no_underscores;
   const char *linkage = "extern";
-  char *compiler = NULL;
+  const char *compiler = NULL;
   CompilerType compiler_type = COMPILER_GCC;
   GOptionContext *context;
   GOptionEntry entries[] = {
@@ -886,7 +886,6 @@ main (int argc, char **argv)
     linkage = "G_GNUC_INTERNAL";
 
   compiler_type = get_compiler_id (compiler);
-  g_free (compiler);
 
   srcfile = argv[1];
 

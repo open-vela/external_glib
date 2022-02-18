@@ -1032,7 +1032,7 @@ emit_start_element (GMarkupParseContext  *context,
    */
   if ((context->flags & G_MARKUP_IGNORE_QUALIFIED) && strchr (current_element (context), ':'))
     {
-      static const GMarkupParser ignore_parser = { 0 };
+      static const GMarkupParser ignore_parser;
       g_markup_parse_context_push (context, &ignore_parser, NULL);
       clear_attributes (context);
       return;

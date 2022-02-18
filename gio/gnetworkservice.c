@@ -445,7 +445,7 @@ g_network_service_address_enumerator_next (GSocketAddressEnumerator  *enumerator
     {
       if (srv_enum->addr_enum == NULL && srv_enum->t)
         {
-          GError *my_error = NULL;
+          GError *error = NULL;
           gchar *uri;
           gchar *hostname;
           GSocketConnectable *addr;
@@ -477,15 +477,15 @@ g_network_service_address_enumerator_next (GSocketAddressEnumerator  *enumerator
 
           addr = g_network_address_parse_uri (uri,
                                               g_srv_target_get_port (target),
-                                              &my_error);
+                                              &error);
           g_free (uri);
 
           if (addr == NULL)
             {
               if (srv_enum->error == NULL)
-                srv_enum->error = my_error;
+                srv_enum->error = error;
               else
-                g_error_free (my_error);
+                g_error_free (error);
               continue;
             }
 
@@ -498,18 +498,18 @@ g_network_service_address_enumerator_next (GSocketAddressEnumerator  *enumerator
 
       if (srv_enum->addr_enum)
         {
-          GError *my_error = NULL;
+          GError *error = NULL;
 
           ret = g_socket_address_enumerator_next (srv_enum->addr_enum,
                                                   cancellable,
-                                                  &my_error);
+                                                  &error);
 
-          if (my_error)
+          if (error)
             {
               if (srv_enum->error == NULL)
-                srv_enum->error = my_error;
+                srv_enum->error = error;
               else
-                g_error_free (my_error);
+                g_error_free (error);
             }
 
           if (!ret)

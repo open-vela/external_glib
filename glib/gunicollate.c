@@ -415,7 +415,7 @@ g_utf8_collate_key (const gchar *str,
   return result;
 #else
 
-  gsize xfrm_len = 0;
+  gsize xfrm_len;
   const gchar *charset;
   gchar *str_norm;
 
