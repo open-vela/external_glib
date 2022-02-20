@@ -1169,7 +1169,6 @@ test_file_test (void)
 
   /* Cleaning */
   g_remove (name);
-  g_free (name);
 }
 
 static void
