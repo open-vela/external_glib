@@ -42,20 +42,14 @@ giotypefuncs_inc = custom_target(
 
 #  Test programs buildable on all platforms
 gio_tests = {
-  'appmonitor' : {
-    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-    'should_fail' : host_system == 'darwin',
-  },
+  'appmonitor' : {},
   'async-close-output-stream' : {},
   'async-splice-output-stream' : {},
   'buffered-input-stream' : {},
   'buffered-output-stream' : {},
   'cancellable' : {},
   'contexts' : {},
-  'contenttype' : {
-    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392 / https://gitlab.gnome.org/GNOME/glib/-/issues/1251
-    'should_fail' : host_system == 'darwin',
-  },
+  'contenttype' : {},
   'converter-stream' : {},
   'credentials' : {},
   'cxx' : {
@@ -63,21 +57,14 @@ gio_tests = {
   },
   'data-input-stream' : {},
   'data-output-stream' : {},
+  'debugcontroller' : {},
+  'defaultvalue' : {'extra_sources' : [giotypefuncs_inc]},
   'fileattributematcher' : {},
   'filter-streams' : {},
-  'giomodule' : {
-    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-    'should_fail' : host_system == 'darwin',
-  },
-  'gsubprocess' : {
-    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-    'should_fail' : host_system == 'darwin',
-  },
+  'giomodule' : {},
+  'gsubprocess' : {},
   'g-file' : {},
-  'g-file-info' : {
-    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-    'should_fail' : host_system == 'darwin',
-  },
+  'g-file-info' : {},
   'g-icon' : {},
   'gdbus-addresses' : {},
   'gdbus-message' : {},
@@ -87,11 +74,7 @@ gio_tests = {
   'memory-monitor' : {},
   'memory-output-stream' : {},
   'mount-operation' : {},
-  'network-address' : {
-    'extra_sources': ['mock-resolver.c'],
-    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-    'should_fail' : host_system == 'darwin',
-  },
+  'network-address' : {'extra_sources': ['mock-resolver.c']},
   'network-monitor' : {},
   'network-monitor-race' : {},
   'permission' : {},
@@ -102,10 +85,7 @@ gio_tests = {
   'simple-async-result' : {},
   'simple-proxy' : {},
   'sleepy-stream' : {},
-  'socket' : {
-    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-    'should_fail' : host_system == 'darwin',
-  },
+  'socket' : {},
   'socket-listener' : {},
   'socket-service' : {},
   'srvtarget' : {},
@@ -119,10 +99,7 @@ gio_tests = {
   'tls-interaction' : {'extra_sources' : ['gtesttlsbackend.c']},
   'tls-database' : {'extra_sources' : ['gtesttlsbackend.c']},
   'tls-bindings' : {'extra_sources' : ['gtesttlsbackend.c']},
-  'gdbus-address-get-session' : {
-    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-    'should_fail' : host_system == 'darwin',
-  },
+  'gdbus-address-get-session' : {},
   'win32-appinfo' : {},
 }
 
@@ -181,9 +158,7 @@ if host_machine.system() != 'windows'
     'file' : {},
     'gdbus-peer' : {
       'dependencies' : [libgdbus_example_objectmanager_dep],
-      'install_rpath' : installed_tests_execdir,
-      # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-      'should_fail' : host_system == 'darwin',
+      'install_rpath' : installed_tests_execdir
     },
     'gdbus-peer-object-manager' : {},
     'live-g-file' : {},
@@ -322,8 +297,6 @@ if host_machine.system() != 'windows'
         'extra_sources' : extra_sources,
         'suite' : ['slow'],
       },
-      'debugcontroller' : {},
-      'defaultvalue' : {'extra_sources' : [giotypefuncs_inc]},
       'gdbus-auth' : {'extra_sources' : extra_sources},
       'gdbus-bz627724' : {'extra_sources' : extra_sources},
       'gdbus-close-pending' : {'extra_sources' : extra_sources},
@@ -806,8 +779,6 @@ if not meson.is_cross_build() or meson.has_exe_wrapper()
   gio_tests += {
     'resources' : {
       'extra_sources' : resources_extra_sources,
-      # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
-      'should_fail' : host_system == 'darwin',
     },
   }
 endif
@@ -861,7 +832,6 @@ foreach test_name, extra_args : gio_tests
     suite : suite,
     is_parallel : extra_args.get('is_parallel', true),
     depends : extra_args.get('depends', []),
-    should_fail : extra_args.get('should_fail', false),
   )
 endforeach
 
