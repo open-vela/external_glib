@@ -87,7 +87,11 @@ gio_tests = {
   'memory-monitor' : {},
   'memory-output-stream' : {},
   'mount-operation' : {},
-  'network-address' : {'extra_sources': ['mock-resolver.c']},
+  'network-address' : {
+    'extra_sources': ['mock-resolver.c'],
+    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
+    'should_fail' : host_system == 'darwin',
+  },
   'network-monitor' : {},
   'network-monitor-race' : {},
   'permission' : {},
