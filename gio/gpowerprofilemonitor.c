@@ -41,10 +41,10 @@
  * some systems).
  *
  * When in “Low Power” mode, it is recommended that applications:
- * - disable automatic downloads;
+ * - disabling automatic downloads
  * - reduce the rate of refresh from online sources such as calendar or
- *   email synchronisation;
- * - reduce the use of expensive visual effects.
+ *   email synchronisation
+ * - if the application has expensive visual effects, reduce them
  *
  * It is also likely that OS components providing services to applications will
  * lower their own background activity, for the sake of the system.
