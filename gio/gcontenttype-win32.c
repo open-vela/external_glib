@@ -128,8 +128,7 @@ g_content_type_is_a (const gchar *type,
                      const gchar *supertype)
 {
   gboolean res;
-  char *perceived_type;
-  char *perceived_supertype;
+  char *value_utf8;
 
   g_return_val_if_fail (type != NULL, FALSE);
   g_return_val_if_fail (supertype != NULL, FALSE);
@@ -137,15 +136,12 @@ g_content_type_is_a (const gchar *type,
   if (g_content_type_equals (type, supertype))
     return TRUE;
 
-  perceived_type = get_registry_classes_key (type, L"PerceivedType");
-  perceived_supertype = get_registry_classes_key (supertype, L"PerceivedType");
-
-  res = perceived_type && perceived_supertype &&
-    strcmp (perceived_type, perceived_supertype) == 0;
-
-  g_free (perceived_type);
-  g_free (perceived_supertype);
-
+  res = FALSE;
+  value_utf8 = get_registry_classes_key (type, L"PerceivedType");
+  if (value_utf8 && strcmp (value_utf8, supertype) == 0)
+    res = TRUE;
+  g_free (value_utf8);
+  
   return res;
 }
 
@@ -346,8 +342,7 @@ g_content_type_from_mime_type (const gchar *mime_type)
   content_type = get_registry_classes_key (key, L"Extension");
   g_free (key);
 
-
-  return content_type ? g_steal_pointer (&content_type) : g_strdup ("*");
+  return content_type;
 }
 
 gchar *
@@ -359,7 +354,6 @@ g_content_type_guess (const gchar  *filename,
   char *basename;
   char *type;
   char *dot;
-  size_t i;
 
   type = NULL;
 
@@ -372,21 +366,11 @@ g_content_type_guess (const gchar  *filename,
 
   if (filename)
     {
-      i = strlen (filename);
-      if (i > 0 && filename[i - 1] == G_DIR_SEPARATOR)
-        {
-          type = g_strdup ("inode/directory");
-          if (result_uncertain)
-            *result_uncertain = TRUE;
-        }
-      else
-        {
-          basename = g_path_get_basename (filename);
-          dot = strrchr (basename, '.');
-          if (dot)
-            type = g_strdup (dot);
-          g_free (basename);
-        }
+      basename = g_path_get_basename (filename);
+      dot = strrchr (basename, '.');
+      if (dot)
+        type = g_strdup (dot);
+      g_free (basename);
     }
 
   if (type)
