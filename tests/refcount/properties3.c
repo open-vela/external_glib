@@ -144,25 +144,28 @@ run_thread (GTest * test)
     my_test_do_property (test);
     if ((i++ % 10000) == 0)
       {
-        g_test_message (".%c", 'a' + test->id);
-        g_thread_yield(); /* force context switch */
+	g_print (".%c", 'a' + test->id);
+	g_thread_yield(); /* force context switch */
       }
   }
 
   return NULL;
 }
 
-static void
-test_refcount_properties_3 (void)
+int
+main (int argc, char **argv)
 {
   gint i;
   GTest *test;
   GArray *test_threads;
   const gint n_threads = 5;
 
+  g_print ("START: %s\n", argv[0]);
+  g_log_set_always_fatal (G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL | g_log_set_always_fatal (G_LOG_FATAL_MASK));
+
   test = g_object_new (G_TYPE_TEST, NULL);
 
-  g_assert_cmpint (test->count, ==, test->dummy);
+  g_assert (test->count == test->dummy);
   g_signal_connect (test, "notify::dummy", G_CALLBACK (dummy_notify), NULL);
 
   test_threads = g_array_new (FALSE, FALSE, sizeof (GThread *));
@@ -172,13 +175,13 @@ test_refcount_properties_3 (void)
   for (i = 0; i < n_threads; i++) {
     GThread *thread;
 
-    thread = g_thread_new (NULL, (GThreadFunc) run_thread, test);
+    thread = g_thread_create ((GThreadFunc) run_thread, test, TRUE, NULL);
     g_array_append_val (test_threads, thread);
   }
   g_usleep (30000000);
 
   g_atomic_int_set (&stopping, 1);
-  g_test_message ("\nstopping\n");
+  g_print ("\nstopping\n");
 
   /* join all threads */
   for (i = 0; i < n_threads; i++) {
@@ -188,23 +191,12 @@ test_refcount_properties_3 (void)
     g_thread_join (thread);
   }
 
-  g_test_message ("stopped\n");
-  g_test_message ("%d %d\n", test->setcount, test->count);
+  g_print ("stopped\n");
+
+  g_print ("%d %d\n", test->setcount, test->count);
 
   g_array_free (test_threads, TRUE);
   g_object_unref (test);
-}
 
-int
-main (int argc, gchar *argv[])
-{
-  g_log_set_always_fatal (G_LOG_LEVEL_WARNING |
-                          G_LOG_LEVEL_CRITICAL |
-                          g_log_set_always_fatal (G_LOG_FATAL_MASK));
-
-  g_test_init (&argc, &argv, NULL);
-
-  g_test_add_func ("/gobject/refcount/properties-3", test_refcount_properties_3);
-
-  return g_test_run ();
+  return 0;
 }
