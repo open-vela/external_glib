@@ -1,21 +1,35 @@
-gobject_tests = {
-  'testgobject' : {},
+refcount_tests = {
+  'objects' : {},
+  'objects2' : {'suite' : ['slow']},
+  'properties' : {},
+  'properties2' : {'suite' : ['slow']},
+  'properties3' : {'suite' : ['slow']},
+  'properties4' : {},
+  'signal1' : {
+    'source' : 'signals.c',
+    'c_args' : ['-DTESTNUM=1'],
+  },
+  'signal2' : {
+    'source' : 'signals.c',
+    'c_args' : ['-DTESTNUM=2'],
+  },
+  'signal3' : {
+    'source' : 'signals.c',
+    'c_args' : ['-DTESTNUM=3'],
+  },
+  'signal4' : {
+    'source' : 'signals.c',
+    'c_args' : ['-DTESTNUM=4'],
+  },
 }
-
-if host_system != 'windows'
-  gobject_tests += {
-    'timeloop-closure' : {},
-  }
-endif
 
 common_c_args = test_cargs + ['-DGLIB_DISABLE_DEPRECATION_WARNINGS']
 common_deps = [libm, thread_dep, libglib_dep, libgobject_dep]
 
-foreach test_name, extra_args : gobject_tests
+foreach test_name, extra_args : refcount_tests
   source = extra_args.get('source', test_name + '.c')
   extra_sources = extra_args.get('extra_sources', [])
   install = installed_tests_enabled and extra_args.get('install', true)
-  template = extra_args.get('tap', false) ? installed_tests_template_tap : installed_tests_template
 
   if install
     test_conf = configuration_data()
@@ -23,7 +37,7 @@ foreach test_name, extra_args : gobject_tests
     test_conf.set('program', test_name)
     test_conf.set('env', '')
     configure_file(
-      input: template,
+      input: installed_tests_template,
       output: test_name + '.test',
       install_dir: installed_tests_metadir,
       configuration: test_conf
@@ -38,19 +52,9 @@ foreach test_name, extra_args : gobject_tests
     install: install,
   )
 
-  suite = ['gobject'] + extra_args.get('suite', [])
+  suite = ['refcount'] + extra_args.get('suite', [])
   timeout = suite.contains('slow') ? test_timeout_slow : test_timeout
+
   # FIXME? TESTS_ENVIRONMENT = LIBCHARSET_ALIAS_DIR=$(top_builddir)/glib/libcharset
   test(test_name, exe, env : test_env, timeout : timeout, suite : suite)
 endforeach
-
-# Don't install these ones, and keep them out of 'make check' because they take too long...
-executable('performance', 'performance.c',
-    c_args : common_c_args,
-    dependencies : common_deps,
-    install : false)
-
-executable('performance-threaded', 'performance-threaded.c',
-    c_args : common_c_args,
-    dependencies : common_deps,
-    install : false)

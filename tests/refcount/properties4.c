@@ -143,14 +143,18 @@ my_badger_mama_notify (GObject    *object,
   MyBadger *self;
 
   self = MY_BADGER (object);
+
   self->mama_notify_count++;
 }
 
-static void
-test_refcount_properties_4 (void)
+int
+main (int argc, char **argv)
 {
   MyBadger * badger1, * badger2;
   gpointer test;
+
+  g_print ("START: %s\n", argv[0]);
+  g_log_set_always_fatal (G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL | g_log_set_always_fatal (G_LOG_FATAL_MASK));
 
   badger1 = g_object_new (MY_TYPE_BADGER, NULL);
   badger2 = g_object_new (MY_TYPE_BADGER, NULL);
@@ -159,23 +163,11 @@ test_refcount_properties_4 (void)
   g_assert_cmpuint (badger1->mama_notify_count, ==, 1);
   g_assert_cmpuint (badger2->mama_notify_count, ==, 1);
   g_object_get (badger1, "mama", &test, NULL);
-  g_assert_cmpmem (test, sizeof (MyBadger), badger2, sizeof (MyBadger));
+  g_assert (test == badger2);
   g_object_unref (test);
 
   g_object_unref (badger1);
   g_object_unref (badger2);
-}
 
-int
-main (int argc, gchar *argv[])
-{
-  g_log_set_always_fatal (G_LOG_LEVEL_WARNING |
-                          G_LOG_LEVEL_CRITICAL |
-                          g_log_set_always_fatal (G_LOG_FATAL_MASK));
-
-  g_test_init (&argc, &argv, NULL);
-
-  g_test_add_func ("/gobject/refcount/properties-4", test_refcount_properties_4);
-
-  return g_test_run ();
+  return 0;
 }
