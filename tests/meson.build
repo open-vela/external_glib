@@ -20,6 +20,7 @@ tests = {
   'mainloop-test' : {},
   'mapping-test' : {},
   'onceinit' : {},
+  'relation-test' : {},
   'slice-concurrent' : {},
   'slice-threadinit' : {
     'dependencies' : [libgthread_dep],
