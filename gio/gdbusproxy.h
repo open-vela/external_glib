@@ -183,8 +183,6 @@ GVariant        *g_dbus_proxy_call_sync                 (GDBusProxy          *pr
                                                          GCancellable        *cancellable,
                                                          GError             **error);
 
-#ifdef G_OS_UNIX
-
 GLIB_AVAILABLE_IN_ALL
 void             g_dbus_proxy_call_with_unix_fd_list        (GDBusProxy          *proxy,
                                                              const gchar         *method_name,
@@ -210,8 +208,6 @@ GVariant        *g_dbus_proxy_call_with_unix_fd_list_sync   (GDBusProxy         
                                                              GUnixFDList        **out_fd_list,
                                                              GCancellable        *cancellable,
                                                              GError             **error);
-
-#endif /* G_OS_UNIX */
 
 G_END_DECLS
 

@@ -218,9 +218,6 @@ GVariant *g_dbus_connection_call_sync                         (GDBusConnection  
                                                                gint                timeout_msec,
                                                                GCancellable       *cancellable,
                                                                GError            **error);
-
-#ifdef G_OS_UNIX
-
 GLIB_AVAILABLE_IN_2_30
 void      g_dbus_connection_call_with_unix_fd_list            (GDBusConnection    *connection,
                                                                const gchar        *bus_name,
@@ -254,8 +251,6 @@ GVariant *g_dbus_connection_call_with_unix_fd_list_sync       (GDBusConnection  
                                                                GUnixFDList       **out_fd_list,
                                                                GCancellable       *cancellable,
                                                                GError            **error);
-
-#endif /* G_OS_UNIX */
 
 /* ---------------------------------------------------------------------------------------------------- */
 
