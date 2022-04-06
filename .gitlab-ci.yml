@@ -103,7 +103,6 @@ fedora-x86_64:
       junit: "_build/${CI_JOB_NAME}-report.xml"
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_build/config.h"
       - "_build/glib/glibconfig.h"
@@ -145,7 +144,6 @@ debian-stable-x86_64:
       junit: "_build/${CI_JOB_NAME}-report.xml"
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_build/config.h"
       - "_build/glib/glibconfig.h"
@@ -183,7 +181,6 @@ installed-tests:
   artifacts:
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_build/config.h"
       - "_build/glib/glibconfig.h"
@@ -212,7 +209,6 @@ G_DISABLE_ASSERT:
       junit: "_build/${CI_JOB_NAME}-report.xml"
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_build/config.h"
       - "_build/glib/glibconfig.h"
@@ -249,7 +245,6 @@ valgrind:
       junit: "_build/${CI_JOB_NAME}-report.xml"
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_build/config.h"
       - "_build/glib/glibconfig.h"
@@ -262,7 +257,6 @@ valgrind:
   artifacts:
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_build/meson-logs"
 
@@ -290,7 +284,6 @@ cross-mingw64:
       junit: "_build/${env:CI_JOB_NAME}-report.xml"
     name: "glib-${env:CI_JOB_NAME}-${env:CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - _build/meson-logs
       - "_build/${env:CI_JOB_NAME}-report.xml"
@@ -318,7 +311,6 @@ msys2-mingw32:
       junit: "_build/${env:CI_JOB_NAME}-report.xml"
     name: "glib-${env:CI_JOB_NAME}-${env:CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - _build/meson-logs
       - "_build/${env:CI_JOB_NAME}-report.xml"
@@ -339,7 +331,6 @@ vs2017-x64:
       junit: "_build/${env:CI_JOB_NAME}-report.xml"
     name: "glib-${env:CI_JOB_NAME}-${env:CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - _build/meson-logs
       - "_build/${env:CI_JOB_NAME}-report.xml"
@@ -364,7 +355,6 @@ vs2017-x64-static:
       junit: "_build/${env:CI_JOB_NAME}-report.xml"
     name: "glib-${env:CI_JOB_NAME}-${env:CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - _build/meson-logs
       - "_build/${env:CI_JOB_NAME}-report.xml"
@@ -408,7 +398,6 @@ freebsd-12-x86_64:
       junit: "_build/${CI_JOB_NAME}-report.xml"
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_build/config.h"
       - "_build/glib/glibconfig.h"
@@ -436,7 +425,6 @@ freebsd-13-x86_64:
       junit: "_build/${CI_JOB_NAME}-report.xml"
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_build/config.h"
       - "_build/glib/glibconfig.h"
@@ -471,7 +459,6 @@ macos:
       junit: "_build/${CI_JOB_NAME}-report.xml"
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_build/config.h"
       - "_build/glib/glibconfig.h"
@@ -485,7 +472,6 @@ coverage:
   needs: ['fedora-x86_64', 'msys2-mingw32']
   artifacts:
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
-    expire_in: 1 week
     paths:
       - _coverage/
   before_script:
@@ -516,7 +502,6 @@ scan-build:
   artifacts:
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "_scan_build/meson-logs/scanbuild"
 
@@ -550,7 +535,6 @@ coverity:
   artifacts:
     name: "glib-${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}"
     when: always
-    expire_in: 1 week
     paths:
       - "cov-int/build-log.txt"
 
