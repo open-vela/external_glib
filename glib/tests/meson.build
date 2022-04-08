@@ -109,7 +109,9 @@ glib_tests = {
   'sort' : {},
   'spawn-multithreaded' : {},
   'spawn-path-search' : {},
-  'spawn-singlethread' : {},
+  'spawn-singlethread' : {
+    'dependencies' : [winsock2],
+  },
   'spawn-test' : {},
   'strfuncs' : {},
   'string' : {},
