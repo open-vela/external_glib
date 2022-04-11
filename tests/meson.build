@@ -19,6 +19,7 @@ tests = {
   'gio-test' : {},
   'mainloop-test' : {},
   'mapping-test' : {},
+  'onceinit' : {},
   'slice-threadinit' : {
     'dependencies' : [libgthread_dep],
   },
