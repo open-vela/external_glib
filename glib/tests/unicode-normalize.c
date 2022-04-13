@@ -121,7 +121,7 @@ test_unicode_normalize (void)
 	goto next;
       if (buffer->str[0] == '@') /* Part */
 	{
-	  g_test_message ("Processing %s", buffer->str + 1);
+	  fprintf (stderr, "\nProcessing %s\n", buffer->str + 1);
 	  goto next;
 	}
 
