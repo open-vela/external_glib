@@ -127,10 +127,7 @@ test_unicode_normalize (void)
 
       columns = g_strsplit (buffer->str, ";", -1);
       if (!columns[0])
-        {
-          g_strfreev (columns);
-          goto next;
-        }
+	goto next;
 
       process_one (line, columns);
       g_strfreev (columns);
