@@ -4147,7 +4147,7 @@ g_main_context_iterate (GMainContext *context,
 			gboolean      dispatch,
 			GThread      *self)
 {
-  gint max_priority = 0;
+  gint max_priority;
   gint timeout;
   gboolean some_ready;
   gint nfds, allocated_nfds;
