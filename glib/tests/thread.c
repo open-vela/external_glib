@@ -140,11 +140,12 @@ test_thread4 (void)
   struct rlimit ol, nl;
   GThread *thread;
   GError *error;
+  gint ret;
 
   getrlimit (RLIMIT_NPROC, &nl);
   nl.rlim_cur = 1;
 
-  if (prlimit (getpid (), RLIMIT_NPROC, &nl, &ol) != 0)
+  if ((ret = prlimit (getpid (), RLIMIT_NPROC, &nl, &ol)) != 0)
     g_error ("prlimit failed: %s", g_strerror (errno));
 
   error = NULL;
@@ -170,7 +171,7 @@ test_thread4 (void)
       g_error_free (error);
     }
 
-  if (prlimit (getpid (), RLIMIT_NPROC, &ol, NULL) != 0)
+  if ((ret = prlimit (getpid (), RLIMIT_NPROC, &ol, NULL)) != 0)
     g_error ("resetting RLIMIT_NPROC failed: %s", g_strerror (errno));
 #endif
 }
