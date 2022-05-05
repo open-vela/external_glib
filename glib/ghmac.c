@@ -100,9 +100,6 @@ g_hmac_new (GChecksumType  digest_type,
   guchar *pad;
   gsize i, len;
   gsize block_size;
-  gssize block_size_signed, key_len_signed;
-
-  g_return_val_if_fail (key_len <= G_MAXSSIZE, NULL);
 
   checksum = g_checksum_new (digest_type);
   g_return_val_if_fail (checksum != NULL, NULL);
@@ -137,9 +134,7 @@ g_hmac_new (GChecksumType  digest_type,
   if (key_len > block_size)
     {
       len = block_size;
-      g_assert (key_len <= G_MAXSSIZE);
-      key_len_signed = key_len;
-      g_checksum_update (hmac->digesti, key, key_len_signed);
+      g_checksum_update (hmac->digesti, key, key_len);
       g_checksum_get_digest (hmac->digesti, buffer, &len);
       g_checksum_reset (hmac->digesti);
     }
@@ -150,19 +145,15 @@ g_hmac_new (GChecksumType  digest_type,
       memcpy (buffer, key, key_len);
     }
 
-  /* g_checksum_update() accepts a signed length, so build and check that. */
-  g_assert (block_size <= G_MAXSSIZE);
-  block_size_signed = block_size;
-
   /* First pad */
   for (i = 0; i < block_size; i++)
     pad[i] = 0x36 ^ buffer[i]; /* ipad value */
-  g_checksum_update (hmac->digesti, pad, block_size_signed);
+  g_checksum_update (hmac->digesti, pad, block_size);
 
   /* Second pad */
   for (i = 0; i < block_size; i++)
     pad[i] = 0x5c ^ buffer[i]; /* opad value */
-  g_checksum_update (hmac->digesto, pad, block_size_signed);
+  g_checksum_update (hmac->digesto, pad, block_size);
 
   return hmac;
 }
@@ -289,17 +280,11 @@ const gchar *
 g_hmac_get_string (GHmac *hmac)
 {
   guint8 *buffer;
-  gssize digest_len_signed;
   gsize digest_len;
 
   g_return_val_if_fail (hmac != NULL, NULL);
 
-  /* It shouldn’t be possible for @digest_len_signed to be negative, as
-   * `hmac->digest_type` has already been validated as being supported. */
-  digest_len_signed = g_checksum_type_get_length (hmac->digest_type);
-  g_assert (digest_len_signed >= 0);
-  digest_len = digest_len_signed;
-
+  digest_len = g_checksum_type_get_length (hmac->digest_type);
   buffer = g_alloca (digest_len);
 
   /* This is only called for its side-effect of updating hmac->digesto... */
@@ -331,24 +316,15 @@ g_hmac_get_digest (GHmac  *hmac,
                    gsize  *digest_len)
 {
   gsize len;
-  gssize len_signed;
 
   g_return_if_fail (hmac != NULL);
 
-  /* It shouldn’t be possible for @len_signed to be negative, as
-   * `hmac->digest_type` has already been validated as being supported. */
-  len_signed = g_checksum_type_get_length (hmac->digest_type);
-  g_assert (len_signed >= 0);
-  len = len_signed;
-
-  /* @buffer must be long enough for the digest */
+  len = g_checksum_type_get_length (hmac->digest_type);
   g_return_if_fail (*digest_len >= len);
 
   /* Use the same buffer, because we can :) */
   g_checksum_get_digest (hmac->digesti, buffer, &len);
-  g_assert (len <= G_MAXSSIZE);
-  len_signed = len;
-  g_checksum_update (hmac->digesto, buffer, len_signed);
+  g_checksum_update (hmac->digesto, buffer, len);
   g_checksum_get_digest (hmac->digesto, buffer, digest_len);
 }
 
