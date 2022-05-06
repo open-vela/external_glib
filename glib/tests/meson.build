@@ -115,7 +115,6 @@ glib_tests = {
   'testing' : {},
   'test-printf' : {},
   'thread' : {},
-  'thread-deprecated' : {},
   'thread-pool' : {},
   'thread-pool-slow' : {'suite' : ['slow']},
   'timeout' : {},
@@ -316,7 +315,7 @@ executable('testing-helper', 'testing-helper.c',
 )
 
 # some testing of gtester functionality
-if meson.can_run_host_binaries() and host_system != 'windows'
+if not meson.is_cross_build() and host_system != 'windows'
   xmllint = find_program('xmllint', required: false)
   if xmllint.found()
     tmpsample_xml = custom_target('tmpsample.xml',
