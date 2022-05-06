@@ -401,14 +401,17 @@ pkg.generate(libglib,
   name : 'GLib',
   description : 'C Utility Library',
 )
-meson.override_dependency('glib-2.0', libglib_dep)
+
+if meson.version().version_compare('>=0.54.0')
+  meson.override_dependency('glib-2.0', libglib_dep)
+endif
 
 # On Windows, glib needs a spawn helper for g_spawn* API
 if host_system == 'windows'
   if host_machine.cpu_family() == 'x86'
     executable('gspawn-win32-helper', 'gspawn-win32-helper.c',
       install : true,
-      win_subsystem : 'windows',
+      gui_app : true,
       include_directories : configinc,
       dependencies : [libglib_dep])
     executable('gspawn-win32-helper-console', 'gspawn-win32-helper.c',
@@ -419,7 +422,7 @@ if host_system == 'windows'
   else
     executable('gspawn-win64-helper', 'gspawn-win32-helper.c',
       install : true,
-      win_subsystem : 'windows',
+      gui_app : true,
       include_directories : configinc,
       dependencies : [libglib_dep])
     executable('gspawn-win64-helper-console', 'gspawn-win32-helper.c',
@@ -450,9 +453,11 @@ configure_file(
 install_data('glib_gdb.py', install_dir : join_paths(glib_pkgdatadir, 'gdb'))
 
 # This is needed to make gdb find glib_gdb.py
-env = environment()
-env.prepend('PYTHONPATH', meson.current_source_dir())
-meson.add_devenv(env)
+if meson.version().version_compare('>=0.58')
+  env = environment()
+  env.prepend('PYTHONPATH', meson.current_source_dir())
+  meson.add_devenv(env)
+endif
 
 gdb_conf = configuration_data()
 gdb_conf.set('datadir', glib_datadir)
