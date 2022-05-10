@@ -52,7 +52,6 @@ glib_tests = {
   'macros' : {},
   'mainloop' : {},
   'mappedfile' : {},
-  'mapping' : {},
   'markup' : {},
   'markup-parse' : {},
   'markup-collect' : {},
