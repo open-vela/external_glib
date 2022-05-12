@@ -21,6 +21,7 @@ tags
 *.log
 *.trs
 
+INSTALL
 /glib-lcov.info
 /glib-lcov/
 
