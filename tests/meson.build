@@ -16,6 +16,9 @@ subdir('gobject')
 subdir('refcount')
 
 tests = {
+  'slice-threadinit' : {
+    'dependencies' : [libgthread_dep],
+  },
   'module-test-library' : {
     'dependencies' : [libgmodule_dep],
     'export_dynamic' : true,
