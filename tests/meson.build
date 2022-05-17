@@ -31,6 +31,9 @@ tests = {
 }
 
 test_extra_programs = {
+  'slice-test' : {
+    'extra_sources' : ['memchunks.c'],
+  },
   'assert-msg-test' : {},
 }
 
