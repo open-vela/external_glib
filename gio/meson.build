@@ -354,6 +354,7 @@ if host_system != 'windows'
   unix_sources = files(
     'gfiledescriptorbased.c',
     'giounix-private.c',
+    'gunixfdlist.c',
     'gunixfdmessage.c',
     'gunixmount.c',
     'gunixmounts.c',
@@ -573,7 +574,6 @@ gio_sources = files(
   'gdtlsserverconnection.c',
   'gunionvolumemonitor.c',
   'gunixconnection.c',
-  'gunixfdlist.c',
   'gunixcredentialsmessage.c',
   'gunixsocketaddress.c',
   'gvfs.c',
