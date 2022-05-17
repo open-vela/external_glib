@@ -417,8 +417,7 @@ test_search_path_heap_allocation (void)
   if (skip_win32 ())
     return;
 
-  memset (placeholder, '_', sizeof (placeholder) - 1);
-  placeholder[sizeof (placeholder) - 1] = '\0';
+  memset (placeholder, '_', sizeof (placeholder));
   /* Force search_path_buffer to be heap-allocated */
   long_dir = g_test_build_filename (G_TEST_BUILT, "path-test-subdir", placeholder, NULL);
   long_path = g_strjoin (G_SEARCHPATH_SEPARATOR_S, subdir, long_dir, NULL);
