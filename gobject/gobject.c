@@ -1315,18 +1315,22 @@ g_object_freeze_notify (GObject *object)
   g_object_unref (object);
 }
 
+/* Inlined version of g_param_spec_get_redirect_target(), for speed */
+static inline void
+param_spec_follow_override (GParamSpec **pspec)
+{
+  if (((GTypeInstance *) (*pspec))->g_class->g_type == G_TYPE_PARAM_OVERRIDE)
+    *pspec = ((GParamSpecOverride *) (*pspec))->overridden;
+}
+
 static inline void
 g_object_notify_by_spec_internal (GObject    *object,
                                   GParamSpec *pspec)
 {
-  GParamSpec *redirected;
-
   if (G_UNLIKELY (~pspec->flags & G_PARAM_READABLE))
     return;
 
-  redirected = g_param_spec_get_redirect_target (pspec);
-  if (redirected != NULL)
-    pspec = redirected;
+  param_spec_follow_override (&pspec);
 
   if (pspec != NULL)
     {
@@ -1555,7 +1559,6 @@ object_get_property (GObject     *object,
   GTypeInstance *inst = (GTypeInstance *) object;
   GObjectClass *class;
   guint param_id = PARAM_SPEC_PARAM_ID (pspec);
-  GParamSpec *redirect;
 
   if (G_LIKELY (inst->g_class->g_type == pspec->owner_type))
     class = (GObjectClass *) inst->g_class;
@@ -1564,9 +1567,7 @@ object_get_property (GObject     *object,
 
   g_assert (class != NULL);
 
-  redirect = g_param_spec_get_redirect_target (pspec);
-  if (redirect)
-    pspec = redirect;
+  param_spec_follow_override (&pspec);
 
   consider_issuing_property_deprecation_warning (pspec);
 
@@ -1583,7 +1584,6 @@ object_set_property (GObject             *object,
   GObjectClass *class;
   GParamSpecClass *pclass;
   guint param_id = PARAM_SPEC_PARAM_ID (pspec);
-  GParamSpec *redirect;
 
   if (G_LIKELY (inst->g_class->g_type == pspec->owner_type))
     class = (GObjectClass *) inst->g_class;
@@ -1592,9 +1592,7 @@ object_set_property (GObject             *object,
 
   g_assert (class != NULL);
 
-  redirect = g_param_spec_get_redirect_target (pspec);
-  if (redirect)
-    pspec = redirect;
+  param_spec_follow_override (&pspec);
 
   consider_issuing_property_deprecation_warning (pspec);
 
