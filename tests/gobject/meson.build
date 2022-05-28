@@ -1,4 +1,5 @@
 gobject_tests = {
+  'testgobject' : {},
 }
 
 if host_system != 'windows'
