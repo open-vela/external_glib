@@ -236,6 +236,7 @@ run_thread (GTest * test)
     if (TESTNUM == 4)
       my_test_do_signal3 (test);
     if ((i++ % 10000) == 0) {
+        g_test_message (".");
         g_thread_yield (); /* force context switch */
     }
   }
@@ -249,8 +250,7 @@ notify (GObject *object, GParamSpec *spec, gpointer user_data)
   gint value;
 
   g_object_get (object, "test-prop", &value, NULL);
-  if (TESTNUM != 3)
-    g_assert_cmpint (value, ==, 0);
+  g_test_message ("+ %d", value);
 }
 
 static void
