@@ -103,7 +103,7 @@ glib_tests = {
   'slice' : {},
   'slice-color' : {},
   'slice-concurrent' : {},
-  'slice-known-pages' : {'suite' : ['no-valgrind']},
+  'slice-known-pages' : {},
   'slice-glib' : {},
   'slice-slab' : {},
   'slice-malloc' : {},
