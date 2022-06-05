@@ -1315,20 +1315,33 @@ g_object_freeze_notify (GObject *object)
   g_object_unref (object);
 }
 
-static inline void
-g_object_notify_by_spec_internal (GObject    *object,
-                                  GParamSpec *pspec)
+static GParamSpec *
+get_notify_pspec (GParamSpec *pspec)
 {
   GParamSpec *redirected;
 
-  if (G_UNLIKELY (~pspec->flags & G_PARAM_READABLE))
-    return;
+  /* we don't notify on non-READABLE parameters */
+  if (~pspec->flags & G_PARAM_READABLE)
+    return NULL;
 
+  /* if the paramspec is redirected, notify on the target */
   redirected = g_param_spec_get_redirect_target (pspec);
   if (redirected != NULL)
-    pspec = redirected;
+    return redirected;
 
-  if (pspec != NULL)
+  /* else, notify normally */
+  return pspec;
+}
+
+static inline void
+g_object_notify_by_spec_internal (GObject    *object,
+				  GParamSpec *pspec)
+{
+  GParamSpec *notify_pspec;
+
+  notify_pspec = get_notify_pspec (pspec);
+
+  if (notify_pspec != NULL)
     {
       GObjectNotifyQueue *nqueue;
 
@@ -1338,13 +1351,13 @@ g_object_notify_by_spec_internal (GObject    *object,
       if (nqueue != NULL)
         {
           /* we're frozen, so add to the queue and release our freeze */
-          g_object_notify_queue_add (object, nqueue, pspec);
+          g_object_notify_queue_add (object, nqueue, notify_pspec);
           g_object_notify_queue_thaw (object, nqueue);
         }
       else
         /* not frozen, so just dispatch the notification directly */
         G_OBJECT_GET_CLASS (object)
-          ->dispatch_properties_changed (object, 1, &pspec);
+          ->dispatch_properties_changed (object, 1, &notify_pspec);
     }
 }
 
@@ -2196,10 +2209,18 @@ g_object_new_with_properties (GType          object_type,
           if (!g_object_new_is_valid_property (object_type, pspec, names[i], params, count))
             continue;
           params[count].pspec = pspec;
-          params[count].value = (GValue *) &values[i];
+
+          /* Init GValue */
+          params[count].value = g_newa0 (GValue, 1);
+          g_value_init (params[count].value, G_VALUE_TYPE (&values[i]));
+
+          g_value_copy (&values[i], params[count].value);
           count++;
         }
       object = g_object_new_internal (class, params, count);
+
+      while (count--)
+        g_value_unset (params[count].value);
     }
   else
     object = g_object_new_internal (class, NULL, 0);
@@ -2367,7 +2388,7 @@ g_object_new_valist (GType        object_type,
           params[n_params].value = &values[n_params];
           memset (&values[n_params], 0, sizeof (GValue));
 
-          G_VALUE_COLLECT_INIT2 (&values[n_params], vtabs[n_params], pspec->value_type, var_args, G_VALUE_NOCOPY_CONTENTS, &error);
+          G_VALUE_COLLECT_INIT2 (&values[n_params], vtabs[n_params], pspec->value_type, var_args, 0, &error);
 
           if (error)
             {
@@ -2561,7 +2582,7 @@ g_object_set_valist (GObject	 *object,
       if (!g_object_set_is_valid_property (object, pspec, name))
         break;
 
-      G_VALUE_COLLECT_INIT2 (&value, vtab, pspec->value_type, var_args, G_VALUE_NOCOPY_CONTENTS, &error);
+      G_VALUE_COLLECT_INIT2 (&value, vtab, pspec->value_type, var_args, 0, &error);
       if (error)
 	{
 	  g_warning ("%s: %s", G_STRFUNC, error);
