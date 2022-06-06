@@ -1550,17 +1550,16 @@ object_get_property (GObject     *object,
 		     GParamSpec  *pspec,
 		     GValue      *value)
 {
-  GTypeInstance *inst = (GTypeInstance *) object;
-  GObjectClass *class;
+  GObjectClass *class = g_type_class_peek (pspec->owner_type);
   guint param_id = PARAM_SPEC_PARAM_ID (pspec);
   GParamSpec *redirect;
 
-  if (G_LIKELY (inst->g_class->g_type == pspec->owner_type))
-    class = (GObjectClass *) inst->g_class;
-  else
-    class = g_type_class_peek (pspec->owner_type);
-
-  g_assert (class != NULL);
+  if (class == NULL)
+    {
+      g_warning ("'%s::%s' is not a valid property name; '%s' is not a GObject subtype",
+                 g_type_name (pspec->owner_type), pspec->name, g_type_name (pspec->owner_type));
+      return;
+    }
 
   redirect = g_param_spec_get_redirect_target (pspec);
   if (redirect)
@@ -1577,18 +1576,17 @@ object_set_property (GObject             *object,
 		     const GValue        *value,
 		     GObjectNotifyQueue  *nqueue)
 {
-  GTypeInstance *inst = (GTypeInstance *) object;
-  GObjectClass *class;
+  GObjectClass *class = g_type_class_peek (pspec->owner_type);
   GParamSpecClass *pclass;
   guint param_id = PARAM_SPEC_PARAM_ID (pspec);
   GParamSpec *redirect;
 
-  if (G_LIKELY (inst->g_class->g_type == pspec->owner_type))
-    class = (GObjectClass *) inst->g_class;
-  else
-    class = g_type_class_peek (pspec->owner_type);
-
-  g_assert (class != NULL);
+  if (G_UNLIKELY (class == NULL))
+    {
+      g_warning ("'%s::%s' is not a valid property name; '%s' is not a GObject subtype",
+                 g_type_name (pspec->owner_type), pspec->name, g_type_name (pspec->owner_type));
+      return;
+    }
 
   redirect = g_param_spec_get_redirect_target (pspec);
   if (redirect)
