@@ -1342,15 +1342,9 @@ g_object_notify_by_spec_internal (GObject    *object,
           g_object_notify_queue_thaw (object, nqueue);
         }
       else
-        {
-          g_object_ref (object);
-
-          /* not frozen, so just dispatch the notification directly */
-          G_OBJECT_GET_CLASS (object)
-              ->dispatch_properties_changed (object, 1, &pspec);
-
-          g_object_unref (object);
-        }
+        /* not frozen, so just dispatch the notification directly */
+        G_OBJECT_GET_CLASS (object)
+          ->dispatch_properties_changed (object, 1, &pspec);
     }
 }
 
@@ -1381,6 +1375,7 @@ g_object_notify (GObject     *object,
   if (g_atomic_int_get (&object->ref_count) == 0)
     return;
   
+  g_object_ref (object);
   /* We don't need to get the redirect target
    * (by, e.g. calling g_object_class_find_property())
    * because g_object_notify_queue_add() does that
@@ -1397,6 +1392,7 @@ g_object_notify (GObject     *object,
 	       property_name);
   else
     g_object_notify_by_spec_internal (object, pspec);
+  g_object_unref (object);
 }
 
 /**
@@ -1455,7 +1451,9 @@ g_object_notify_by_pspec (GObject    *object,
   if (g_atomic_int_get (&object->ref_count) == 0)
     return;
 
+  g_object_ref (object);
   g_object_notify_by_spec_internal (object, pspec);
+  g_object_unref (object);
 }
 
 /**
@@ -1552,16 +1550,17 @@ object_get_property (GObject     *object,
 		     GParamSpec  *pspec,
 		     GValue      *value)
 {
-  GObjectClass *class = g_type_class_peek (pspec->owner_type);
+  GTypeInstance *inst = (GTypeInstance *) object;
+  GObjectClass *class;
   guint param_id = PARAM_SPEC_PARAM_ID (pspec);
   GParamSpec *redirect;
 
-  if (class == NULL)
-    {
-      g_warning ("'%s::%s' is not a valid property name; '%s' is not a GObject subtype",
-                 g_type_name (pspec->owner_type), pspec->name, g_type_name (pspec->owner_type));
-      return;
-    }
+  if (G_LIKELY (inst->g_class->g_type == pspec->owner_type))
+    class = (GObjectClass *) inst->g_class;
+  else
+    class = g_type_class_peek (pspec->owner_type);
+
+  g_assert (class != NULL);
 
   redirect = g_param_spec_get_redirect_target (pspec);
   if (redirect)
@@ -1578,17 +1577,18 @@ object_set_property (GObject             *object,
 		     const GValue        *value,
 		     GObjectNotifyQueue  *nqueue)
 {
-  GObjectClass *class = g_type_class_peek (pspec->owner_type);
+  GTypeInstance *inst = (GTypeInstance *) object;
+  GObjectClass *class;
   GParamSpecClass *pclass;
   guint param_id = PARAM_SPEC_PARAM_ID (pspec);
   GParamSpec *redirect;
 
-  if (G_UNLIKELY (class == NULL))
-    {
-      g_warning ("'%s::%s' is not a valid property name; '%s' is not a GObject subtype",
-                 g_type_name (pspec->owner_type), pspec->name, g_type_name (pspec->owner_type));
-      return;
-    }
+  if (G_LIKELY (inst->g_class->g_type == pspec->owner_type))
+    class = (GObjectClass *) inst->g_class;
+  else
+    class = g_type_class_peek (pspec->owner_type);
+
+  g_assert (class != NULL);
 
   redirect = g_param_spec_get_redirect_target (pspec);
   if (redirect)
