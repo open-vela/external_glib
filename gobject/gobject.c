@@ -319,23 +319,23 @@ g_object_notify_queue_thaw (GObject            *object,
   GSList *slist;
   guint n_pspecs = 0;
 
+  g_return_if_fail (g_atomic_int_get(&object->ref_count) > 0);
+
   G_LOCK(notify_lock);
 
   /* Just make sure we never get into some nasty race condition */
-  if (G_UNLIKELY (nqueue->freeze_count == 0))
-    {
-      G_UNLOCK (notify_lock);
-      g_warning ("%s: property-changed notification for %s(%p) is not frozen",
-                 G_STRFUNC, G_OBJECT_TYPE_NAME (object), object);
-      return;
-    }
+  if (G_UNLIKELY(nqueue->freeze_count == 0)) {
+    G_UNLOCK(notify_lock);
+    g_warning ("%s: property-changed notification for %s(%p) is not frozen",
+               G_STRFUNC, G_OBJECT_TYPE_NAME (object), object);
+    return;
+  }
 
   nqueue->freeze_count--;
-  if (nqueue->freeze_count)
-    {
-      G_UNLOCK (notify_lock);
-      return;
-    }
+  if (nqueue->freeze_count) {
+    G_UNLOCK(notify_lock);
+    return;
+  }
 
   pspecs = nqueue->n_pspecs > 16 ? free_me = g_new (GParamSpec*, nqueue->n_pspecs) : pspecs_mem;
 
@@ -578,25 +578,22 @@ g_object_do_class_init (GObjectClass *class)
   g_type_add_interface_check (NULL, object_interface_check_properties);
 }
 
-/* Sinks @pspec if it’s a floating ref. */
 static inline gboolean
 install_property_internal (GType       g_type,
 			   guint       property_id,
 			   GParamSpec *pspec)
 {
-  g_param_spec_ref_sink (pspec);
-
   if (g_param_spec_pool_lookup (pspec_pool, pspec->name, g_type, FALSE))
     {
       g_warning ("When installing property: type '%s' already has a property named '%s'",
 		 g_type_name (g_type),
 		 pspec->name);
-      g_param_spec_unref (pspec);
       return FALSE;
     }
 
+  g_param_spec_ref_sink (pspec);
   PARAM_SPEC_SET_PARAM_ID (pspec, property_id);
-  g_param_spec_pool_insert (pspec_pool, g_steal_pointer (&pspec), g_type);
+  g_param_spec_pool_insert (pspec_pool, pspec, g_type);
   return TRUE;
 }
 
@@ -617,7 +614,6 @@ validate_pspec_to_install (GParamSpec *pspec)
   return TRUE;
 }
 
-/* Sinks @pspec if it’s a floating ref. */
 static gboolean
 validate_and_install_class_property (GObjectClass *class,
                                      GType         oclass_type,
@@ -626,11 +622,7 @@ validate_and_install_class_property (GObjectClass *class,
                                      GParamSpec   *pspec)
 {
   if (!validate_pspec_to_install (pspec))
-    {
-      g_param_spec_ref_sink (pspec);
-      g_param_spec_unref (pspec);
-      return FALSE;
-    }
+    return FALSE;
 
   if (pspec->flags & G_PARAM_WRITABLE)
     g_return_val_if_fail (class->set_property != NULL, FALSE);
@@ -846,11 +838,7 @@ g_object_interface_install_property (gpointer      g_iface,
   g_return_if_fail (!G_IS_PARAM_SPEC_OVERRIDE (pspec)); /* paranoid */
 
   if (!validate_pspec_to_install (pspec))
-    {
-      g_param_spec_ref_sink (pspec);
-      g_param_spec_unref (pspec);
-      return;
-    }
+    return;
 
   (void) install_property_internal (iface_class->g_type, 0, pspec);
 }
@@ -1327,22 +1315,18 @@ g_object_freeze_notify (GObject *object)
   g_object_unref (object);
 }
 
-/* Inlined version of g_param_spec_get_redirect_target(), for speed */
-static inline void
-param_spec_follow_override (GParamSpec **pspec)
-{
-  if (((GTypeInstance *) (*pspec))->g_class->g_type == G_TYPE_PARAM_OVERRIDE)
-    *pspec = ((GParamSpecOverride *) (*pspec))->overridden;
-}
-
 static inline void
 g_object_notify_by_spec_internal (GObject    *object,
                                   GParamSpec *pspec)
 {
+  GParamSpec *redirected;
+
   if (G_UNLIKELY (~pspec->flags & G_PARAM_READABLE))
     return;
 
-  param_spec_follow_override (&pspec);
+  redirected = g_param_spec_get_redirect_target (pspec);
+  if (redirected != NULL)
+    pspec = redirected;
 
   if (pspec != NULL)
     {
@@ -1394,6 +1378,8 @@ g_object_notify (GObject     *object,
   
   g_return_if_fail (G_IS_OBJECT (object));
   g_return_if_fail (property_name != NULL);
+  if (g_atomic_int_get (&object->ref_count) == 0)
+    return;
   
   /* We don't need to get the redirect target
    * (by, e.g. calling g_object_class_find_property())
@@ -1465,6 +1451,9 @@ g_object_notify_by_pspec (GObject    *object,
 
   g_return_if_fail (G_IS_OBJECT (object));
   g_return_if_fail (G_IS_PARAM_SPEC (pspec));
+
+  if (g_atomic_int_get (&object->ref_count) == 0)
+    return;
 
   g_object_notify_by_spec_internal (object, pspec);
 }
@@ -1566,6 +1555,7 @@ object_get_property (GObject     *object,
   GTypeInstance *inst = (GTypeInstance *) object;
   GObjectClass *class;
   guint param_id = PARAM_SPEC_PARAM_ID (pspec);
+  GParamSpec *redirect;
 
   if (G_LIKELY (inst->g_class->g_type == pspec->owner_type))
     class = (GObjectClass *) inst->g_class;
@@ -1574,7 +1564,9 @@ object_get_property (GObject     *object,
 
   g_assert (class != NULL);
 
-  param_spec_follow_override (&pspec);
+  redirect = g_param_spec_get_redirect_target (pspec);
+  if (redirect)
+    pspec = redirect;
 
   consider_issuing_property_deprecation_warning (pspec);
 
@@ -1591,6 +1583,7 @@ object_set_property (GObject             *object,
   GObjectClass *class;
   GParamSpecClass *pclass;
   guint param_id = PARAM_SPEC_PARAM_ID (pspec);
+  GParamSpec *redirect;
 
   if (G_LIKELY (inst->g_class->g_type == pspec->owner_type))
     class = (GObjectClass *) inst->g_class;
@@ -1599,7 +1592,9 @@ object_set_property (GObject             *object,
 
   g_assert (class != NULL);
 
-  param_spec_follow_override (&pspec);
+  redirect = g_param_spec_get_redirect_target (pspec);
+  if (redirect)
+    pspec = redirect;
 
   consider_issuing_property_deprecation_warning (pspec);
 
