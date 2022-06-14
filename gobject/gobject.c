@@ -1360,10 +1360,7 @@ g_object_real_dispose (GObject *object)
   };
 
   g_signal_handlers_destroy (object);
-  /* FIXME: This should be simplified down to a single remove_multiple() call.
-   * See https://gitlab.gnome.org/GNOME/glib/-/issues/2672 */
-  g_datalist_id_remove_multiple (&object->qdata, keys, 1);
-  g_datalist_id_remove_multiple (&object->qdata, keys + 1, 2);
+  g_datalist_id_remove_multiple (&object->qdata, keys, G_N_ELEMENTS (keys));
 }
 
 #ifdef G_ENABLE_DEBUG
@@ -1530,24 +1527,13 @@ g_object_notify_by_spec_internal (GObject    *object,
         }
       else
         {
-          /*
-           * Coverity doesn’t understand the paired ref/unref here and seems to
-           * ignore the ref, thus reports every call to g_object_notify() as
-           * causing a double-free. That’s incorrect, but I can’t get a model
-           * file to work for avoiding the false positives, so instead comment
-           * out the ref/unref when doing static analysis.
-           */
-#ifndef __COVERITY__
           g_object_ref (object);
-#endif
 
           /* not frozen, so just dispatch the notification directly */
           G_OBJECT_GET_CLASS (object)
               ->dispatch_properties_changed (object, 1, &pspec);
 
-#ifndef __COVERITY__
           g_object_unref (object);
-#endif
         }
     }
 }

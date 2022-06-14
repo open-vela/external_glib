@@ -1,5 +1,5 @@
 project('glib', 'c', 'cpp',
-  version : '2.73.1',
+  version : '2.73.0',
   # NOTE: See the policy in docs/meson-version.md before changing the Meson dependency
   meson_version : '>= 0.60.0',
   default_options : [
@@ -101,30 +101,6 @@ installed_tests_template_tap = files('tests/template-tap.test.in')
 
 # Don’t build the tests unless we can run them (either natively, in an exe wrapper, or by installing them for later use)
 build_tests = get_option('tests') and (meson.can_run_host_binaries() or installed_tests_enabled)
-
-# Allow the tests to be easily run under valgrind using --setup=valgrind
-valgrind = find_program('valgrind', required: false)
-if valgrind.found()
-  suppression_file = files('tools' / 'glib.supp')
-
-  add_test_setup('valgrind',
-    exclude_suites: [ 'no-valgrind' ],
-    exe_wrapper: [
-      valgrind,
-      '--tool=memcheck',
-      '--error-exitcode=1',
-      '--track-origins=yes',
-      '--leak-check=full',
-      '--leak-resolution=high',
-      '--num-callers=50',
-      '--show-leak-kinds=definite,possible',
-      '--show-error-list=yes',
-      '--suppressions=@0@'.format(meson.project_source_root() /
-        '@0@'.format(suppression_file[0])),
-    ],
-    timeout_multiplier: 10,
-  )
-endif
 
 add_project_arguments('-D_GNU_SOURCE', language: 'c')
 
@@ -2000,12 +1976,28 @@ glibconfig_conf.set10('G_HAVE_GROWING_STACK', growing_stack)
 # We should never use the MinGW C library's iconv because it may not be
 # available in the actual runtime environment. On Windows, we always use
 # the built-in implementation
+iconv_opt = get_option('iconv')
 if host_system == 'windows'
+  libiconv = []
   # We have a #include "win_iconv.c" in gconvert.c on Windows, so we don't need
   # any external library for it
-  libiconv = []
+  if iconv_opt != 'auto'
+    warning('-Diconv was set to @0@, which was ignored')
+  endif
 else
-  libiconv = dependency('iconv')
+  found_iconv = false
+  if ['auto', 'libc'].contains(iconv_opt) and cc.has_function('iconv_open')
+    libiconv = []
+    found_iconv = true
+  endif
+  if not found_iconv and ['auto', 'external'].contains(iconv_opt) and cc.has_header_symbol('iconv.h', 'iconv_open')
+    libiconv = [cc.find_library('iconv')]
+    found_iconv = true
+  endif
+
+  if not found_iconv
+    error('iconv implementation "@0@" not found'.format(iconv_opt))
+  endif
 endif
 
 pcre = dependency('libpcre', version: '>= 8.31', required : false) # Should check for Unicode support, too. FIXME
@@ -2041,9 +2033,6 @@ else
   use_pcre_static_flag = false
 endif
 
-# Import the gvdb sources as a subproject to avoid having the copylib in-tree
-gvdb_dep = dependency('gvdb')
-
 libm = cc.find_library('m', required : false)
 libffi_dep = dependency('libffi', version : '>= 3.0.0', fallback : ['libffi', 'ffi_dep'])
 
@@ -2054,35 +2043,40 @@ libz_dep = dependency('zlib')
 # FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
 # implementations. This could be extended if issues are found in some platforms.
 libintl_deps = []
-libintl = dependency('intl', required: false)
-if libintl.found()
-  # libintl supports different threading APIs, which may not
-  # require additional flags, but it defaults to using pthreads if
-  # found. Meson's "threads" dependency does not allow you to
-  # prefer pthreads. We may not be using pthreads for glib itself
-  # either so just link the library to satisfy libintl rather than
-  # also defining the macros with the -pthread flag.
-  #
-  # Meson's builtin dependency lookup as of 0.60.0 doesn't check for
-  # pthread, so we do this manually here.
-  if cc.has_function('ngettext', dependencies : libintl)
-    libintl_deps += [libintl]
-  else
-    libintl_pthread = cc.find_library('pthread', required : false)
-    if libintl_pthread.found() and cc.has_function('ngettext', dependencies : [libintl, libintl_pthread])
-      libintl_deps += [libintl, libintl_pthread]
-    else
-      libintl = disabler()
-    endif
-  endif
-endif
-
-if libintl.found()
-  have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset', dependencies: libintl_deps)
+if cc.has_function('ngettext')
+  have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset')
 else
-  libintl = subproject('proxy-libintl').get_variable('intl_dep')
-  libintl_deps = [libintl]
-  have_bind_textdomain_codeset = true  # proxy-libintl supports it
+  # First just find the bare library.
+  libintl = cc.find_library('intl', required : false)
+  # The bare library probably won't link without help if it's static.
+  if libintl.found() and not cc.has_function('ngettext', dependencies : libintl)
+     libintl_iconv = cc.find_library('iconv', required : false)
+     # libintl supports different threading APIs, which may not
+     # require additional flags, but it defaults to using pthreads if
+     # found. Meson's "threads" dependency does not allow you to
+     # prefer pthreads. We may not be using pthreads for glib itself
+     # either so just link the library to satisfy libintl rather than
+     # also defining the macros with the -pthread flag.
+     libintl_pthread = cc.find_library('pthread', required : false)
+     # Try linking with just libiconv.
+     if libintl_iconv.found() and cc.has_function('ngettext', dependencies : [libintl, libintl_iconv])
+       libintl_deps += [libintl_iconv]
+     # Then also try linking with pthreads.
+     elif libintl_iconv.found() and libintl_pthread.found() and cc.has_function('ngettext', dependencies : [libintl, libintl_iconv, libintl_pthread])
+       libintl_deps += [libintl_iconv, libintl_pthread]
+     else
+       libintl = disabler()
+     endif
+  endif
+  if not libintl.found()
+    libintl = subproject('proxy-libintl').get_variable('intl_dep')
+    libintl_deps = [libintl] + libintl_deps
+    have_bind_textdomain_codeset = true  # proxy-libintl supports it
+  else
+    libintl_deps = [libintl] + libintl_deps
+    have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset', 
+                                                   dependencies : libintl_deps)
+  endif
 endif
 
 glib_conf.set('HAVE_BIND_TEXTDOMAIN_CODESET', have_bind_textdomain_codeset)

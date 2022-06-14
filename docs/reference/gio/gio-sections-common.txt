@@ -156,6 +156,8 @@ g_file_make_directory_async
 g_file_make_directory_finish
 g_file_make_directory_with_parents
 g_file_make_symbolic_link
+g_file_make_symbolic_link_async
+g_file_make_symbolic_link_finish
 g_file_query_settable_attributes
 g_file_query_writable_namespaces
 g_file_set_attribute
@@ -1371,6 +1373,7 @@ g_io_scheduler_job_send_to_mainloop_async
 G_IO_ERROR
 GIOErrorEnum
 g_io_error_from_errno
+g_io_error_from_file_error
 g_io_error_from_win32_error
 <SUBSECTION Standard>
 G_TYPE_IO_ERROR_ENUM

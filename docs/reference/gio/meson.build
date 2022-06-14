@@ -4,6 +4,7 @@ if get_option('gtk_doc')
 
   ignore_headers = [
     'gdbus-2.0',
+    'gvdb',
     'inotify',
     'kqueue',
     'libasyncns',
