@@ -115,20 +115,9 @@ g_io_error_from_errno (gint err_no)
       break;
 #endif
 
-#ifdef ENODEV
-    case ENODEV:
-      return G_IO_ERROR_NO_SUCH_DEVICE;
-#endif
-
 #ifdef EROFS
     case EROFS:
       return G_IO_ERROR_READ_ONLY;
-      break;
-#endif
-
-#ifdef EMLINK
-    case EMLINK:
-      return G_IO_ERROR_TOO_MANY_LINKS;
       break;
 #endif
 
@@ -153,24 +142,6 @@ g_io_error_from_errno (gint err_no)
 #ifdef EINVAL
     case EINVAL:
       return G_IO_ERROR_INVALID_ARGUMENT;
-      break;
-#endif
-
-#ifdef ENOMSG
-    case ENOMSG:
-      return G_IO_ERROR_INVALID_DATA;
-      break;
-#endif
-
-#ifdef ENODATA
-    case ENODATA:
-      return G_IO_ERROR_INVALID_DATA;
-      break;
-#endif
-
-#ifdef EBADMSG
-    case EBADMSG:
-      return G_IO_ERROR_INVALID_DATA;
       break;
 #endif
 
@@ -230,12 +201,6 @@ g_io_error_from_errno (gint err_no)
       break;
 #endif
 
-#ifdef ENOSYS
-    case ENOSYS:
-      return G_IO_ERROR_NOT_SUPPORTED;
-      break;
-#endif
-
 #ifdef ETIMEDOUT
     case ETIMEDOUT:
       return G_IO_ERROR_TIMED_OUT;
@@ -244,12 +209,6 @@ g_io_error_from_errno (gint err_no)
 
 #ifdef EBUSY
     case EBUSY:
-      return G_IO_ERROR_BUSY;
-      break;
-#endif
-
-#ifdef ETXTBSY
-    case ETXTBSY:
       return G_IO_ERROR_BUSY;
       break;
 #endif
@@ -273,12 +232,6 @@ g_io_error_from_errno (gint err_no)
       break;
 #endif
 
-#ifdef ENFILE
-    case ENFILE:
-      return G_IO_ERROR_TOO_MANY_OPEN_FILES;
-      break;
-#endif
-
 #ifdef EADDRINUSE
     case EADDRINUSE:
       return G_IO_ERROR_ADDRESS_IN_USE;
@@ -293,12 +246,6 @@ g_io_error_from_errno (gint err_no)
 
 #ifdef ENETUNREACH
     case ENETUNREACH:
-      return G_IO_ERROR_NETWORK_UNREACHABLE;
-      break;
-#endif
-
-#ifdef ENETDOWN
-    case ENETDOWN:
       return G_IO_ERROR_NETWORK_UNREACHABLE;
       break;
 #endif
