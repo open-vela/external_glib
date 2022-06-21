@@ -157,7 +157,8 @@ test_rec_mutex4 (void)
     g_assert (owners[i] == NULL);
 }
 
-static gint count_to = 0;
+#define COUNT_TO 100000000
+
 static gint depth;
 
 static gboolean
@@ -171,7 +172,7 @@ do_addition (gint *value)
   for (i = 0; i < depth; i++)
     g_rec_mutex_lock (&lock);
 
-  if ((more = *value != count_to))
+  if ((more = *value != COUNT_TO))
     if (*value != -1)
       (*value)++;
 
@@ -202,7 +203,6 @@ test_mutex_perf (gconstpointer data)
 
   n_threads = c / 256;
   depth = c % 256;
-  count_to = g_test_perf () ? 100000000 : 1;
 
   for (i = 0; i < n_threads - 1; i++)
     threads[i] = g_thread_new ("test", addition_thread, &x);
@@ -211,7 +211,7 @@ test_mutex_perf (gconstpointer data)
   start_time = g_get_monotonic_time ();
   g_atomic_int_set (&x, 0);
   addition_thread (&x);
-  g_assert_cmpint (g_atomic_int_get (&x), ==, count_to);
+  g_assert_cmpint (g_atomic_int_get (&x), ==, COUNT_TO);
   rate = g_get_monotonic_time () - start_time;
   rate = x / rate;
 
@@ -232,6 +232,7 @@ main (int argc, char *argv[])
   g_test_add_func ("/thread/rec-mutex3", test_rec_mutex3);
   g_test_add_func ("/thread/rec-mutex4", test_rec_mutex4);
 
+  if (g_test_perf ())
     {
       gint i, j;
 
