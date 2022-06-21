@@ -231,7 +231,7 @@ run_test_thread (gpointer user_data)
   results = g_array_new (FALSE, FALSE, sizeof (double));
 
   /* Run the test */
-  do
+  while (g_timer_elapsed (total, NULL) < test_length)
     {
       g_timer_reset (timer);
       g_timer_start (timer);
@@ -241,7 +241,6 @@ run_test_thread (gpointer user_data)
       g_array_append_val (results, elapsed);
       test->reset (data);
     }
-  while (g_timer_elapsed (total, NULL) < test_length);
 
   /* Tear down */
   test->teardown (data);
@@ -301,7 +300,7 @@ run_test (const PerformanceTest *test)
       
     threads = g_new (GThread *, n_threads);
     for (i = 0; i < n_threads; i++) {
-      threads[i] = g_thread_new (NULL, run_test_thread, (gpointer) test);
+      threads[i] = g_thread_create (run_test_thread, (gpointer) test, TRUE, NULL);
       g_assert (threads[i] != NULL);
     }
 
