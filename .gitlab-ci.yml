@@ -10,10 +10,10 @@ cache:
     - _ccache/
 
 variables:
-  FEDORA_IMAGE: "registry.gitlab.gnome.org/gnome/glib/fedora:v15"
-  COVERITY_IMAGE: "registry.gitlab.gnome.org/gnome/glib/coverity:v4"
-  DEBIAN_IMAGE: "registry.gitlab.gnome.org/gnome/glib/debian-stable:v10"
-  MINGW_IMAGE: "registry.gitlab.gnome.org/gnome/glib/mingw:v6"
+  FEDORA_IMAGE: "registry.gitlab.gnome.org/gnome/glib/fedora:v16"
+  COVERITY_IMAGE: "registry.gitlab.gnome.org/gnome/glib/coverity:v5"
+  DEBIAN_IMAGE: "registry.gitlab.gnome.org/gnome/glib/debian-stable:v11"
+  MINGW_IMAGE: "registry.gitlab.gnome.org/gnome/glib/mingw:v7"
   MESON_TEST_TIMEOUT_MULTIPLIER: 2
   G_MESSAGES_DEBUG: all
   MESON_COMMON_OPTIONS: "--buildtype debug --wrap-mode=nodownload --fatal-meson-warnings"
@@ -225,8 +225,7 @@ valgrind:
     # See https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2710
     - ulimit -Sn 1024
     - bash -x ./.gitlab-ci/run-tests.sh
-                 --wrap "valgrind --tool=memcheck --error-exitcode=1 --track-origins=yes --leak-check=full --leak-resolution=high --num-callers=50 --show-leak-kinds=definite,possible --show-error-list=yes --suppressions=${CI_PROJECT_DIR}/tools/glib.supp"
-                 --no-suite no-valgrind
+                 --setup valgrind
                  --no-suite slow
   # FIXME: Remove this when we have zero valgrind leaks.
   # https://gitlab.gnome.org/GNOME/glib/issues/333
@@ -386,11 +385,10 @@ freebsd-12-x86_64:
     - bash .gitlab-ci/show-execution-environment.sh
   script:
     # We cannot use -Wl,--no-undefined because GLib uses 'environ' variable.
-    # FreeBSD iconv doesn't handle transliteration, so we use (external) GNU libiconv here.
     # FreeBSD supports xattr, but its API is different from Linux xattr.
     # FIXME: extattr(2) support: https://gitlab.gnome.org/GNOME/glib/issues/1404
     # localstatedir is needed for access to /var/lib/dbus/machine-id
-    - meson ${MESON_COMMON_OPTIONS} --localstatedir=/var -Db_lundef=false -Diconv=external -Dxattr=false _build
+    - meson ${MESON_COMMON_OPTIONS} --localstatedir=/var -Db_lundef=false -Dxattr=false _build
     - ninja -C _build
     - bash -x ./.gitlab-ci/run-tests.sh
   artifacts:
@@ -417,7 +415,7 @@ freebsd-13-x86_64:
   before_script:
     - bash .gitlab-ci/show-execution-environment.sh
   script:
-    - meson ${MESON_COMMON_OPTIONS} --localstatedir=/var -Db_lundef=false -Diconv=external -Dxattr=false _build
+    - meson ${MESON_COMMON_OPTIONS} --localstatedir=/var -Db_lundef=false -Dxattr=false _build
     - ninja -C _build
     - bash -x ./.gitlab-ci/run-tests.sh
   artifacts:

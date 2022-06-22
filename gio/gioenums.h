@@ -509,7 +509,6 @@ typedef enum {
  *     value, which has this more logical name. Since 2.44.
  * @G_IO_ERROR_NOT_CONNECTED: Transport endpoint is not connected. Since 2.44
  * @G_IO_ERROR_MESSAGE_TOO_LARGE: Message too large. Since 2.48.
- * @G_IO_ERROR_NO_SUCH_DEVICE: No such device found. Since 2.74
  *
  * Error codes returned by GIO functions.
  *
@@ -578,8 +577,7 @@ typedef enum {
   G_IO_ERROR_BROKEN_PIPE,
   G_IO_ERROR_CONNECTION_CLOSED = G_IO_ERROR_BROKEN_PIPE,
   G_IO_ERROR_NOT_CONNECTED,
-  G_IO_ERROR_MESSAGE_TOO_LARGE,
-  G_IO_ERROR_NO_SUCH_DEVICE,
+  G_IO_ERROR_MESSAGE_TOO_LARGE
 } GIOErrorEnum;
 
 
