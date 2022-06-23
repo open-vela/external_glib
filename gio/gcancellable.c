@@ -589,7 +589,7 @@ g_cancellable_connect (GCancellable   *cancellable,
       id = g_signal_connect_data (cancellable, "cancelled",
                                   callback, data,
                                   (GClosureNotify) data_destroy_func,
-                                  G_CONNECT_DEFAULT);
+                                  0);
 
       g_mutex_unlock (&cancellable_mutex);
     }

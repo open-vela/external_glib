@@ -314,7 +314,7 @@ main (int argc, char *argv[])
   if (argc > 1)
     {
       gint arg = 1;
-      GMarkupParseFlags flags = G_MARKUP_PARSE_FLAGS_NONE;
+      GMarkupParseFlags flags = 0;
 
       if (strcmp (argv[1], "--cdata-as-text") == 0)
         {

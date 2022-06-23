@@ -630,7 +630,7 @@ g_dbus_server_start (GDBusServer *server)
                                                          G_CALLBACK (on_run),
                                                          g_object_ref (server),
                                                          (GClosureNotify) g_object_unref,
-                                                         G_CONNECT_DEFAULT);
+                                                         0  /* flags */);
   g_socket_service_start (G_SOCKET_SERVICE (server->listener));
   server->active = TRUE;
   g_object_notify (G_OBJECT (server), "active");
