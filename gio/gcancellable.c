@@ -273,10 +273,12 @@ g_cancellable_reset (GCancellable *cancellable)
       g_cond_wait (&cancellable_cond, &cancellable_mutex);
     }
 
-  if (g_atomic_int_exchange (&priv->cancelled, FALSE))
+  if (g_atomic_int_get (&priv->cancelled))
     {
       if (priv->wakeup)
         GLIB_PRIVATE_CALL (g_wakeup_acknowledge) (priv->wakeup);
+
+      g_atomic_int_set (&priv->cancelled, FALSE);
     }
 
   g_mutex_unlock (&cancellable_mutex);
@@ -495,12 +497,13 @@ g_cancellable_cancel (GCancellable *cancellable)
 
   g_mutex_lock (&cancellable_mutex);
 
-  if (g_atomic_int_exchange (&priv->cancelled, TRUE))
+  if (g_atomic_int_get (&priv->cancelled))
     {
       g_mutex_unlock (&cancellable_mutex);
       return;
     }
 
+  g_atomic_int_set (&priv->cancelled, TRUE);
   priv->cancelled_running = TRUE;
 
   if (priv->wakeup)
