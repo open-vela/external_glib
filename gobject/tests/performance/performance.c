@@ -479,7 +479,7 @@ test_construction_init (PerformanceTest *test,
   if (data->n_objects != n)
     {
       data->n_objects = n;
-      data->objects = g_renew (GObject *, data->objects, n);
+      data->objects = g_new (GObject *, n);
     }
 }
 
@@ -603,7 +603,7 @@ test_finalization_init (PerformanceTest *test,
   if (data->n_objects != n)
     {
       data->n_objects = n;
-      data->objects = g_renew (GObject *, data->objects, n);
+      data->objects = g_new (GObject *, n);
     }
 
   for (int i = 0; i <  data->n_objects; i++)
@@ -1219,6 +1219,5 @@ main (int   argc,
         run_test (&tests[k]);
     }
 
-  g_option_context_free (context);
   return 0;
 }
