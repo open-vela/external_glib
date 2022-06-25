@@ -504,7 +504,7 @@ g_data_remove_internal (GData  **datalist,
       GDataElt *old, *data, *data_end;
       gsize found_keys;
 
-      old = g_newa0 (GDataElt, n_keys);
+      old = g_newa (GDataElt, n_keys);
 
       data = d->data;
       data_end = data + d->len;
@@ -518,7 +518,6 @@ g_data_remove_internal (GData  **datalist,
             {
               if (data->key == keys[i])
                 {
-                  old[i] = *data;
                   remove = TRUE;
                   break;
                 }
@@ -526,10 +525,14 @@ g_data_remove_internal (GData  **datalist,
 
           if (remove)
             {
+              old[found_keys] = *data;
               found_keys++;
 
-              if (data < --data_end)
-                *data = *data_end;
+              if (data < data_end)
+                {
+                  data_end--;
+                  *data = *data_end;
+                }
 
               d->len--;
 
@@ -543,17 +546,15 @@ g_data_remove_internal (GData  **datalist,
                   break;
                 }
             }
-          else
-            {
-              data++;
-            }
+
+          data++;
         }
 
       if (found_keys > 0)
         {
           g_datalist_unlock (datalist);
 
-          for (gsize i = 0; i < n_keys; i++)
+          for (gsize i = 0; i < found_keys; i++)
             {
               if (old[i].destroy)
                 old[i].destroy (old[i].data);
