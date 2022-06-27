@@ -1353,10 +1353,17 @@ g_object_do_get_property (GObject     *object,
 static void
 g_object_real_dispose (GObject *object)
 {
+  GQuark keys[3] = {
+    quark_closure_array,
+    quark_weak_refs,
+    quark_weak_locations,
+  };
+
   g_signal_handlers_destroy (object);
-  g_datalist_id_set_data (&object->qdata, quark_closure_array, NULL);
-  g_datalist_id_set_data (&object->qdata, quark_weak_refs, NULL);
-  g_datalist_id_set_data (&object->qdata, quark_weak_locations, NULL);
+  /* FIXME: This should be simplified down to a single remove_multiple() call.
+   * See https://gitlab.gnome.org/GNOME/glib/-/issues/2672 */
+  g_datalist_id_remove_multiple (&object->qdata, keys, 1);
+  g_datalist_id_remove_multiple (&object->qdata, keys + 1, 2);
 }
 
 #ifdef G_ENABLE_DEBUG
@@ -3086,8 +3093,8 @@ g_object_get_property (GObject	   *object,
  *
  * The signal specs expected by this function have the form
  * "modifier::signal_name", where modifier can be one of the following:
- * - signal: equivalent to g_signal_connect_data (..., NULL, G_CONNECT_DEFAULT)
- * - object-signal, object_signal: equivalent to g_signal_connect_object (..., G_CONNECT_DEFAULT)
+ * - signal: equivalent to g_signal_connect_data (..., NULL, 0)
+ * - object-signal, object_signal: equivalent to g_signal_connect_object (..., 0)
  * - swapped-signal, swapped_signal: equivalent to g_signal_connect_data (..., NULL, G_CONNECT_SWAPPED)
  * - swapped_object_signal, swapped-object-signal: equivalent to g_signal_connect_object (..., G_CONNECT_SWAPPED)
  * - signal_after, signal-after: equivalent to g_signal_connect_data (..., NULL, G_CONNECT_AFTER)
@@ -3128,12 +3135,12 @@ g_object_connect (gpointer     _object,
       if (strncmp (signal_spec, "signal::", 8) == 0)
 	g_signal_connect_data (object, signal_spec + 8,
 			       callback, data, NULL,
-			       G_CONNECT_DEFAULT);
+			       0);
       else if (strncmp (signal_spec, "object_signal::", 15) == 0 ||
                strncmp (signal_spec, "object-signal::", 15) == 0)
 	g_signal_connect_object (object, signal_spec + 15,
 				 callback, data,
-				 G_CONNECT_DEFAULT);
+				 0);
       else if (strncmp (signal_spec, "swapped_signal::", 16) == 0 ||
                strncmp (signal_spec, "swapped-signal::", 16) == 0)
 	g_signal_connect_data (object, signal_spec + 16,
@@ -3881,10 +3888,15 @@ g_object_unref (gpointer _object)
 	}
 
       /* we are still in the process of taking away the last ref */
-      g_datalist_id_set_data (&object->qdata, quark_closure_array, NULL);
       g_signal_handlers_destroy (object);
-      g_datalist_id_set_data (&object->qdata, quark_weak_refs, NULL);
-      g_datalist_id_set_data (&object->qdata, quark_weak_locations, NULL);
+      {
+        GQuark keys[3] = {
+          quark_closure_array,
+          quark_weak_refs,
+          quark_weak_locations,
+        };
+        g_datalist_id_remove_multiple (&object->qdata, keys, G_N_ELEMENTS (keys));
+      }
 
       /* decrement the last reference */
       old_ref = g_atomic_int_add (&object->ref_count, -1);

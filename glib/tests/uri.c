@@ -351,7 +351,7 @@ test_uri_unescape_string (void)
       { "%0", NULL, NULL },
       { "%ra", NULL, NULL },
       { "%2r", NULL, NULL },
-      { "Timm B\303\244der", NULL, "Timm B\303\244der" },
+      { "Timm B\344der", NULL, "Timm B\344der" },
       { NULL, NULL, NULL },  /* actually a valid test, not a delimiter */
     };
   gsize i;
@@ -479,16 +479,14 @@ test_uri_escape_string (void)
   for (i = 0; i < G_N_ELEMENTS (tests); i++)
     {
       gchar *s = NULL;
-      gchar *escaped = g_strescape (tests[i].unescaped, NULL);
 
-      g_test_message ("Test %" G_GSIZE_FORMAT ": %s", i, escaped);
+      g_test_message ("Test %" G_GSIZE_FORMAT ": %s", i, tests[i].unescaped);
 
       s = g_uri_escape_string (tests[i].unescaped,
                                tests[i].reserved_chars_allowed,
                                tests[i].allow_utf8);
       g_assert_cmpstr (s, ==, tests[i].expected_escaped);
       g_free (s);
-      g_free (escaped);
     }
 }
 
