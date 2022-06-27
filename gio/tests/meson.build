@@ -63,14 +63,16 @@ gio_tests = {
   },
   'data-input-stream' : {},
   'data-output-stream' : {},
-  'error': {},
   'fileattributematcher' : {},
   'filter-streams' : {},
   'giomodule' : {
     # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
     'should_fail' : host_system == 'darwin',
   },
-  'gsubprocess' : {},
+  'gsubprocess' : {
+    # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392
+    'should_fail' : host_system == 'darwin',
+  },
   'g-file' : {},
   'g-file-info' : {
     # FIXME: https://gitlab.gnome.org/GNOME/glib/-/issues/1392

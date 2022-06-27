@@ -756,9 +756,7 @@ g_subprocess_wait_async (GSubprocess         *subprocess,
        * see the cancellation in the _finish().
        */
       if (cancellable)
-        g_signal_connect_object (cancellable, "cancelled",
-                                 G_CALLBACK (g_subprocess_wait_cancelled),
-                                 task, G_CONNECT_DEFAULT);
+        g_signal_connect_object (cancellable, "cancelled", G_CALLBACK (g_subprocess_wait_cancelled), task, 0);
 
       subprocess->pending_waits = g_slist_prepend (subprocess->pending_waits, task);
       task = NULL;

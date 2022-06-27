@@ -13,7 +13,6 @@ RUN apt-get update -qq && apt-get install --no-install-recommends -qq -y \
     flake8 \
     fuse \
     gcc \
-    gdb \
     g++ \
     gettext \
     git \
@@ -27,7 +26,6 @@ RUN apt-get update -qq && apt-get install --no-install-recommends -qq -y \
     libffi-dev \
     libmount-dev \
     libpcre3-dev \
-    libpcre2-dev \
     libselinux1-dev \
     libxml2-utils \
     libxslt1-dev \
