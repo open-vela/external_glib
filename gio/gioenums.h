@@ -509,6 +509,7 @@ typedef enum {
  *     value, which has this more logical name. Since 2.44.
  * @G_IO_ERROR_NOT_CONNECTED: Transport endpoint is not connected. Since 2.44
  * @G_IO_ERROR_MESSAGE_TOO_LARGE: Message too large. Since 2.48.
+ * @G_IO_ERROR_NO_SUCH_DEVICE: No such device found. Since 2.74
  *
  * Error codes returned by GIO functions.
  *
@@ -577,7 +578,8 @@ typedef enum {
   G_IO_ERROR_BROKEN_PIPE,
   G_IO_ERROR_CONNECTION_CLOSED = G_IO_ERROR_BROKEN_PIPE,
   G_IO_ERROR_NOT_CONNECTED,
-  G_IO_ERROR_MESSAGE_TOO_LARGE
+  G_IO_ERROR_MESSAGE_TOO_LARGE,
+  G_IO_ERROR_NO_SUCH_DEVICE,
 } GIOErrorEnum;
 
 
@@ -1578,6 +1580,7 @@ typedef enum {
 
 /**
  * GTlsCertificateFlags:
+ * @G_TLS_CERTIFICATE_FLAGS_NONE: No flags. Since: 2.74
  * @G_TLS_CERTIFICATE_UNKNOWN_CA: The signing certificate authority is
  *   not known.
  * @G_TLS_CERTIFICATE_BAD_IDENTITY: The certificate does not match the
@@ -1609,6 +1612,7 @@ typedef enum {
  * Since: 2.28
  */
 typedef enum {
+  G_TLS_CERTIFICATE_FLAGS_NONE GLIB_AVAILABLE_ENUMERATOR_IN_2_74 = 0,
   G_TLS_CERTIFICATE_UNKNOWN_CA    = (1 << 0),
   G_TLS_CERTIFICATE_BAD_IDENTITY  = (1 << 1),
   G_TLS_CERTIFICATE_NOT_ACTIVATED = (1 << 2),
