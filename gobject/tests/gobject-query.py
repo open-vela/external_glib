@@ -25,6 +25,7 @@ import os
 import shutil
 import subprocess
 import sys
+from textwrap import dedent
 import unittest
 
 import taptestrunner
