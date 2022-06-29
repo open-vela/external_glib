@@ -1715,8 +1715,11 @@ g_have_iso_c_varargs = cc.compiles('''
     call_a(2,3);
   }''', name : 'ISO C99 varargs macros in C')
 
-if not g_have_iso_c_varargs
-  error('GLib requires a C compiler with support for C99 __VA_ARG__ in macros.')
+if g_have_iso_c_varargs
+  glibconfig_conf.set('g_have_iso_c_varargs', '''
+#ifndef __cplusplus
+# define G_HAVE_ISO_VARARGS 1
+#endif''')
 endif
 
 g_have_iso_cxx_varargs = cxx.compiles('''
@@ -1726,8 +1729,11 @@ g_have_iso_cxx_varargs = cxx.compiles('''
     call_a(2,3);
   }''', name : 'ISO C99 varargs macros in C++')
 
-if not g_have_iso_cxx_varargs
-  error('GLib requires a C++ compiler with support for C99 __VA_ARG__ in macros.')
+if g_have_iso_cxx_varargs
+  glibconfig_conf.set('g_have_iso_cxx_varargs', '''
+#ifdef __cplusplus
+# define G_HAVE_ISO_VARARGS 1
+#endif''')
 endif
 
 g_have_gnuc_varargs = cc.compiles('''
