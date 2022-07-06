@@ -1490,8 +1490,7 @@ g_mutex_clear (GMutex *mutex)
     }
 }
 
-G_GNUC_NO_INLINE
-static void
+static void __attribute__((noinline))
 g_mutex_lock_slowpath (GMutex *mutex)
 {
   /* Set to contended.  If it was empty before then we
@@ -1506,8 +1505,7 @@ g_mutex_lock_slowpath (GMutex *mutex)
     }
 }
 
-G_GNUC_NO_INLINE
-static void
+static void __attribute__((noinline))
 g_mutex_unlock_slowpath (GMutex *mutex,
                          guint   prev)
 {
