@@ -352,8 +352,6 @@ struct _GChildWatchSource
 {
   GSource     source;
   GPid        pid;
-  /* On Unix this is a wait status, which is the thing you pass to WEXITSTATUS()
-   * to get the status returned from the process’ main() or passed to exit(): */
   gint        child_status;
 #ifdef G_OS_WIN32
   GPollFD     poll;
