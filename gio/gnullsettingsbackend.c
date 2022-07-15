@@ -22,7 +22,7 @@
 #include "config.h"
 
 #include "gsettingsbackendinternal.h"
-#include "giomodule-priv.h"
+#include "giomodule.h"
 #include "gsimplepermission.h"
 
 
@@ -38,7 +38,6 @@ typedef GSettingsBackend      GNullSettingsBackend;
 G_DEFINE_TYPE_WITH_CODE (GNullSettingsBackend,
                          g_null_settings_backend,
                          G_TYPE_SETTINGS_BACKEND,
-                         _g_io_modules_ensure_extension_points_registered ();
                          g_io_extension_point_implement (G_SETTINGS_BACKEND_EXTENSION_POINT_NAME,
                                                          g_define_type_id, "null", 10))
 
