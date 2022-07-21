@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ru\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/glib/issues\n"
-"POT-Creation-Date: 2022-08-05 19:22+0000\n"
-"PO-Revision-Date: 2022-08-05 23:07+0300\n"
+"POT-Creation-Date: 2022-07-26 07:58+0000\n"
+"PO-Revision-Date: 2022-07-26 12:57+0300\n"
 "Last-Translator: Aleksandr Melman <Alexmelman88@gmail.com>\n"
 "Language-Team: Русский <gnome-cyr@gnome.org>\n"
 "Language: ru\n"
@@ -1765,7 +1765,7 @@ msgstr "Ошибка при записи в stdout"
 #: gio/gio-tool-mkdir.c:50 gio/gio-tool-monitor.c:39 gio/gio-tool-monitor.c:41
 #: gio/gio-tool-monitor.c:43 gio/gio-tool-monitor.c:45
 #: gio/gio-tool-monitor.c:206 gio/gio-tool-mount.c:1202 gio/gio-tool-open.c:72
-#: gio/gio-tool-remove.c:50 gio/gio-tool-rename.c:47 gio/gio-tool-set.c:95
+#: gio/gio-tool-remove.c:50 gio/gio-tool-rename.c:47 gio/gio-tool-set.c:93
 #: gio/gio-tool-trash.c:222 gio/gio-tool-tree.c:241
 msgid "LOCATION"
 msgstr "РАСПОЛОЖЕНИЕ"
@@ -1874,7 +1874,7 @@ msgstr "Получаемые атрибуты"
 msgid "ATTRIBUTES"
 msgstr "АТРИБУТЫ"
 
-#: gio/gio-tool-info.c:42 gio/gio-tool-list.c:40 gio/gio-tool-set.c:37
+#: gio/gio-tool-info.c:42 gio/gio-tool-list.c:40 gio/gio-tool-set.c:36
 msgid "Don’t follow symbolic links"
 msgstr "Не переходить по символическим ссылкам"
 
@@ -2273,7 +2273,7 @@ msgstr "Переименовать файл."
 msgid "Missing argument"
 msgstr "Отсутствует аргумент"
 
-#: gio/gio-tool-rename.c:78 gio/gio-tool-save.c:192 gio/gio-tool-set.c:150
+#: gio/gio-tool-rename.c:78 gio/gio-tool-save.c:192 gio/gio-tool-set.c:141
 msgid "Too many arguments"
 msgstr "Слишком много аргументов"
 
@@ -2329,43 +2329,39 @@ msgstr "Прочитать из стандартного ввода и сохр�
 msgid "No destination given"
 msgstr "Не указан путь назначения"
 
-#: gio/gio-tool-set.c:36
+#: gio/gio-tool-set.c:35
 msgid "Type of the attribute"
 msgstr "Тип атрибута"
 
-#: gio/gio-tool-set.c:36
+#: gio/gio-tool-set.c:35
 msgid "TYPE"
 msgstr "ТИП"
 
-#: gio/gio-tool-set.c:38
-msgid "Unset given attribute"
-msgstr "Снять данный атрибут"
-
-#: gio/gio-tool-set.c:95
+#: gio/gio-tool-set.c:93
 msgid "ATTRIBUTE"
 msgstr "АТРИБУТ"
 
-#: gio/gio-tool-set.c:95
+#: gio/gio-tool-set.c:93
 msgid "VALUE"
 msgstr "ЗНАЧЕНИЕ"
 
-#: gio/gio-tool-set.c:99
+#: gio/gio-tool-set.c:97
 msgid "Set a file attribute of LOCATION."
 msgstr "Установить атрибуты файла ПРИЁМНИКА."
 
-#: gio/gio-tool-set.c:119
+#: gio/gio-tool-set.c:117
 msgid "Location not specified"
 msgstr "Адрес не определён"
 
-#: gio/gio-tool-set.c:126
+#: gio/gio-tool-set.c:124
 msgid "Attribute not specified"
 msgstr "Атрибут не определён"
 
-#: gio/gio-tool-set.c:143
+#: gio/gio-tool-set.c:134
 msgid "Value not specified"
 msgstr "Значение не определено"
 
-#: gio/gio-tool-set.c:193
+#: gio/gio-tool-set.c:184
 #, c-format
 msgid "Invalid attribute type “%s”"
 msgstr "Неверный тип атрибута «%s»"
@@ -3551,7 +3547,7 @@ msgstr "Недопустимый домен"
 #: gio/gresource.c:683 gio/gresource.c:945 gio/gresource.c:985
 #: gio/gresource.c:1109 gio/gresource.c:1181 gio/gresource.c:1255
 #: gio/gresource.c:1336 gio/gresourcefile.c:478 gio/gresourcefile.c:601
-#: gio/gresourcefile.c:752
+#: gio/gresourcefile.c:738
 #, c-format
 msgid "The resource at “%s” does not exist"
 msgstr "Ресурс из «%s» не существует"
@@ -3561,16 +3557,12 @@ msgstr "Ресурс из «%s» не существует"
 msgid "The resource at “%s” failed to decompress"
 msgstr "Не удалось распаковать ресурс из «%s»"
 
-#: gio/gresourcefile.c:658
-msgid "Resource files cannot be renamed"
-msgstr "Файлы ресурсов нельзя переименовать"
-
-#: gio/gresourcefile.c:748
+#: gio/gresourcefile.c:734
 #, c-format
 msgid "The resource at “%s” is not a directory"
 msgstr "Ресурс из «%s» не является каталогом"
 
-#: gio/gresourcefile.c:956
+#: gio/gresourcefile.c:942
 msgid "Input stream doesn’t implement seek"
 msgstr "По входному потоку перемещение не поддерживается"
 
@@ -4225,7 +4217,7 @@ msgstr "Прокси SOCKSv5 не поддерживает предложенн�
 msgid "Unknown SOCKSv5 proxy error."
 msgstr "Неизвестная ошибка прокси SOCKSv5."
 
-#: gio/gtestdbus.c:614 glib/gspawn-win32.c:354
+#: gio/gtestdbus.c:614 glib/gspawn-win32.c:303
 #, c-format
 msgid "Failed to create pipe for communicating with child process (%s)"
 msgstr "Не удалось создать канал для сообщения с процессом-потомком (%s)"
@@ -5894,7 +5886,7 @@ msgstr "Неожиданная ошибка при чтении данных и�
 msgid "Unexpected error in waitpid() (%s)"
 msgstr "Произошла неожиданная ошибка в функции waitpid() (%s)"
 
-#: glib/gspawn.c:1170 glib/gspawn-win32.c:1488
+#: glib/gspawn.c:1170 glib/gspawn-win32.c:1434
 #, c-format
 msgid "Child process exited with code %ld"
 msgstr "Дочерний процесс завершился с кодом %ld"
@@ -5914,7 +5906,7 @@ msgstr "Дочерний процесс остановлен по сигналу
 msgid "Child process exited abnormally"
 msgstr "Дочерний процесс аварийно завершил работу"
 
-#: glib/gspawn.c:1885 glib/gspawn-win32.c:393 glib/gspawn-win32.c:401
+#: glib/gspawn.c:1885 glib/gspawn-win32.c:342 glib/gspawn-win32.c:350
 #, c-format
 msgid "Failed to read from child pipe (%s)"
 msgstr "Не удалось выполнить чтение из дочернего канала (%s)"
@@ -5929,7 +5921,7 @@ msgstr "Не удалось запустить дочерний процесс \
 msgid "Failed to fork (%s)"
 msgstr "Функция fork завершилась неудачно (%s)"
 
-#: glib/gspawn.c:2525 glib/gspawn-win32.c:424
+#: glib/gspawn.c:2525 glib/gspawn-win32.c:373
 #, c-format
 msgid "Failed to change to directory “%s” (%s)"
 msgstr "Не удалось сменить каталог на «%s» (%s)"
@@ -5971,46 +5963,46 @@ msgstr ""
 "Не удалось прочитать нужное количество данных из канала дочернего процесса "
 "(%s)"
 
-#: glib/gspawn-win32.c:337
+#: glib/gspawn-win32.c:286
 msgid "Failed to read data from child process"
 msgstr "Не удалось прочитать данные из дочернего процесса"
 
-#: glib/gspawn-win32.c:430 glib/gspawn-win32.c:435 glib/gspawn-win32.c:561
+#: glib/gspawn-win32.c:379 glib/gspawn-win32.c:384 glib/gspawn-win32.c:510
 #, c-format
 msgid "Failed to execute child process (%s)"
 msgstr "Не удалось выполнить дочерний процесс (%s)"
 
-#: glib/gspawn-win32.c:440
+#: glib/gspawn-win32.c:389
 #, c-format
 msgid "Failed to dup() in child process (%s)"
 msgstr "Не удалось выполнить dup() в дочернем процессе (%s)"
 
-#: glib/gspawn-win32.c:511
+#: glib/gspawn-win32.c:460
 #, c-format
 msgid "Invalid program name: %s"
 msgstr "Недопустимое имя программы: %s"
 
-#: glib/gspawn-win32.c:521 glib/gspawn-win32.c:853
+#: glib/gspawn-win32.c:470 glib/gspawn-win32.c:802
 #, c-format
 msgid "Invalid string in argument vector at %d: %s"
 msgstr "Недопустимая строка в векторе аргументов под номером %d: %s"
 
-#: glib/gspawn-win32.c:532 glib/gspawn-win32.c:869
+#: glib/gspawn-win32.c:481 glib/gspawn-win32.c:818
 #, c-format
 msgid "Invalid string in environment: %s"
 msgstr "Недопустимая строка в окружении: %s"
 
-#: glib/gspawn-win32.c:849
+#: glib/gspawn-win32.c:798
 #, c-format
 msgid "Invalid working directory: %s"
 msgstr "Недопустимый рабочий каталог: %s"
 
-#: glib/gspawn-win32.c:914
+#: glib/gspawn-win32.c:863
 #, c-format
 msgid "Failed to execute helper program (%s)"
 msgstr "Не удалось выполнить вспомогательную программу (%s)"
 
-#: glib/gspawn-win32.c:1143
+#: glib/gspawn-win32.c:1092
 msgid ""
 "Unexpected error in g_io_channel_win32_poll() reading data from a child "
 "process"
