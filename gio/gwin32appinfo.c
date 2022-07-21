@@ -4734,6 +4734,7 @@ g_win32_app_info_launch_internal (GWin32AppInfo      *info,
                                   IShellItemArray    *items, /* UWP only */
                                   GAppLaunchContext  *launch_context,
                                   GSpawnFlags         spawn_flags,
+                                  GTask              *from_task,
                                   GError            **error)
 {
   gboolean completed = FALSE;
@@ -5028,10 +5029,11 @@ make_item_array (gboolean   for_files,
 
 
 static gboolean
-g_win32_app_info_launch_uris (GAppInfo           *appinfo,
-                              GList              *uris,
-                              GAppLaunchContext  *launch_context,
-                              GError            **error)
+g_win32_app_info_launch_uris_impl (GAppInfo           *appinfo,
+                                   GList              *uris,
+                                   GAppLaunchContext  *launch_context,
+                                   GTask              *from_task,
+                                   GError            **error)
 {
   gboolean res = FALSE;
   gboolean do_files;
@@ -5049,7 +5051,7 @@ g_win32_app_info_launch_uris (GAppInfo           *appinfo,
             return res;
         }
 
-      res = g_win32_app_info_launch_internal (info, NULL, FALSE, items, launch_context, 0, error);
+      res = g_win32_app_info_launch_internal (info, NULL, FALSE, items, launch_context, 0, from_task, error);
 
       if (items != NULL)
         IShellItemArray_Release (items);
@@ -5090,11 +5092,21 @@ g_win32_app_info_launch_uris (GAppInfo           *appinfo,
                                           NULL,
                                           launch_context,
                                           G_SPAWN_SEARCH_PATH,
+                                          from_task,
                                           error);
 
   g_list_free_full (objs, free_file_or_uri);
 
   return res;
+}
+
+static gboolean
+g_win32_app_info_launch_uris (GAppInfo           *appinfo,
+                              GList              *uris,
+                              GAppLaunchContext  *launch_context,
+                              GError            **error)
+{
+  return g_win32_app_info_launch_uris_impl (appinfo, uris, launch_context, NULL, error);
 }
 
 typedef struct
@@ -5122,7 +5134,7 @@ launch_uris_async_thread (GTask         *task,
   GError *local_error = NULL;
   gboolean succeeded;
 
-  succeeded = g_app_info_launch_uris (appinfo, data->uris, data->context, &local_error);
+  succeeded = g_win32_app_info_launch_uris_impl (appinfo, data->uris, data->context, task, &local_error);
   if (succeeded)
     g_task_return_boolean (task, TRUE);
   else
@@ -5193,7 +5205,7 @@ g_win32_app_info_launch (GAppInfo           *appinfo,
             return res;
         }
 
-      res = g_win32_app_info_launch_internal (info, NULL, TRUE, items, launch_context, 0, error);
+      res = g_win32_app_info_launch_internal (info, NULL, TRUE, items, launch_context, 0, NULL, error);
 
       if (items != NULL)
         IShellItemArray_Release (items);
@@ -5225,6 +5237,7 @@ g_win32_app_info_launch (GAppInfo           *appinfo,
                                           NULL,
                                           launch_context,
                                           G_SPAWN_SEARCH_PATH,
+                                          NULL,
                                           error);
 
   g_list_free_full (objs, free_file_or_uri);
