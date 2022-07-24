@@ -78,7 +78,6 @@ gboolean    _g_dbus_auth_run_server (GDBusAuth             *auth,
 
 gchar      *_g_dbus_auth_run_client (GDBusAuth     *auth,
                                      GDBusAuthObserver     *observer,
-                                     GDBusConnectionFlags   conn_flags,
                                      GDBusCapabilityFlags offered_capabilities,
                                      GDBusCapabilityFlags *out_negotiated_capabilities,
                                      GCancellable  *cancellable,
