@@ -39,6 +39,7 @@
 
 #if defined(__linux__) && !defined(__BIONIC__)
 #include <alloca.h>
+#include <assert.h>
 #include <errno.h>
 #include <stddef.h>
 #include <string.h>
@@ -47,9 +48,6 @@
 #include <sys/un.h>
 
 #include "gjournal-private.h"
-#define GLIB_COMPILATION
-#include "gmacros.h" /* For G_STATIC_ASSERT define */
-#undef GLIB_COMPILATION
 
 /*
  * write_all:
@@ -121,8 +119,8 @@ journal_stream_fd (const char *identifier,
   /* Arbitrary large size for the sending buffer, from systemd */
   int large_buffer_size = 8 * 1024 * 1024;
 
-  G_STATIC_ASSERT (LOG_EMERG == 0 && "Linux ABI defines LOG_EMERG");
-  G_STATIC_ASSERT (LOG_DEBUG == 7 && "Linux ABI defines LOG_DEBUG");
+  static_assert (LOG_EMERG == 0, "Linux ABI defines LOG_EMERG");
+  static_assert (LOG_DEBUG == 7, "Linux ABI defines LOG_DEBUG");
 
   fd = socket (AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
 
