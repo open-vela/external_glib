@@ -4798,7 +4798,6 @@ emit_launched (GAppLaunchContext *context,
       GVariant *platform_data = make_platform_data (*pid);
       g_signal_emit_by_name (context, "launched", info, platform_data);
       g_variant_unref (platform_data);
-      g_spawn_close_pid (*pid);
     }
   else
     {
@@ -4816,7 +4815,7 @@ emit_launched (GAppLaunchContext *context,
                                   (GDestroyNotify) emit_launched_data_free);
     }
 
-  *pid = NULL;
+  *pid = 0;
 }
 
 typedef struct {
