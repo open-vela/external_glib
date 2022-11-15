@@ -1944,10 +1944,10 @@ do_posix_spawn (const gchar * const *argv,
 
   if (child_close_fds)
     {
-      int i = -1;
-      while (child_close_fds[++i] != -1)
+      int j = -1;
+      while (child_close_fds[++j] != -1)
         child_close = g_slist_prepend (child_close,
-                                       GINT_TO_POINTER (child_close_fds[i]));
+                                       GINT_TO_POINTER (child_close_fds[j]));
     }
 
   r = posix_spawnattr_setflags (&attr, POSIX_SPAWN_SETSIGDEF);
