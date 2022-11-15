@@ -39,7 +39,7 @@
 #endif
 
 #if !defined WIN32_NATIVE
-# if HAVE_LANGINFO_CODESET
+# if defined HAVE_LANGINFO_CODESET
 #  include <langinfo.h>
 # else
 #  if 0 /* see comment below */
@@ -83,7 +83,7 @@
 # define ISSLASH(C) ((C) == DIRECTORY_SEPARATOR)
 #endif
 
-#if HAVE_DECL_GETC_UNLOCKED
+#if defined HAVE_DECL_GETC_UNLOCKED
 # undef getc
 # define getc getc_unlocked
 #endif
@@ -283,7 +283,7 @@ _g_locale_charset_raw (void)
 
 #if !(defined WIN32_NATIVE || defined OS2)
 
-# if HAVE_LANGINFO_CODESET
+# if defined HAVE_LANGINFO_CODESET
 
   /* Most systems support nl_langinfo (CODESET) nowadays.  */
   codeset = nl_langinfo (CODESET);
