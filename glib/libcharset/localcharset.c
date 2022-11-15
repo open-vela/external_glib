@@ -59,7 +59,7 @@
 # include <os2.h>
 #endif
 
-#if ENABLE_RELOCATABLE
+#if defined ENABLE_RELOCATABLE
 # include "relocatable.h"
 #else
 # define relocate(pathname) (pathname)

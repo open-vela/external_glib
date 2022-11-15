@@ -1139,11 +1139,11 @@ g_private_replace (GPrivate *key,
 /* {{{1 GThread */
 
 #define posix_check_err(err, name) G_STMT_START{			\
-  int error = (err); 							\
-  if (error)	 		 		 			\
+  int error_ = (err); 							\
+  if (error_)	 		 		 			\
     g_error ("file %s: line %d (%s): error '%s' during '%s'",		\
            __FILE__, __LINE__, G_STRFUNC,				\
-           g_strerror (error), name);					\
+           g_strerror (error_), name);					\
   }G_STMT_END
 
 #define posix_check_cmd(cmd) posix_check_err (cmd, #cmd)
