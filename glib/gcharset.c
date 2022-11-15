@@ -39,7 +39,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#if (HAVE_LANGINFO_TIME_CODESET || HAVE_LANGINFO_CODESET)
+#if defined(HAVE_LANGINFO_TIME_CODESET) || defined(HAVE_LANGINFO_CODESET)
 #include <langinfo.h>
 #endif
 
