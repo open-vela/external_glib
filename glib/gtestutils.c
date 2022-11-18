@@ -844,7 +844,7 @@ static guint8*  g_test_log_dump                 (GTestLogMsg *msg,
 static void     gtest_default_log_handler       (const gchar    *log_domain,
                                                  GLogLevelFlags  log_level,
                                                  const gchar    *message,
-                                                 gpointer        unused_data);
+                                                 gpointer        unused);
 
 
 static const char * const g_test_result_names[] = {
@@ -3159,7 +3159,7 @@ static void
 gtest_default_log_handler (const gchar    *log_domain,
                            GLogLevelFlags  log_level,
                            const gchar    *message,
-                           gpointer        unused_data)
+                           gpointer        unused)
 {
   const gchar *strv[16];
   gboolean fatal = FALSE;
@@ -3196,7 +3196,7 @@ gtest_default_log_handler (const gchar    *log_domain,
 
   msg = g_strjoinv ("", (gchar**) strv);
   g_test_log (fatal ? G_TEST_LOG_ERROR : G_TEST_LOG_MESSAGE, msg, NULL, 0, NULL);
-  g_log_default_handler (log_domain, log_level, message, unused_data);
+  g_log_default_handler (log_domain, log_level, message, unused);
 
   g_free (msg);
 }
