@@ -456,9 +456,12 @@ g_slice_init_nomessage (void)
 #else
   sys_page_size = sysconf (_SC_PAGESIZE); /* = sysconf (_SC_PAGE_SIZE); = getpagesize(); */
 #endif
-  mem_assert (sys_page_size >= 2 * LARGEALIGNMENT);
   mem_assert ((sys_page_size & (sys_page_size - 1)) == 0);
   slice_config_init (&allocator->config);
+  if (sys_page_size < 2 * LARGEALIGNMENT)
+    {
+      allocator->config.always_malloc = true;
+    }
   allocator->min_page_size = sys_page_size;
 #if HAVE_POSIX_MEMALIGN || HAVE_MEMALIGN
   /* allow allocation of pages up to 8KB (with 8KB alignment).

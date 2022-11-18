@@ -91,7 +91,7 @@
 
 #ifdef HAVE__NSGETENVIRON
 #define environ (*_NSGetEnviron())
-#else
+#elif !defined __NuttX__
 extern char **environ;
 #endif
 

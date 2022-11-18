@@ -429,6 +429,8 @@ g_get_console_charset (const char **charset)
     *charset = cache->charset;
 
   return cache->is_utf8;
+#elif defined(__NuttX__)
+  return true;
 #else
   /* assume the locale settings match the console encoding on non-Windows OSs */
   return g_get_charset (charset);
