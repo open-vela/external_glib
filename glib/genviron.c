@@ -327,7 +327,7 @@ g_setenv (const gchar *variable,
 
 #ifdef HAVE__NSGETENVIRON
 #define environ (*_NSGetEnviron())
-#else
+#elif !defined(__NuttX__)
 /* According to the Single Unix Specification, environ is not
  * in any system header, although unistd.h often declares it.
  */
