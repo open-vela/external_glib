@@ -3117,7 +3117,7 @@ void
 _g_log_fallback_handler (const gchar   *log_domain,
 			 GLogLevelFlags log_level,
 			 const gchar   *message,
-			 gpointer       unused_data)
+			 gpointer       unused)
 {
   gchar level_prefix[STRING_BUFFER_SIZE];
 #ifndef G_OS_WIN32
@@ -3227,7 +3227,7 @@ escape_string (GString *string)
  * default "" application domain
  * @log_level: the level of the message
  * @message: (nullable): the message
- * @unused_data: (nullable): data passed from g_log() which is unused
+ * @unused: (nullable): data passed from g_log() which is unused
  *
  * The default log handler set up by GLib; g_log_set_default_handler()
  * allows to install an alternate default log handler.
@@ -3260,7 +3260,7 @@ void
 g_log_default_handler (const gchar   *log_domain,
 		       GLogLevelFlags log_level,
 		       const gchar   *message,
-		       gpointer	      unused_data)
+		       gpointer	      unused)
 {
   GLogField fields[4];
   int n_fields = 0;
@@ -3268,7 +3268,7 @@ g_log_default_handler (const gchar   *log_domain,
   /* we can be called externally with recursion for whatever reason */
   if (log_level & G_LOG_FLAG_RECURSION)
     {
-      _g_log_fallback_handler (log_domain, log_level, message, unused_data);
+      _g_log_fallback_handler (log_domain, log_level, message, unused);
       return;
     }
 
