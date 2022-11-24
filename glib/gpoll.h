@@ -26,6 +26,9 @@
 
 #include <glibconfig.h>
 #include <glib/gtypes.h>
+#if !defined (G_OS_WIN32)
+#include <sys/poll.h>
+#endif
 
 G_BEGIN_DECLS
 
@@ -58,7 +61,11 @@ G_BEGIN_DECLS
  * to use the main loop polling stuff for your own needs on
  * Windows.
  */
+#if defined (G_OS_WIN32)
 typedef struct _GPollFD GPollFD;
+#else
+typedef struct pollfd GPollFD;
+#endif
 
 /**
  * GPollFunc:
@@ -90,9 +97,10 @@ typedef gint    (*GPollFunc)    (GPollFD *ufds,
  * Represents a file descriptor, which events to poll for, and which events
  * occurred.
  */
+#if defined (G_OS_WIN32)
 struct _GPollFD
 {
-#if defined (G_OS_WIN32) && GLIB_SIZEOF_VOID_P == 8
+#if GLIB_SIZEOF_VOID_P == 8
 #ifndef __GTK_DOC_IGNORE__
   gint64	fd;
 #endif
@@ -102,6 +110,7 @@ struct _GPollFD
   gushort 	events;
   gushort 	revents;
 };
+#endif
 
 /**
  * G_POLLFD_FORMAT:
