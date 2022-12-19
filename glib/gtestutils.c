@@ -1765,6 +1765,10 @@ test_cleanup (void)
   g_clear_pointer (&test_argv0_dirname, g_free);
 
   g_clear_pointer (&test_initial_cwd, g_free);
+
+  test_suite_root = NULL;
+  mutable_test_config_vars.test_initialized = FALSE;
+  g_test_run_once = TRUE;
 }
 
 static void
