@@ -48,6 +48,10 @@
 #define G_MAIN_POLL_DEBUG
 #endif
 
+#ifdef __NuttX__
+#include <nuttx/tls.h>
+#endif
+
 #ifdef G_OS_UNIX
 #include "glib-unix.h"
 #include <pthread.h>
@@ -774,6 +778,18 @@ g_main_context_new_with_flags (GMainContextFlags flags)
   return context;
 }
 
+static void
+free_context (gpointer data)
+{
+  GMainContext *context = data;
+
+  TRACE (GLIB_MAIN_CONTEXT_FREE (context));
+
+  g_main_context_release (context);
+  if (context)
+    g_main_context_unref (context);
+}
+
 /**
  * g_main_context_default:
  *
@@ -787,6 +803,34 @@ g_main_context_new_with_flags (GMainContextFlags flags)
 GMainContext *
 g_main_context_default (void)
 {
+#ifdef __NuttX__
+  static int index = -1;
+  GMainContext *default_main_context = NULL;
+
+  if (index < 0)
+    {
+      index = task_tls_alloc(free_context);
+    }
+
+  if (index >= 0)
+    {
+      default_main_context = (GMainContext *)task_tls_get_value(index);
+      if (default_main_context == NULL)
+        {
+          default_main_context = g_main_context_new ();
+
+          TRACE (GLIB_MAIN_CONTEXT_DEFAULT (default_main_context));
+
+#ifdef G_MAIN_POLL_DEBUG
+          if (_g_main_poll_debug)
+            g_print ("default context=%p\n", default_main_context);
+#endif
+          task_tls_set_value(index, (uintptr_t)default_main_context);
+        }
+    }
+
+  return default_main_context;
+#else
   static GMainContext *default_main_context = NULL;
 
   if (g_once_init_enter (&default_main_context))
@@ -806,18 +850,7 @@ g_main_context_default (void)
     }
 
   return default_main_context;
-}
-
-static void
-free_context (gpointer data)
-{
-  GMainContext *context = data;
-
-  TRACE (GLIB_MAIN_CONTEXT_FREE (context));
-
-  g_main_context_release (context);
-  if (context)
-    g_main_context_unref (context);
+#endif
 }
 
 static void
