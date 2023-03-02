@@ -5231,7 +5231,7 @@ g_timeout_add_full (gint           priority,
  * Returns: the ID (greater than 0) of the event source.
  **/
 guint
-g_timeout_add (guint32        interval,
+g_timeout_add (guint          interval,
 	       GSourceFunc    function,
 	       gpointer       data)
 {
@@ -5259,7 +5259,7 @@ g_timeout_add (guint32        interval,
  * Since: 2.74
  */
 guint
-g_timeout_add_once (guint32         interval,
+g_timeout_add_once (guint           interval,
                     GSourceOnceFunc function,
                     gpointer        data)
 {
@@ -5321,7 +5321,7 @@ g_timeout_add_once (guint32         interval,
  **/
 guint
 g_timeout_add_seconds_full (gint           priority,
-                            guint32        interval,
+                            guint          interval,
                             GSourceFunc    function,
                             gpointer       data,
                             GDestroyNotify notify)
