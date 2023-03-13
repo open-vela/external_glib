@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <float.h>
 #include <stdint.h>
+#include <sys/types.h>
 #define GLIB_HAVE_ALLOCA_H
 
 /* Specifies that GLib's g_print*() functions wrap the
@@ -149,7 +150,9 @@ typedef uintptr_t guintptr;
 #define G_THREADS_ENABLED
 #define G_THREADS_IMPL_POSIX
 
-#define G_ATOMIC_LOCK_FREE
+#ifndef __clang__
+#  define G_ATOMIC_LOCK_FREE
+#endif
 
 #define GINT16_TO_LE(val)	((gint16) (val))
 #define GUINT16_TO_LE(val)	((guint16) (val))
