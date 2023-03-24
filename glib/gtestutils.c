@@ -840,7 +840,7 @@ static void     test_cleanup                    (void);
 static void     test_run_seed                   (const gchar *rseed);
 static void     test_trap_clear                 (void);
 static guint8*  g_test_log_dump                 (GTestLogMsg *msg,
-                                                 guint       *len);
+                                                 guint32     *len);
 static void     gtest_default_log_handler       (const gchar    *log_domain,
                                                  GLogLevelFlags  log_level,
                                                  const gchar    *message,
@@ -1634,7 +1634,7 @@ void
   va_end (args);
 
   /* setup random seed string */
-  g_snprintf (seedstr, sizeof (seedstr), "R02S%08x%08x%08x%08x", g_random_int(), g_random_int(), g_random_int(), g_random_int());
+  g_snprintf (seedstr, sizeof (seedstr), "R02S%08"PRIx32"%08"PRIx32"%08"PRIx32"%08"PRIx32"", g_random_int(), g_random_int(), g_random_int(), g_random_int());
   test_run_seedstr = seedstr;
 
   /* parse args, sets up mode, changes seed, etc. */
@@ -4105,7 +4105,7 @@ gstring_append_double (GString *gstring,
 
 static guint8*
 g_test_log_dump (GTestLogMsg *msg,
-                 guint       *len)
+                 guint32     *len)
 {
   GString *gstring = g_string_sized_new (1024);
   guint ui;

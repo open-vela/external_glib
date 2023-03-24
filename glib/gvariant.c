@@ -2499,11 +2499,11 @@ g_variant_print_string (GVariant *value,
                       break;
 
                     default:
-                      g_string_append_printf (string, "u%04x", c);
+                      g_string_append_printf (string, "u%04"PRIx32"", c);
                       break;
                     }
                  else
-                   g_string_append_printf (string, "U%08x", c);
+                   g_string_append_printf (string, "U%08"PRIx32"", c);
               }
 
             str = g_utf8_next_char (str);

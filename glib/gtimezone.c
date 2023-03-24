@@ -2050,7 +2050,7 @@ g_time_zone_new_offset (gint32 seconds)
    * However, we always need to set the #GTimeZone.name to a constructed
    * string anyway, so we might as well reuse its code.
    * g_time_zone_new_identifier() should never fail in this situation. */
-  identifier = g_strdup_printf ("%c%02u:%02u:%02u",
+  identifier = g_strdup_printf ("%c%02"PRIi32":%02"PRIi32":%02"PRIi32"",
                                 (seconds >= 0) ? '+' : '-',
                                 (ABS (seconds) / 60) / 60,
                                 (ABS (seconds) / 60) % 60,
