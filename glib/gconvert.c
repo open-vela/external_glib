@@ -775,7 +775,7 @@ g_convert_with_fallback (const gchar *str,
 		  if (!fallback)
 		    { 
 		      gunichar ch = g_utf8_get_char (p);
-		      insert_str = g_strdup_printf (ch < 0x10000 ? "\\u%04x" : "\\U%08x",
+		      insert_str = g_strdup_printf (ch < 0x10000 ? "\\u%04"PRIx32"" : "\\U%08"PRIx32"",
 						    ch);
 		    }
 		  else

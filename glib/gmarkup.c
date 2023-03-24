@@ -2262,7 +2262,7 @@ append_escaped_text (GString     *str,
                   (0x86 <= u && u <= 0x9f))
                 {
                   APPEND_TEXT_AND_SEEK (str, p, pending);
-                  g_string_append_printf (str, "&#x%x;", u);
+                  g_string_append_printf (str, "&#x%"PRIx32";", u);
 
                   /*
                    * We have appended a two byte character above, which
