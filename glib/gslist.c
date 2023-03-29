@@ -171,6 +171,12 @@ g_slist_free_1 (GSList *list)
   _g_slist_free1 (list);
 }
 
+static void
+g_slist_free_full_cb (gpointer data, GDestroyNotify free_func)
+{
+  free_func (data);
+}
+
 /**
  * g_slist_free_full:
  * @list: the first link of a #GSList
@@ -197,7 +203,7 @@ void
 g_slist_free_full (GSList         *list,
 		   GDestroyNotify  free_func)
 {
-  g_slist_foreach (list, (GFunc) free_func, NULL);
+  g_slist_foreach (list, (GFunc) g_slist_free_full_cb, free_func);
   g_slist_free (list);
 }
 
@@ -910,14 +916,28 @@ g_slist_insert_sorted_real (GSList   *list,
       return new_list;
     }
 
-  cmp = ((GCompareDataFunc) func) (data, tmp_list->data, user_data);
+  if (user_data != NULL)
+    {
+      cmp = ((GCompareDataFunc) func) (data, tmp_list->data, user_data);
+    }
+  else
+    {
+      cmp = ((GCompareFunc) func) (data, tmp_list->data);
+    }
 
   while ((tmp_list->next) && (cmp > 0))
     {
       prev_list = tmp_list;
       tmp_list = tmp_list->next;
 
-      cmp = ((GCompareDataFunc) func) (data, tmp_list->data, user_data);
+      if (user_data != NULL)
+        {
+          cmp = ((GCompareDataFunc) func) (data, tmp_list->data, user_data);
+        }
+      else
+        {
+          cmp = ((GCompareFunc) func) (data, tmp_list->data);
+        }
     }
 
   new_list = _g_slist_alloc ();
