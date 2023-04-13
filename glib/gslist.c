@@ -1022,7 +1022,14 @@ g_slist_sort_merge (GSList   *l1,
 
   while (l1 && l2)
     {
-      cmp = ((GCompareDataFunc) compare_func) (l1->data, l2->data, user_data);
+      if (user_data != NULL)
+        {
+          cmp = ((GCompareDataFunc) compare_func) (l1->data, l2->data, user_data);
+        }
+      else
+        {
+          cmp = ((GCompareFunc) compare_func) (l1->data, l2->data);
+        }
 
       if (cmp <= 0)
         {
