@@ -32,7 +32,7 @@
  * See also
  * https://docs.microsoft.com/en-us/cpp/sanitizers/asan-building?view=msvc-160
  */
-#if !defined(_MSC_VER) && (defined(__SANITIZE_ADDRESS__) || g_macro__has_feature(address_sanitizer))
+#if !defined(_MSC_VER) && !defined(__NuttX__) && (defined(__SANITIZE_ADDRESS__) || g_macro__has_feature(address_sanitizer))
 
 /*
  * %_GLIB_ADDRESS_SANITIZER:
