@@ -1037,7 +1037,7 @@ guint
 gpointer
 (g_atomic_pointer_get) (const volatile void *atomic)
 {
-  const gpointer *ptr = atomic;
+  const gpointer *ptr = (const gpointer *) atomic;
   gpointer value;
 
   pthread_mutex_lock (&g_atomic_lock);
@@ -1051,7 +1051,7 @@ void
 (g_atomic_pointer_set) (volatile void *atomic,
                         gpointer       newval)
 {
-  gpointer *ptr = atomic;
+  gpointer *ptr = (gpointer *) atomic;
 
   pthread_mutex_lock (&g_atomic_lock);
   *ptr = newval;
@@ -1063,7 +1063,7 @@ gboolean
                                          gpointer       oldval,
                                          gpointer       newval)
 {
-  gpointer *ptr = atomic;
+  gpointer *ptr = (gpointer *) atomic;
   gboolean success;
 
   pthread_mutex_lock (&g_atomic_lock);
@@ -1116,7 +1116,7 @@ gssize
 (g_atomic_pointer_add) (volatile void *atomic,
                         gssize         val)
 {
-  gssize *ptr = atomic;
+  gssize *ptr = (gssize *) atomic;
   gssize oldval;
 
   pthread_mutex_lock (&g_atomic_lock);
@@ -1131,7 +1131,7 @@ gsize
 (g_atomic_pointer_and) (volatile void *atomic,
                         gsize          val)
 {
-  gsize *ptr = atomic;
+  gsize *ptr = (gsize *) atomic;
   gsize oldval;
 
   pthread_mutex_lock (&g_atomic_lock);
@@ -1146,7 +1146,7 @@ gsize
 (g_atomic_pointer_or) (volatile void *atomic,
                        gsize          val)
 {
-  gsize *ptr = atomic;
+  gsize *ptr = (gsize *) atomic;
   gsize oldval;
 
   pthread_mutex_lock (&g_atomic_lock);
@@ -1161,7 +1161,7 @@ gsize
 (g_atomic_pointer_xor) (volatile void *atomic,
                         gsize          val)
 {
-  gsize *ptr = atomic;
+  gsize *ptr = (gsize *) atomic;
   gsize oldval;
 
   pthread_mutex_lock (&g_atomic_lock);
