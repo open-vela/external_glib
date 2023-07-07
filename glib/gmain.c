@@ -5885,7 +5885,6 @@ g_unix_signal_handler (int signum)
   g_atomic_int_set (&unix_signal_pending[signum], 1);
   g_atomic_int_set (&any_unix_signal_pending, 1);
 #else
-#warning "Can't use atomics in g_unix_signal_handler(): Unix signal handling will be racy"
   unix_signal_pending[signum] = 1;
   any_unix_signal_pending = 1;
 #endif
