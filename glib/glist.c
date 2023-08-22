@@ -218,6 +218,22 @@ g_list_free_1 (GList *list)
 }
 
 /**
+ * g_list_free_full_proxy:
+ * @data: the data to free
+ * @proxy: the proxy function pointer
+ *
+ * A proxy function for g_list_free_full() that can be used as a #GFunc.
+ **/
+
+static void
+g_list_free_full_proxy (gpointer data,
+                        gpointer proxy)
+{
+  GDestroyNotify free_func = proxy;
+  free_func (data);
+}
+
+/**
  * g_list_free_full:
  * @list: the first link of a #GList
  * @free_func: the function to be called to free each element's data
@@ -243,7 +259,7 @@ void
 g_list_free_full (GList          *list,
                   GDestroyNotify  free_func)
 {
-  g_list_foreach (list, (GFunc) free_func, NULL);
+  g_list_foreach (list, g_list_free_full_proxy, free_func);
   g_list_free (list);
 }
 
