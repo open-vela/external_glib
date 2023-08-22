@@ -94,6 +94,22 @@ g_queue_free (GQueue *queue)
 }
 
 /**
+ * g_queue_free_full_proxy:
+ * @data: the data to free
+ * @proxy: the proxy function pointer
+ *
+ * A proxy function for g_queue_free_full() that can be used as a #GFunc.
+ **/
+
+static void
+g_queue_free_full_proxy (gpointer data,
+                         gpointer proxy)
+{
+  GDestroyNotify free_func = proxy;
+  free_func(data);
+}
+
+/**
  * g_queue_free_full:
  * @queue: a pointer to a #GQueue
  * @free_func: the function to be called to free each element's data
@@ -110,7 +126,7 @@ void
 g_queue_free_full (GQueue        *queue,
                   GDestroyNotify  free_func)
 {
-  g_queue_foreach (queue, (GFunc) free_func, NULL);
+  g_queue_foreach (queue, g_queue_free_full_proxy, free_func);
   g_queue_free (queue);
 }
 
