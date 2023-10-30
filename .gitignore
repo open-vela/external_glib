@@ -27,3 +27,5 @@ tags
 # Meson
 /meson-build/
 /subprojects/*/
+glib/*.wo
+glib/libcharset/*.wo
