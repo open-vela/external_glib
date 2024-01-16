@@ -28,6 +28,10 @@
 #include <string.h>
 #include <errno.h>
 
+#if defined(__NuttX__)
+#include <nuttx/tls.h>
+#endif
+
 #ifdef G_OS_UNIX
 #include <unistd.h>             /* sysconf() */
 #endif
@@ -281,7 +285,42 @@ static int      smc_notify_free   (void   *pointer,
                                    size_t  size);
 
 /* --- variables --- */
+#if defined(__NuttX__)
+static void free_private_thread_memory(void* data)
+{
+  free(data);
+}
+
+static GPrivate *get_private_thread_memory(void)
+{
+  static int index = -1;
+  GPrivate *thread_memory_ptr = NULL;
+
+  if (index < 0)
+    {
+      index = task_tls_alloc(free_private_thread_memory);
+    }
+
+  if (index >= 0)
+    {
+      thread_memory_ptr = (GPrivate *)task_tls_get_value(index);
+      if (thread_memory_ptr == NULL)
+        {
+          thread_memory_ptr = calloc(1, sizeof(GPrivate));
+          mem_assert(thread_memory_ptr);
+
+          thread_memory_ptr->notify = private_thread_memory_cleanup;
+          task_tls_set_value(index, (uintptr_t)thread_memory_ptr);
+        }
+    }
+  return thread_memory_ptr;
+}
+
+#define private_thread_memory (*get_private_thread_memory())
+
+#else
 static GPrivate    private_thread_memory = G_PRIVATE_INIT (private_thread_memory_cleanup);
+#endif
 static gsize       sys_page_size = 0;
 static Allocator   allocator[1] = { { 0, }, };
 static SliceConfig slice_config = {
