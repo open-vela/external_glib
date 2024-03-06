@@ -71,11 +71,17 @@ typedef uint64_t guint64;
 #define G_GINT64_FORMAT PRIi64
 #define G_GUINT64_FORMAT PRIu64
 
-
+#if (__UINTPTR_MAX__ == 0xFFFFFFFF)
 #define GLIB_SIZEOF_VOID_P 4
 #define GLIB_SIZEOF_LONG   4
 #define GLIB_SIZEOF_SIZE_T 4
 #define GLIB_SIZEOF_SSIZE_T 4
+#else
+#define GLIB_SIZEOF_VOID_P 8
+#define GLIB_SIZEOF_LONG   8
+#define GLIB_SIZEOF_SIZE_T 8
+#define GLIB_SIZEOF_SSIZE_T 8
+#endif
 
 typedef ssize_t gssize;
 typedef size_t gsize;
