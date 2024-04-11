@@ -106,7 +106,7 @@ g_queue_free_full_proxy (gpointer data,
                          gpointer proxy)
 {
   GDestroyNotify free_func = proxy;
-  free_func(data);
+  free_func (data);
 }
 
 /**
