@@ -49,7 +49,7 @@
 #endif
 
 #ifdef __NuttX__
-#include <nuttx/tls.h>
+#include <nuttx/tls_task.h>
 #endif
 
 #ifdef G_OS_UNIX
