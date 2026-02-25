@@ -88,4 +88,18 @@ guint           g_thread_n_created              (void);
 gpointer        g_private_set_alloc0            (GPrivate       *key,
                                                  gsize           size);
 
+#ifdef __NuttX__
+#include <nuttx/tls_task.h>
+
+typedef struct _GMainContext GMainContext;
+
+typedef struct {
+  GMainContext  *default_main_context;
+  GPrivate       depth_private;
+  GPrivate       thread_specific_private;
+} glib_global_t;
+
+glib_global_t *glib_global_get (void);
+#endif
+
 #endif /* __G_THREADPRIVATE_H__ */

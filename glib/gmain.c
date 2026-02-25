@@ -289,6 +289,48 @@ struct _GMainDispatch
   GSource *source;
 };
 
+#ifdef __NuttX__
+
+static int glib_global_tls_index = -1;
+static void g_main_dispatch_free (gpointer dispatch);
+
+static void
+glib_global_destroy (gpointer data)
+{
+  glib_global_t *global = data;
+
+  if (global->default_main_context)
+    {
+      g_main_context_unref (global->default_main_context);
+    }
+
+  g_free (global);
+}
+
+glib_global_t *
+glib_global_get (void)
+{
+  glib_global_t *global;
+
+  if (glib_global_tls_index < 0)
+    glib_global_tls_index = task_tls_alloc ((tls_dtor_t) glib_global_destroy);
+
+  if (glib_global_tls_index < 0)
+    return NULL;
+
+  global = (glib_global_t *) task_tls_get_value (glib_global_tls_index);
+  if (global == NULL)
+    {
+      global = g_malloc0 (sizeof (glib_global_t));
+      task_tls_set_value (glib_global_tls_index, (uintptr_t) global);
+      global->depth_private = (GPrivate) G_PRIVATE_INIT (g_main_dispatch_free);
+      global->thread_specific_private = (GPrivate) G_PRIVATE_INIT ((GDestroyNotify) g_thread_unref);
+    }
+
+  return global;
+}
+#endif
+
 #ifdef G_MAIN_POLL_DEBUG
 gboolean _g_main_poll_debug = FALSE;
 #endif
@@ -804,34 +846,10 @@ GMainContext *
 g_main_context_default (void)
 {
 #ifdef __NuttX__
-  static int index = -1;
-  GMainContext *default_main_context = NULL;
-
-  if (index < 0)
-    {
-      index = task_tls_alloc(free_context);
-    }
-
-  if (index >= 0)
-    {
-      default_main_context = (GMainContext *)task_tls_get_value(index);
-      if (default_main_context == NULL)
-        {
-          default_main_context = g_main_context_new ();
-
-          TRACE (GLIB_MAIN_CONTEXT_DEFAULT (default_main_context));
-
-#ifdef G_MAIN_POLL_DEBUG
-          if (_g_main_poll_debug)
-            g_print ("default context=%p\n", default_main_context);
-#endif
-          task_tls_set_value(index, (uintptr_t)default_main_context);
-        }
-    }
-
-  return default_main_context;
+  #define default_main_context (glib_global_get ()->default_main_context)
 #else
   static GMainContext *default_main_context = NULL;
+#endif
 
   if (g_once_init_enter (&default_main_context))
     {
@@ -850,7 +868,6 @@ g_main_context_default (void)
     }
 
   return default_main_context;
-#endif
 }
 
 static void
@@ -3108,7 +3125,11 @@ g_main_dispatch_free (gpointer dispatch)
 static GMainDispatch *
 get_dispatch (void)
 {
+#ifdef __NuttX__
+  #define depth_private (glib_global_get ()->depth_private)
+#else
   static GPrivate depth_private = G_PRIVATE_INIT (g_main_dispatch_free);
+#endif
   GMainDispatch *dispatch;
 
   dispatch = g_private_get (&depth_private);

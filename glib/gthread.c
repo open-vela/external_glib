@@ -518,8 +518,12 @@ static GSList   *g_once_init_list = NULL;
 
 static guint g_thread_n_created_counter = 0;  /* (atomic) */
 
+#ifdef __NuttX__
+#define g_thread_specific_private glib_global_get()->thread_specific_private
+#else
 static void g_thread_cleanup (gpointer data);
-static GPrivate     g_thread_specific_private = G_PRIVATE_INIT (g_thread_cleanup);
+static GPrivate g_thread_specific_private = G_PRIVATE_INIT (g_thread_cleanup);
+#endif
 
 /*
  * g_private_set_alloc0:
@@ -804,11 +808,13 @@ g_thread_unref (GThread *thread)
     }
 }
 
+#ifndef __NuttX__
 static void
 g_thread_cleanup (gpointer data)
 {
   g_thread_unref (data);
 }
+#endif
 
 gpointer
 g_thread_proxy (gpointer data)
